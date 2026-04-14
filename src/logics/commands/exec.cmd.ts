@@ -86,7 +86,7 @@ export default {
                         const append = i.appendDQWhenTString
                         
                         if (append) {
-                            return JSON.stringify(`\"${options.type.shift().trim()}\"`)
+                            return JSON.stringify(`${options.type.shift().trim()}`)
                         }
 
                     }
