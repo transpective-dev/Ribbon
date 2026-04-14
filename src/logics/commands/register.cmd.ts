@@ -14,7 +14,9 @@ export default {
     action: (i: any, options: any) => {
 
         // split into two parts 
-        const [key, value] = i.split(/=(.*)/s);
+        const parts = i.split(/=(.*)/s).filter(Boolean);
+
+        const [key, value] = parts;
 
         if (rib_conf.has(key)) {
             console.log('error: command already exists');
@@ -32,7 +34,7 @@ export default {
         }
 
         if (!value) {
-            console.log('format-error: please use key="command"');
+            console.log("format-error: please use key='command'");
             return;
         }
 

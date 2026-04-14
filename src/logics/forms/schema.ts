@@ -31,18 +31,23 @@ const config_schema = z.object({
   settings: z.object({
     alwaysRejectExecution: z.boolean().default(true),
     askBeforeDelete: z.boolean().default(true),
-    showMacro: z.boolean().default(true)
+    showMacro: z.boolean().default(true),
+
+    // append double quotes when using <T: string>
+    appendDQWhenTString: z.boolean().default(true)
   }).default({
       alwaysRejectExecution: true,
       askBeforeDelete: true,
-      showMacro: true
+      showMacro: true,
+      appendDQWhenTString: true
   })
 }).default({
   filter: {},
   settings: {
     alwaysRejectExecution: true,
     askBeforeDelete: true,
-    showMacro: true
+    showMacro: true,
+    appendDQWhenTString: true
   }
 });
 

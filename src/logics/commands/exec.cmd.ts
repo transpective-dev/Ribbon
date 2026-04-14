@@ -78,6 +78,19 @@ export default {
                 }
 
                 if (validateType(options.type[0], type)) {
+
+                    const i = rib_conf.all('config').settings as any;
+
+                    if ("appendDQWhenTString" in i) {
+
+                        const append = i.appendDQWhenTString
+                        
+                        if (append) {
+                            return JSON.stringify(`\"${options.type.shift().trim()}\"`)
+                        }
+
+                    }
+
                     return options.type.shift().trim();
                 } else {
                     console.log(colored_prefix.error + `invalid value for type ${type}`);
