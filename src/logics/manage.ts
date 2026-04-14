@@ -51,30 +51,23 @@ class RibbonConfig {
 
         const entried = Object.entries(this.all('command'))
 
-        let res: t_command_schema = {}
+        const res = Object.fromEntries(
+            entried.filter(([key, value]) => {
 
-        if (type === 'all') {
-
-            res = Object.fromEntries(
-                entried.filter(([key, value]) => {
-
-                    if (keywords) {
-                        return value[key].includes(keywords)
-                    }
-
-                    return true
-
-                })
-            )
-
-        }
-
-        res = Object.fromEntries(
-            entried.filter(([_, value]) => {
+                if (type === 'all') {
+                    if (!keywords) return true;
+                    // Global search across multiple fields
+                    const searchStr = `${key} ${value.id} ${value.abs} ${value.cmd} ${value.tags.join(' ')}`.toLowerCase();
+                    return searchStr.includes(keywords.toLowerCase());
+                }
 
                 // filter by keywords if provided
                 if (keywords) {
-                    return value[type].includes(keywords)
+                    const fieldValue = (value as any)[type];
+                    if (Array.isArray(fieldValue)) {
+                        return fieldValue.includes(keywords);
+                    }
+                    return String(fieldValue).includes(keywords);
                 }
 
                 // otherwise return everything
@@ -272,3 +265,6 @@ export const highlightKeywords = (cmd: string, keywords: string[]) => {
 
     return highlighted;
 };
+
+export const [command, config] = [rib_conf.all('command'), rib_conf.all('config')];
+ 

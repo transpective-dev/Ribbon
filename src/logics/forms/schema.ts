@@ -30,16 +30,19 @@ const config_schema = z.object({
   ).default({}),
   settings: z.object({
     alwaysRejectExecution: z.boolean().default(true),
-    askBeforeDelete: z.boolean().default(true)
+    askBeforeDelete: z.boolean().default(true),
+    showMacro: z.boolean().default(true)
   }).default({
       alwaysRejectExecution: true,
-      askBeforeDelete: true
+      askBeforeDelete: true,
+      showMacro: true
   })
 }).default({
   filter: {},
   settings: {
     alwaysRejectExecution: true,
-    askBeforeDelete: true
+    askBeforeDelete: true,
+    showMacro: true
   }
 });
 

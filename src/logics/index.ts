@@ -10,4 +10,4 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
 });
 
-import './cmd.ts'
+import './cmd-hub.ts'
