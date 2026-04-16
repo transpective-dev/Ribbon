@@ -39,25 +39,37 @@ function log_formatter(msg: string, detail: t_command_schema[string]) {
 
 }
 
-const textCenter = (text: string, pad: number) => {
-    return ' '.repeat(pad) + text + ' '.repeat(pad);
-}
-
 const header = {
-    id: textCenter('ID', 6),
-    alia: textCenter('ALIA', 10),
-    t: textCenter('<T>', 1),
-    abs: textCenter('ABSTRACT', 12),
-    time: textCenter('TIME', 10),
+    id: 'ID',
+    alia: 'ALIA',
+    t: '<T>',
+    abs: 'ABSTRACT',
+    time: 'TIME',
+    group: 'GROUP'
 }
 
-function list_up(ls: string[]) {
+import Table from 'cli-table3';
+
+function list_up(ls: (typeof header)[]) {
+
+    const table = new Table({
+        head: Object.values(header),
+        colWidths: [9, 20, 5, 35, 25, 20],
+        wordWrap: true,
+        chars: {
+            'top': '─', 'top-mid': '┬', 'top-left': '┌', 'top-right': '┐',
+            'bottom': '─', 'bottom-mid': '┴', 'bottom-left': '└', 'bottom-right': '┘',
+            'left': '│', 'left-mid': '├', 'mid': '─', 'mid-mid': '┼',
+            'right': '│', 'right-mid': '┤', 'middle': '│'
+        },
+        style: { 'padding-left': 1, 'padding-right': 1, 'head': ['cyan'],  }
+    })
 
     console.log('\n');
-    console.log(Object.values(header).join(' | '));
-    console.log('-'.repeat(Object.values(header).join(' | ').length));
 
-    ls.forEach((i) => console.log(i))
+    ls.forEach((i) => table.push(Object.values(i)))
+
+    console.log(table.toString())
 
     console.log('\n');
 
@@ -73,16 +85,16 @@ function getGroupAndKey(str: string): {
 
     // group name or key name shouldn't startwith '.'
     if (str.startsWith('.')) {
-        return {key: str, group: undefined}
+        return { key: str, group: undefined }
     }
 
     const splited = str.split('.')
 
     if (splited.length === 2) {
-        return {key: splited[1], group: splited[0]}
+        return { key: splited[1], group: splited[0] }
     }
 
-    return {key: str, group: undefined}
+    return { key: str, group: undefined }
 
 }
 

@@ -10,4 +10,13 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
 });
 
+process.on('SIGINT', () => {
+    console.log('Aborted By User');
+    process.exit(0);
+});
+
 import './cmd-hub.ts'
+
+import { init_path } from "./path.ts";
+
+init_path();

@@ -49,8 +49,10 @@ class RibbonConfig {
     allFlatCommands(): Record<string, any> {
         const store = this.config.command.store;
         let flattened: Record<string, any> = {};
-        for (const group of Object.values(store)) {
-            flattened = { ...flattened, ...group as Record<string, any> };
+        for (const [groupName, groupData] of Object.entries(store)) {
+            for (const [key, value] of Object.entries(groupData as any)) {
+                flattened[key] = { ...(value as any), _group: groupName };
+            }
         }
         return flattened;
     }
@@ -67,7 +69,7 @@ class RibbonConfig {
 
             // group
             return Object.entries(this.config.command.get(group) || {});
-            
+
         })()
 
         const res = Object.fromEntries(
@@ -146,48 +148,30 @@ class RibbonConfig {
 
     // show command list
     ls({
-        headerLength,
         isFull,
         provided
     }: {
-        headerLength?: {
-            [key: string]: string
-        },
         isFull?: boolean,
         provided?: t_command_schema
-    }
-    ): (string[] | t_command_schema) {
+    } = {}
+    ): (any[] | t_command_schema) {
 
-        
-        if (provided) {
-            headerLength = utils.header
-        }
-        
         if (isFull) {
             return this.src({type: 'all'}) as t_command_schema
         }
 
-        const arr: string[] = []
-
-        const {
-            id,
-            alia,
-            t,
-            abs,
-            time
-        } = headerLength || {};
+        const arr: any[] = []
 
         Object.entries( provided || this.allFlatCommands()).forEach(([key, value]: any) => {
 
-            const field: string[] = [
-                `${value.id}`.padEnd(id?.length || 0),
-                `${key}`.padEnd(alia?.length || 0),
-                `${value.cmd.split('<T>').length - 1}`.padEnd(t?.length || 0),
-                `${value.abs}`.padEnd(abs?.length || 0),
-                `${value.time}`.padEnd(time?.length || 0),
-            ]
-
-            arr.push(`${field.join(chalk.hex(pallete.gray)(' | '))}`);
+            arr.push({
+                id: value.id,
+                alia: key,
+                t: ' ' + (value.cmd.split(/<T:?\s?\w*>/).length - 1).toString(),
+                abs: value.abs,
+                time: value.time,
+                group: value._group || 'unknown'
+            });
 
         })
 
@@ -208,7 +192,6 @@ class RibbonConfig {
         const { key, group } = form;
 
         const _key = key.trim()
-
         
         if (group !== undefined) {
 
