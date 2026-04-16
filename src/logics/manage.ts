@@ -5,7 +5,7 @@ import schemas from './forms/schema.ts'
 import path from './path.ts';
 import _init from './utils/config_init.ts';
 import chalk from 'chalk';
-import { pallete } from './utils/color.ts';
+import { pallete, colored_prefix } from './utils/color.ts';
 import utils from './utils/utils.ts';
 
 const platform = process.platform;
@@ -46,10 +46,19 @@ class RibbonConfig {
 
     }
 
+    allFlatCommands(): Record<string, any> {
+        const store = this.config.command.store;
+        let flattened: Record<string, any> = {};
+        for (const group of Object.values(store)) {
+            flattened = { ...flattened, ...group as Record<string, any> };
+        }
+        return flattened;
+    }
+
     // src command
     src(type: string, keywords?: string, isMinified?: boolean) {
 
-        const entried = Object.entries(this.all('command'))
+        const entried = Object.entries(this.allFlatCommands())
 
         const res = Object.fromEntries(
             entried.filter(([key, value]) => {
@@ -86,10 +95,16 @@ class RibbonConfig {
     }
 
     // register command
-    register(key: string, value: t_command_schema[string]) {
+    register(key: string, value: any) {
 
         try {
-            this.config.command.set(key, value)
+
+            // check existence
+            if (this.has(key)) return { status: false, msg: 'Command already exists globally' };
+
+            // get user section 
+            const userGroup = this.config.command.get('user') || {};
+            this.config.command.set('user', { ...(userGroup as any), [key]: value });
             return { status: true, msg: 'Command registered successfully' }
         } catch (err) {
             return { status: false, msg: 'Command registration failed' }
@@ -101,8 +116,18 @@ class RibbonConfig {
     delete(key: string) {
 
         try {
-            this.config.command.delete(key)
-            return { status: true, msg: 'Command deleted successfully' }
+            const store = this.config.command.store;
+            let deleted = false;
+            for (const [groupName, groupData] of Object.entries(store)) {
+                if ((groupData as any)[key]) {
+                    const newGroup = { ...groupData } as any;
+                    delete newGroup[key];
+                    this.config.command.set(groupName as any, newGroup);
+                    deleted = true;
+                    break;
+                }
+            }
+            return deleted ? { status: true, msg: 'Command deleted successfully' } : { status: false, msg: 'Command not found' };
         } catch (err) {
             return { status: false, msg: 'Command deletion failed' }
         }
@@ -142,7 +167,7 @@ class RibbonConfig {
             time
         } = headerLength || {};
 
-        Object.entries( provided || this.all('command')).forEach(([key, value]) => {
+        Object.entries( provided || this.allFlatCommands()).forEach(([key, value]: any) => {
 
             const field: string[] = [
                 `${value.id}`.padEnd(id?.length || 0),
@@ -164,12 +189,28 @@ class RibbonConfig {
         return this.config[type].store;
     }
 
-    get(key: string) {
-        return this.config.command.get(key);
+    get(form: {
+        key: string,
+        group?: string
+    }) {
+
+        const { key, group } = form;
+
+        if (group) {
+
+            try {
+                return this.config.command.get(group)?.[key];
+            } catch(e: any) {
+                console.log(colored_prefix.error + e.message);
+                return null;
+            }
+        }
+
+        return this.allFlatCommands()[key];
     }
 
     has(key: string) {
-        return this.config.command.has(key);
+        return !!this.allFlatCommands()[key];
     }
 
     async filter(cmd: string): Promise<{

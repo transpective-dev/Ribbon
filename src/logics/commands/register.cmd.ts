@@ -8,7 +8,8 @@ export default {
     options: [
         { option: '-d, --desc <value>', desc: 'Description of the command' },
         { option: '-a, --abstract <value>', desc: 'Abstract of the command' },
-        { option: '-t, --tags <value>', desc: 'Tags of the command' }
+        { option: '-t, --tags <value>', desc: 'Tags of the command' },
+        { option: '-g, --group <value>', desc: 'Group of the command' },
     ],
     desc: 'register new command',
     action: (i: any, options: any) => {

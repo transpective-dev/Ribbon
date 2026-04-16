@@ -2,23 +2,32 @@ import type { settings } from "node:cluster";
 import { z } from "zod";
 
 const command_schema = z.record(
-  z.string().min(1, "Command name cannot be empty"),
-  z.object({
+  z.string().min(1, "group name cannot be empty"),
+  z.record(
+    z.string().min(1, "Command name cannot be empty"),
+    z.object({
 
-    // unique-id: format: base32
-    id: z.string(),
+      // unique-id: format: base32
+      id: z.string(),
 
-    // datetime: format: localString
-    time: z.string(),
+      // datetime: format: localString
+      time: z.string(),
 
-    // acstract
-    abs: z.string(),
+      // acstract
+      abs: z.string(),
 
-    desc: z.string().default("No description provided"),
-    cmd: z.string().min(1, "Command cannot be empty"),
-    tags: z.array(z.string()).default([]),
-  })
-).default({});
+      desc: z.string().default("No description provided"),
+      cmd: z.string().min(1, "Command cannot be empty"),
+      tags: z.array(z.string()).default([]),
+    })).default({})
+).default({
+  'system': {
+
+  },
+  'user': {
+    
+  }
+})
 
 const config_schema = z.object({
   filter: z.record(
@@ -34,12 +43,25 @@ const config_schema = z.object({
     showMacro: z.boolean().default(true),
 
     // append double quotes when using <T: string>
-    appendDQWhenTString: z.boolean().default(true)
+    appendDQWhenTString: z.boolean().default(true),
+
+    asking: z.object({
+      whenTypeMissing: z.boolean().default(true),
+      whenTypeNotMatched: z.boolean().default(true),
+    }).default({
+      whenTypeMissing: true,
+      whenTypeNotMatched: true
+    })
+
   }).default({
-      alwaysRejectExecution: true,
-      askBeforeDelete: true,
-      showMacro: true,
-      appendDQWhenTString: true
+    alwaysRejectExecution: true,
+    askBeforeDelete: true,
+    showMacro: true,
+    appendDQWhenTString: true,
+    asking: {
+      whenTypeMissing: true,
+      whenTypeNotMatched: true
+    }
   })
 }).default({
   filter: {},
@@ -47,7 +69,11 @@ const config_schema = z.object({
     alwaysRejectExecution: true,
     askBeforeDelete: true,
     showMacro: true,
-    appendDQWhenTString: true
+    appendDQWhenTString: true,
+    asking: {
+      whenTypeMissing: true,
+      whenTypeNotMatched: true
+    }
   }
 });
 
