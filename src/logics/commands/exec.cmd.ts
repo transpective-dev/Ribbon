@@ -77,7 +77,7 @@ export default {
                 if ('get' in get_select) {
 
                     if (get_select.get === 'global') {
-                        get_cmd(key)
+                        return await get_cmd(key)
                     }
 
                     if (get_select.get === 'new') {
@@ -90,7 +90,7 @@ export default {
 
                         if ('get' in get_input) {
                             const { group, key } = utils.getGroupAndKey(get_input.get as string);
-                            get_cmd(key, group);
+                            return await get_cmd(key, group);
                         }
                     }
 
@@ -100,6 +100,8 @@ export default {
 
                 }
             }
+
+            utils.log_formatter('Command found: ', res)
 
             return res;
 

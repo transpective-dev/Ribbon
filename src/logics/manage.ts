@@ -56,9 +56,19 @@ class RibbonConfig {
     }
 
     // src command
-    src(type: string, keywords?: string, isMinified?: boolean) {
+    src({type, keywords, isMinified, group}: {type: string, keywords?: string, isMinified?: boolean, group?: string}) {
 
-        const entried = Object.entries(this.allFlatCommands())
+        const entried = (() => {
+
+            // global 
+            if (!group) {
+                return Object.entries(this.allFlatCommands())
+            }
+
+            // group
+            return Object.entries(this.config.command.get(group) || {});
+            
+        })()
 
         const res = Object.fromEntries(
             entried.filter(([key, value]) => {
@@ -154,7 +164,7 @@ class RibbonConfig {
         }
         
         if (isFull) {
-            return this.src('all') as t_command_schema
+            return this.src({type: 'all'}) as t_command_schema
         }
 
         const arr: string[] = []
@@ -189,24 +199,31 @@ class RibbonConfig {
         return this.config[type].store;
     }
 
+    // single 
     get(form: {
         key: string,
-        group?: string
+        group?: string | undefined
     }) {
 
         const { key, group } = form;
 
-        if (group) {
+        const _key = key.trim()
+
+        
+        if (group !== undefined) {
 
             try {
-                return this.config.command.get(group)?.[key];
+                return this.config.command.get(group)?.[_key];
             } catch(e: any) {
                 console.log(colored_prefix.error + e.message);
                 return null;
             }
         }
 
-        return this.allFlatCommands()[key];
+        const res = this.allFlatCommands()[_key]
+
+        return res;
+
     }
 
     has(key: string) {

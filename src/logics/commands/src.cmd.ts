@@ -9,6 +9,7 @@ export default {
     description: 'search for commands',
     options: [
         { option: '-t, --type <value>', desc: 'Type of search' },
+        { option: '-g, --group <value>', desc: 'Group of search' },
         { option: '-v --value <value>', desc: 'Value of search' },
         { option: '-m --minified', desc: 'Show minified version' }
     ],
@@ -21,7 +22,12 @@ export default {
             options.type = 'all';
         }
 
-        const res = rib_conf.src(options.type, options.value, options.minified);
+        const res = rib_conf.src({
+           type: options.type,
+           keywords: options.value,
+           isMinified: options.minified,
+           group: options.group
+        });
 
         if (options.minified) {
 
