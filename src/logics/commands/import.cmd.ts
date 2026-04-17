@@ -22,7 +22,7 @@ export default {
 
                 let path: string | null = null
 
-                if ( options.path && options.path.match(/\.[^.]+$/)) {
+                if (options.path && options.path.match(/\.[^.]+$/)) {
                     return console.log('error: path must be a directory')
                 }
 
@@ -36,8 +36,8 @@ export default {
                     return console.log('error: path not found')
                 }
 
-                const files = fs.readdirSync(path, {encoding: 'utf-8'}).map((file) => {
-                    
+                const files = fs.readdirSync(path, { encoding: 'utf-8' }).map((file) => {
+
                     if (file.endsWith('.rib.json')) {
                         return file
                     }
@@ -47,7 +47,7 @@ export default {
                 if (files.length === 0) {
                     return console.log('No .rib.json found')
                 }
-                
+
                 console.log('\nAvailable files: ')
 
                 files.forEach((file) => {

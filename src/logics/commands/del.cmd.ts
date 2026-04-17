@@ -11,7 +11,7 @@ export default {
     ],
     desc: 'Delete a command',
     action: async (name: any) => {
-        
+
         const config = rib_conf.all('config') as any;
         const ask = 'askBeforeDelete' in config.settings ? config.settings.askBeforeDelete : true;
 

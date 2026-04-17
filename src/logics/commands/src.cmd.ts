@@ -23,10 +23,10 @@ export default {
         }
 
         const res = rib_conf.src({
-           type: options.type,
-           keywords: options.value,
-           isMinified: options.minified,
-           group: options.group
+            type: options.type,
+            keywords: options.value,
+            isMinified: options.minified,
+            group: options.group
         });
 
         if (options.minified) {
