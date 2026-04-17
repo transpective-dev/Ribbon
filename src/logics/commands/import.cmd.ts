@@ -1,6 +1,8 @@
 export default {
     command: 'import',
-    argument: '<type>',
+    argument: [
+        '<type>'
+    ],
     options: [
         { option: '-p, --path <value>', desc: 'Path to the command' },
     ],

@@ -6,7 +6,9 @@ const { prompt } = enquirer;
 
 export default {
     command: 'del',
-    argument: '<name>',
+    argument: [
+        '<name>'
+    ],
     desc: 'Delete a command',
     action: async (name: any) => {
         

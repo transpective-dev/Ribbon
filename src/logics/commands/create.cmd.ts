@@ -7,7 +7,9 @@ import path from "../path.ts";
 export default {
     command: 'create',
     desc: 'create something',
-    argument: '<type>',
+    argument: [
+        '<type>'
+    ],
     action: async (type: any, options: any) => {
 
         switch (type) {
@@ -21,8 +23,8 @@ export default {
                         initial: path.root
                     })
 
-                    if ('create' in create ){
-                        
+                    if ('create' in create) {
+
                         console.log(create.create)
                         create_schema(create.create);
                         console.log('Schema created successfully')

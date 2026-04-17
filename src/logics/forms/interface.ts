@@ -18,11 +18,10 @@ export default {
   supported_type
 }
 
-// don't use but for example 
 export interface cmd_register {
   command: string,
   alias?: string,
-  argument?: string,
+  argument?: string[],
   options?: {
     option: string,
     desc?: string

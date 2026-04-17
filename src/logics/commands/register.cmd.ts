@@ -4,7 +4,9 @@ import utils from "../utils/utils.ts";
 export default {
     command: 'register',
     alias: 'regis',
-    argument: '<i>',
+    argument: [
+        '<i>'
+    ],
     options: [
         { option: '-d, --desc <value>', desc: 'Description of the command' },
         { option: '-a, --abstract <value>', desc: 'Abstract of the command' },

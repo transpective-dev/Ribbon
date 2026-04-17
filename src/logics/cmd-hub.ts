@@ -38,7 +38,7 @@ const registerCommand = ({
     const cmd = program.command(command);
 
     if (alias) cmd.alias(alias);
-    if (argument) cmd.argument(argument);
+    if (argument) argument.forEach((arg) => cmd.argument(arg));
     if (options) options.forEach((option) => cmd.option(option.option, option.desc));
     if (desc) cmd.description(desc);
     if (action) cmd.action(action);

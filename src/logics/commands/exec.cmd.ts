@@ -35,12 +35,12 @@ import _interface from "../forms/interface.ts";
 export default {
     command: 'exec',
     alias: 'run',
-    argument: '<alia>',
-    options: [
-        { option: '-t, --type <value...>', desc: 'Type of execution' }
+    argument: [
+        '<alia>',
+        '<type...>',
     ],
     desc: 'Execute a command',
-    action: async (alia: string, options: any) => {
+    action: async (alia: string, type: any) => {
 
         const {
             group,
@@ -143,13 +143,13 @@ export default {
 
             return to;
         })();
-        
+
         const requiredType = _interface.supported_type;
 
         const validateType = async (value: string, type: string): Promise<string | false> => {
 
             let valType: typeof requiredType[number] | 'unknown' = 'unknown';
-            
+
             if (['true', 'false'].includes(value.toLowerCase())) {
                 valType = 'boolean';
             } else if (!isNaN(Number(value)) && value.trim() !== '') {
@@ -193,7 +193,7 @@ export default {
                         }
                     }
                 }
-                
+
                 return false;
             }
 
@@ -218,10 +218,10 @@ export default {
 
             // check type existence
             const checkExistence = async () => {
-                if (options.type === undefined || options.type.length === 0) {
+                if (type === undefined || type.length === 0) {
                     return await askForType();
                 }
-                return options.type.shift()?.trim();
+                return type.shift()?.trim();
             }
 
             item = item.trim();
