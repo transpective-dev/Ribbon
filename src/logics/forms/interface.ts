@@ -18,6 +18,7 @@ export default {
   supported_type
 }
 
+// don't use but for example 
 export interface cmd_register {
   command: string,
   alias?: string,
@@ -27,7 +28,7 @@ export interface cmd_register {
     desc?: string
   }[],
   desc?: string,
-  action?: (args: any, options: any) => void
+  action?: (...args: any[]) => void
 }
 
 // types

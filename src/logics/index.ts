@@ -17,6 +17,4 @@ process.on('SIGINT', () => {
 
 import './cmd-hub.ts'
 
-import { init_path } from "./path.ts";
-
-init_path();
+import "./path.ts";

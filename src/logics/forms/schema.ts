@@ -1,7 +1,7 @@
-import type { settings } from "node:cluster";
 import { z } from "zod";
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
-const command_schema = z.record(
+const raw_command_schema = z.record(
   z.string().min(1, "group name cannot be empty"),
   z.record(
     z.string().min(1, "Command name cannot be empty"),
@@ -20,7 +20,9 @@ const command_schema = z.record(
       cmd: z.string().min(1, "Command cannot be empty"),
       tags: z.array(z.string()).default([]),
     })).default({})
-).default({
+)
+
+const command_schema = raw_command_schema.default({
   'system': {
 
   },

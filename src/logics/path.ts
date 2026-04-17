@@ -9,27 +9,25 @@ const usr_config = path.join(usr, 'config.json');
 const usr_command = path.join(usr, 'registered.json');
 const alias_pack = path.join(usr, 'alias_pack');
 const extension = path.join(usr, 'extension');
+const schemas = (targetDir: string = usr) => {
+    return path.join(targetDir, '_rib_alias', 'schema.json');
+};
 
-const init_ls = [
+const paths = {
     usr,
     usr_config,
     usr_command,
     alias_pack,
-    extension
-]
-
-export default {
-    root,
-    usr,
-    usr_config,
-    usr_command
+    extension,
 }
 
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 export const init_path = async () => {
 
-    for (const i of init_ls) {
+    const ls = Object.values(paths)
+
+    for (const i of ls) {
 
         let t: 'folder' | 'file' | undefined = undefined
 
@@ -47,4 +45,20 @@ export const init_path = async () => {
             await fs.ensureFile(i)
         }
     }
+}
+
+await init_path();
+
+export const write_schema = (path: any, schema: any) => {
+    console.log('writing...')
+    fs.outputJSONSync(schemas(path), schema, { spaces: 2 });
+}
+
+export default {
+    root,
+    usr,
+    paths,
+    usr_config,
+    usr_command,
+    write_schema
 }

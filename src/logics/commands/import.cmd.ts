@@ -1,10 +1,11 @@
-import type { cmd_register } from "../forms/interface.ts";
-
 export default {
     command: 'import',
-    argument: '<path> <alia>',
+    argument: '<type>',
+    options: [
+        { option: '-p, --path <value>', desc: 'Path to the command' },
+    ],
     desc: 'Import a command',
-    action: (path: string, alia: string) => {
-        console.log(path, alia);
+    action: (type: string, options: any) => {
+        console.log(type, options);
     }
-} as cmd_register;
+}
