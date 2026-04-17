@@ -20,7 +20,7 @@ export default {
 
 export interface cmd_register {
   command: string,
-  alias?: string,
+  alias?: string[] | string,
   argument?: string[],
   options?: {
     option: string,

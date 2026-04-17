@@ -34,7 +34,7 @@ import _interface from "../forms/interface.ts";
 
 export default {
     command: 'exec',
-    alias: 'run',
+    alias: ['run', 'x'],
     argument: [
         '<alia>',
         '<type...>',

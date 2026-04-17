@@ -10,7 +10,10 @@ const usr_command = path.join(usr, 'registered.json');
 const alias_pack = path.join(usr, 'alias_pack');
 const extension = path.join(usr, 'extension');
 const schemas = (targetDir: string = usr) => {
-    return path.join(targetDir, '_rib_alias', 'schema.json');
+    return {
+        _rib_alia: path.join(targetDir, '_rib_alias'),
+        schema: path.join(targetDir, '_rib_alias', 'schema.json')
+    };
 };
 
 const paths = {
@@ -51,7 +54,7 @@ await init_path();
 
 export const write_schema = (path: any, schema: any) => {
     console.log('writing...')
-    fs.outputJSONSync(schemas(path), schema, { spaces: 2 });
+    fs.outputJSONSync(schemas(path).schema, schema, { spaces: 2 });
 }
 
 export default {
@@ -60,5 +63,6 @@ export default {
     paths,
     usr_config,
     usr_command,
-    write_schema
+    write_schema,
+    schemas
 }
