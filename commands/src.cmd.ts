@@ -1,8 +1,8 @@
-import { rib_conf } from "../manage.ts";
-import utils from "../utils/utils.ts";
+import { rib_conf } from "../src/logics/manage.ts";
+import utils from "../src/logics/utils/utils.ts";
 
 // Try to import interface
-import _interface from "../forms/interface.ts";
+import _interface from "../src/logics/forms/interface.ts";
 
 export default {
     command: 'src',

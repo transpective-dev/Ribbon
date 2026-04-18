@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
-const raw_command_schema = z.record(
+const command_schema = z.record(
   z.string().min(1, "group name cannot be empty"),
   z.record(
     z.string().min(1, "Command name cannot be empty"),
@@ -20,15 +19,9 @@ const raw_command_schema = z.record(
       cmd: z.string().min(1, "Command cannot be empty"),
       tags: z.array(z.string()).default([]),
     })).default({})
-)
-
-const command_schema = raw_command_schema.default({
-  'system': {
-
-  },
-  'user': {
-    
-  }
+).default({
+  'system': {},
+  'user': {}
 })
 
 const config_schema = z.object({

@@ -1,5 +1,5 @@
-import { rib_conf } from "../manage.ts";
-import utils from "../utils/utils.ts";
+import { rib_conf } from "../src/logics/manage.ts";
+import utils from "../src/logics/utils/utils.ts";
 
 export default {
     command: 'ls',

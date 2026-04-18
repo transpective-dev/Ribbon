@@ -2,7 +2,7 @@
 
 import enquirer from 'enquirer'
 const { prompt } = enquirer
-import path from "../path.ts";
+import path from "../src/logics/path.ts";
 
 export default {
     command: 'create',

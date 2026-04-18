@@ -17,33 +17,43 @@ class RibbonConfig {
         config: Conf<t_config_schema>
     };
 
-    constructor() {
+    load() {
 
-        this.config = {
-
+        return {
+    
             command: new Conf<t_command_schema>({
                 configName: 'registered',
                 cwd: path.usr
             }),
-
+    
             config: new Conf<t_config_schema>({
                 configName: 'config',
                 cwd: path.usr
             })
-
+    
         };
-
+    
+        
+    }
+    
+    init() {
+        
         const config = this.config.config
-
+    
         _init.initConditional(config, 'filter', () => {
             if (platform === 'win32') return _init.windows;
             if (platform === 'darwin') return _init.darwin;
             return _init.linux;
         });
-
+    
         const defaultSettings = schemas.config_schema.parse({}).settings;
         _init.initBatch(config, { settings: defaultSettings });
 
+    }
+
+    constructor() {
+        this.config = this.load()
+        this.init()
     }
 
     allFlatCommands(): Record<string, any> {
@@ -193,6 +203,8 @@ class RibbonConfig {
 
         const { key, group } = form;
 
+        if (key === undefined) return null;
+
         const _key = key.trim()
         
         if (group !== undefined) {
@@ -215,99 +227,9 @@ class RibbonConfig {
         return !!this.allFlatCommands()[key];
     }
 
-    async filter(cmd: string): Promise<{
-
-        cmd: string,
-
-        detected: {
-            group: string,
-            keywords: string[]
-        }[],
-
-        msg: string | null
-
-    }> {
-
-        const config = this.all('config');
-
-        const filters = config.filter as t_config_schema['filter'];
-
-        const detected: { group: string; keywords: string[] }[] = [];
-
-        for (const [groupName, rule] of Object.entries(filters)) {
-
-            const matchedKeywords = rule.keywords.filter((keyword: string) =>
-
-                cmd.includes(keyword)
-
-            );
-
-            if (matchedKeywords.length > 0) {
-
-                detected.push({
-                    group: groupName,
-                    keywords: matchedKeywords
-                });
-
-            }
-        }
-
-        let msg: string | null;
-
-        if (detected.length === 0) {
-
-            msg = null;
-
-        } else if (detected.length === 1) {
-
-            const singleGroup = detected[0]?.group;
-
-            if (singleGroup === undefined) {
-
-                msg = `WARNING: We have detected [ ${singleGroup} ]`;
-
-            } else {
-
-                msg = filters[singleGroup]?.msg || `WARNING: We have detected [ ${singleGroup} ]`;
-
-            }
-
-        } else {
-
-            const groupNames = detected.map(d => d.group).join(', ');
-
-            msg = `DANGER: We have detected [ ${groupNames} ]`;
-
-        }
-
-        const highlighted = highlightKeywords(cmd, detected.flatMap(d => d.keywords));
-
-        return {
-            cmd: highlighted,
-            detected,
-            msg
-        };
-    }
-
 }
 
 export const rib_conf = new RibbonConfig();
-
-export const highlightKeywords = (cmd: string, keywords: string[]) => {
-
-    let highlighted = cmd;
-
-    keywords.forEach(kw => {
-
-        // find keywords globally and color up
-        const regex = new RegExp(`(${kw})`, 'g');
-
-        highlighted = highlighted.replace(regex, chalk.red.bold('$1'));
-
-    });
-
-    return highlighted;
-};
 
 export const [command, config] = [rib_conf.all('command'), rib_conf.all('config')];
  

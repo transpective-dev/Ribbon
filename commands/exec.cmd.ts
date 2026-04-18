@@ -1,9 +1,11 @@
 import { spawn } from "node:child_process";
-import { rib_conf } from "../manage.ts";
+import { rib_conf } from "../src/logics/manage.ts";
+import _interface from "../src/logics/forms/interface.ts";
 import enquirer from "enquirer";
 const { prompt } = enquirer;
-import { colored_prefix } from "../utils/color.ts";
-import utils from "../utils/utils.ts";
+import { colored_prefix } from "../src/logics/utils/color.ts";
+import utils from "../src/logics/utils/utils.ts";
+import { execution_guard } from "../src/logics/utils/execution_guard.ts";
 
 const spawnChild = (cmd: string) => {
 
@@ -30,22 +32,33 @@ const spawnChild = (cmd: string) => {
     })
 }
 
-import _interface from "../forms/interface.ts";
+import type { cmd_register } from "../src/logics/forms/interface.ts";
+import { optional } from "zod";
 
 export default {
     command: 'exec',
     alias: ['run', 'x'],
     argument: [
-        '<alia>',
-        '<type...>',
+        '<value>',
+        '[type...]',
+    ],
+    options: [
+        {
+            option: '-d, --direct',
+            desc: 'Direct command execution (bypass alias)'
+        }
     ],
     desc: 'Execute a command',
-    action: async (alia: string, type: any) => {
+    action: async (value: string, type: any, options: any) => {
+
+        if (options.direct) {
+            
+        }
 
         const {
             group,
             key
-        } = utils.getGroupAndKey(alia);
+        } = utils.getGroupAndKey(value);
 
         const get_cmd = async (key: string = '', group?: string) => {
 
@@ -284,49 +297,16 @@ export default {
             return console.log(colored_prefix.error + 'command execution failed');
         }
 
-        const detected = await rib_conf.filter(i);
+        const isSafe = await execution_guard(i);
 
-        if (detected.detected.length > 0) {
-
-            const config = rib_conf.all('config') as any;
-
-            if (config.settings.showMacro) {
-                console.log('\n' + '='.repeat(20) + ' Keywords Detected ' + '='.repeat(20));
-                console.log('\ncommand: ' + detected.cmd);
-                console.log('\ngroups: ')
-                detected.detected.forEach((item: any) => {
-                    console.log(`- ${item.group}: ${item.keywords.join(', ')}`);
-                })
-                console.log('\nmessage: ' + detected.msg + '\n\n' + "=".repeat(59) + '\n\n');
-            }
-
-            const isRejected = 'alwaysRejectExecution' in config.settings ? config.settings.alwaysRejectExecution : false;
-
-            let isContinue = {
-                type: 'select',
-                name: 'isContinue',
-                message: 'Are you sure you want to continue?',
-                choices: [
-                    'yes',
-                    'no'
-                ]
-            }
-
-            if (!isRejected) {
-
-                isContinue = await prompt(isContinue);
-
-            }
-
-
-            if ('isContinue' in isContinue && isContinue.isContinue === 'no' || isRejected) {
-                return console.log('Execution Cancelled by Ribbon-Execution-Guard')
-            }
-
+        if (!isSafe) {
+            return;
         }
 
         spawnChild(i);
 
     }
-}
+
+} satisfies cmd_register;
+
 

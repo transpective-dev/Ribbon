@@ -1,58 +1,54 @@
+// filters
+
 const windows = {
   "delete": {
     "keywords": [
-      "del ",
-      "erase ",
-      "rd ",
-      "rmdir ",
-      "format ",
-      "diskpart ",
-      "Remove-Item -Recurse",
-      "Clear-RecycleBin"
+      "(?:^|\\s)\\bdel\\b(?:\\s|$)",
+      "(?:^|\\s)\\berase\\b(?:\\s|$)",
+      "(?:^|\\s)\\brd\\b(?:\\s|$)",
+      "(?:^|\\s)\\brmdir\\b(?:\\s|$)",
+      "(?:^|\\s)\\bformat\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdiskpart\\b(?:\\s|$)",
+      "(?:^|\\s)\\bRemove-Item\\b[\\s\\S]*?\\b-Recurse\\b|(?:^|\\s)\\bRemove-Item\\b[\\s\\S]*?\\b-r\\b(?!\\w)",
+      "(?:^|\\s)\\bClear-RecycleBin\\b(?:\\s|$)"
     ],
-    "msg": "DENGER: You are executing a command that may result in permanent data loss. Please proceed with caution.",
+    "msg": "DENGER: You are executing a command that may result in permanent data loss. Please proceed with caution."
   },
   "shutdown": {
     "keywords": [
-      "shutdown /s",
-      "shutdown /r",
-      "shutdown /l",
-      "shutdown /h",
-      "shutdown /p",
-      "shutdown -s",
-      "shutdown -r",
-      "Stop-Computer",
-      "Restart-Computer"
+      "(?:^|\\s)\\bshutdown\\b[\\s\\S]*\\s[-/][srlhp]\\b",
+      "(?:^|\\s)\\bStop-Computer\\b",
+      "(?:^|\\s)\\bRestart-Computer\\b"
     ],
-    "msg": "DENGER: You are executing a command that may result in system shutdown or restart. Please proceed with caution.",
+    "msg": "DENGER: You are executing a command that may result in system shutdown or restart. Please proceed with caution."
   },
   "registry": {
     "keywords": [
-      "reg delete",
-      "reg add",
-      "regedit /s",
-      "Remove-ItemProperty",
-      "Set-ItemProperty"
+      "(?:^|\\s)\\breg\\b\\s+\\bdelete\\b",
+      "(?:^|\\s)\\breg\\b\\s+\\badd\\b",
+      "(?:^|\\s)\\bregedit\\b.*?\\b[/-]s\\b",
+      "(?:^|\\s)\\bRemove-ItemProperty\\b(?:\\s|$)",
+      "(?:^|\\s)\\bSet-ItemProperty\\b(?:\\s|$)"
     ],
-    "msg": "DENGER: You are executing a command that may result in system registry modification or deletion. Please proceed with caution.",
+    "msg": "DENGER: You are executing a command that may result in system registry modification or deletion. Please proceed with caution."
   },
   "clear-logs": {
     "keywords": [
-      "wevtutil cl",
-      "Clear-EventLog",
-      "Clear-WinEvent"
+      "(?:^|\\s)\\bwevtutil\\b\\s+\\bcl\\b",
+      "(?:^|\\s)\\bClear-EventLog\\b(?:\\s|$)",
+      "(?:^|\\s)\\bClear-WinEvent\\b(?:\\s|$)"
     ],
-    "msg": "DENGER: You are executing a command that may result in system event log clearing. Please proceed with caution.",
+    "msg": "DENGER: You are executing a command that may result in system event log clearing. Please proceed with caution."
   },
   "permission": {
     "keywords": [
-      "takeown ",
-      "icacls ",
-      "cacls ",
-      "Set-Acl",
-      "Get-Acl"
+      "(?:^|\\s)\\btakeown\\b(?:\\s|$)",
+      "(?:^|\\s)\\bicacls\\b(?:\\s|$)",
+      "(?:^|\\s)\\bcacls\\b(?:\\s|$)",
+      "(?:^|\\s)\\bSet-Acl\\b(?:\\s|$)",
+      "(?:^|\\s)\\bGet-Acl\\b(?:\\s|$)"
     ],
-    "msg": "DENGER: You are executing a command that may result in system permission modification or deletion. Please proceed with caution.",
+    "msg": "DENGER: You are executing a command that may result in system permission modification or deletion. Please proceed with caution."
   }
 }
 
@@ -218,6 +214,9 @@ const linux = {
     "msg": "DENGER: You are executing a command that may result in system configuration or kernel module modification. Please proceed with caution.",
   }
 }
+
+
+// initialization functions
 
 import Conf from 'conf';
 import type { t_command_schema, t_config_schema } from '../forms/schema.ts'

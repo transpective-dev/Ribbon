@@ -1,12 +1,5 @@
 import { Command } from "commander";
-import interfaces from "./forms/interface.ts";
-import { rib_conf } from "./manage.ts";
-import utils from "./utils/utils.ts";
 import _path from "./path.ts";
-
-import enquirer from 'enquirer';
-
-const { prompt } = enquirer;
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -25,7 +18,8 @@ program
 
 import type { cmd_register } from "./forms/interface.ts";
 
-const registerCommand = ({
+const registerCommand = (
+    {
     command,
     alias,
     argument,
@@ -53,7 +47,7 @@ const registerCommand = ({
 
 await (async () => {
 
-    const commandsDir = path.join(_path.root, 'src', 'logics', 'commands');
+    const commandsDir = _path.paths.commands;
     const files = fs.readdirSync(commandsDir);
 
     for (const file of files) {
