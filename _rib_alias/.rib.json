@@ -1,0 +1,13 @@
+{
+    "$schema": "./schema.json",
+    "hello": {
+        "hello": {
+            "abs": "",
+            "desc": "",
+            "cmd": "",
+            "id": "",
+            "tags": [],
+            "time": ""
+        }
+    }
+}

@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 
 process.on('uncaughtException', (err) => {
     console.log(`program encountered an error: ${err.message}`); 

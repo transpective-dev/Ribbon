@@ -107,16 +107,18 @@ class RibbonConfig {
     }
 
     // register command
+    // user only able to register in 'user' group
     register(key: string, value: any) {
 
         try {
 
             // check existence
-            if (this.has(key)) return { status: false, msg: 'Command already exists globally' };
+            if ( key in this.config.command.get('user') ) return { status: false, msg: 'Command already exists in user' };
 
             // get user section 
             const userGroup = this.config.command.get('user') || {};
             this.config.command.set('user', { ...(userGroup as any), [key]: value });
+
             return { status: true, msg: 'Command registered successfully' }
         } catch (err) {
             return { status: false, msg: 'Command registration failed' }

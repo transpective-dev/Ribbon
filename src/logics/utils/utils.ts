@@ -1,9 +1,9 @@
 const base36 = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
-function generate_id() {
+function generate_id(digit: number = 6) {
 
-    const a = Math.random().toString().slice(2, 2 + 6);
-    const b = Math.random().toString(36).slice(2, 2 + 6);
+    const a = Math.random().toString().slice(2, 2 + digit);
+    const b = Math.random().toString(36).slice(2, 2 + digit);
 
     let final_id = "";
 

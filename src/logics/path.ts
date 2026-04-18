@@ -7,20 +7,12 @@ const root = appRoot.path;
 const usr = path.join(root, 'src', 'usr');
 const usr_config = path.join(usr, 'config.json');
 const usr_command = path.join(usr, 'registered.json');
-const alias_pack = path.join(usr, 'alias_pack');
 const extension = path.join(usr, 'extension');
-const schemas = (targetDir: string = usr) => {
-    return {
-        _rib_alia: path.join(targetDir, '_rib_alias'),
-        schema: path.join(targetDir, '_rib_alias', 'schema.json')
-    };
-};
 
 const paths = {
     usr,
     usr_config,
     usr_command,
-    alias_pack,
     extension,
 }
 
@@ -52,17 +44,10 @@ export const init_path = async () => {
 
 await init_path();
 
-export const write_schema = (path: any, schema: any) => {
-    console.log('writing...')
-    fs.outputJSONSync(schemas(path).schema, schema, { spaces: 2 });
-}
-
 export default {
     root,
     usr,
     paths,
     usr_config,
     usr_command,
-    write_schema,
-    schemas
 }
