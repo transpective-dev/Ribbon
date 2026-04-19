@@ -1,6 +1,9 @@
 import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from 'events';
+import iconv from 'iconv-lite';
+
+const isWindows = process.platform === 'win32';
 
 export class Spawn {
 
@@ -27,9 +30,13 @@ export class Spawn {
                 stdio: 'pipe',
             });
 
+            const toString = (data: Buffer) => {
+                return isWindows ? iconv.decode(data, 'gbk') : data.toString();
+            }
+
             this.child.stdout?.on('data', (data) => {
 
-                data = data.toString();
+                data = toString(data);
 
                 if (this.showInConsole) {
                     process.stdout.write(data);
@@ -40,7 +47,7 @@ export class Spawn {
 
             this.child.stderr?.on('data', (data) => {
 
-                data = data.toString();
+                data = toString(data);
 
                 if (this.showInConsole) {
                     process.stderr.write(data);
