@@ -1,4 +1,6 @@
-import { z } from "zod";
+import al from "../../async_loader.ts";
+
+const { z } = al;
 
 const command_schema = z.record(
   z.string().min(1, "group name cannot be empty"),
@@ -77,5 +79,7 @@ export default {
   config_schema
 }
 
+// @ts-ignore
 export type t_config_schema = z.infer<typeof config_schema>
+// @ts-ignore
 export type t_command_schema = z.infer<typeof command_schema>

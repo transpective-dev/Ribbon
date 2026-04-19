@@ -109,7 +109,7 @@ const guard_test = {
     ]
 }
 
-import { execution_guard } from "../src/logics/utils/execution_guard.ts";
+import { execution_guard } from "../src/logics/utils/executions/execution_guard.ts";
 
 const test_cmd = async () => {
 
@@ -120,7 +120,7 @@ const test_cmd = async () => {
         true: [],
         false: []
     }
-    
+
     for (const [groupName, rule] of Object.entries(guard_test)) {
 
 
@@ -135,7 +135,7 @@ const test_cmd = async () => {
             }
 
         }
-        
+
     }
 
     console.log('detected: ', res.false.length);

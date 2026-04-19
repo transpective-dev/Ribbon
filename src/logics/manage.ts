@@ -4,9 +4,7 @@ import type { t_command_schema, t_config_schema } from './forms/schema.ts';
 import schemas from './forms/schema.ts'
 import path from './path.ts';
 import _init from './utils/config_init.ts';
-import chalk from 'chalk';
-import { pallete, colored_prefix } from './utils/color.ts';
-import utils from './utils/utils.ts';
+import {colored_prefix } from './utils/color.ts';
 
 const platform = process.platform;
 
@@ -144,7 +142,7 @@ class RibbonConfig {
             let deleted = false;
             for (const [groupName, groupData] of Object.entries(store)) {
                 if ((groupData as any)[key]) {
-                    const newGroup = { ...groupData } as any;
+                    const newGroup = { ...groupData as any } as any;
                     delete newGroup[key];
                     this.config.command.set(groupName as any, newGroup);
                     deleted = true;
@@ -232,4 +230,3 @@ class RibbonConfig {
 export const rib_conf = new RibbonConfig();
 
 export const [command, config] = [rib_conf.all('command'), rib_conf.all('config')];
- 

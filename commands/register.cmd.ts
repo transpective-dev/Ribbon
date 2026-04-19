@@ -3,23 +3,24 @@ import utils from "../src/logics/utils/utils.ts";
 
 export default {
     command: 'register',
-    alias: 'regis',
+    alias: ['regis', ':$'],
     argument: [
         '<i>'
     ],
     options: [
         { option: '-d, --desc <value>', desc: 'Description of the command' },
         { option: '-a, --abstract <value>', desc: 'Abstract of the command' },
-        { option: '-t, --tags <value>', desc: 'Tags of the command' },
-        { option: '-g, --group <value>', desc: 'Group of the command' },
+        { option: '-t, --tags <value>', desc: 'Tags of the command. form: "tag1, tag2..."' },
     ],
-    desc: 'register new command',
+    desc: "register new command \n\ngrammer: rib $/regis name='command' -d 'desc' -a 'abstract' -t 'tag1, tag2...'",
     action: (i: any, options: any) => {
 
         // split into two parts 
         const parts = i.split(/=(.*)/s).filter(Boolean);
 
-        const [key, value] = parts;
+        let [key, value] = parts;
+
+        key = key.trim();
 
         if (rib_conf.has(key)) {
             console.log('error: command already exists');
@@ -61,7 +62,7 @@ export default {
             (() => {
                 const config = rib_conf.all('config') as any;
                 if (config.settings.showMacro) {
-                    return [...utils.log_formatter('Command registered: ', rib_conf.get(key))];
+                    return [...utils.log_formatter('Command registered: ', rib_conf.get({key}))];
                 }
             })();
         } else {

@@ -1,13 +1,16 @@
-import _interface from "../forms/interface.ts";
-import {rib_conf} from "../manage.ts";
+import _interface from "../../forms/interface.ts";
+import { rib_conf } from "../../manage.ts";
 import enquirer from "enquirer";
 const { prompt } = enquirer;
 import chalk from "chalk";
-import { colored_prefix } from "./color.ts";
+import { colored_prefix } from "../color.ts";
 
 /**
  * Independent Execution Guard  
  * Checks if the final command violates any regex policies
+ * 
+ * @param cmdString provide command you want to check
+ * @returns boolean (true = no keywords found, false = keywords found)
  */
 
 export const execution_guard = async (cmdString: string): Promise<boolean> => {

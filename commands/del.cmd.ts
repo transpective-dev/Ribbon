@@ -29,7 +29,7 @@ export default {
 
             (() => {
                 if (config.settings.showMacro) {
-                    return [...utils.log_formatter('Command to delete: ', rib_conf.get(name))];
+                    return [...utils.log_formatter('Command to delete: ', rib_conf.get({key: name}))];
                 }
             })();
 

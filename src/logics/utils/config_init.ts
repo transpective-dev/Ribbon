@@ -1,3 +1,5 @@
+import type { t_command_schema, t_config_schema } from '../forms/schema.ts'
+
 // filters
 
 const windows = {
@@ -10,7 +12,9 @@ const windows = {
       "(?:^|\\s)\\bformat\\b(?:\\s|$)",
       "(?:^|\\s)\\bdiskpart\\b(?:\\s|$)",
       "(?:^|\\s)\\bRemove-Item\\b[\\s\\S]*?\\b-Recurse\\b|(?:^|\\s)\\bRemove-Item\\b[\\s\\S]*?\\b-r\\b(?!\\w)",
-      "(?:^|\\s)\\bClear-RecycleBin\\b(?:\\s|$)"
+      "(?:^|\\s)\\bClear-RecycleBin\\b(?:\\s|$)",
+      "(?:^|\\s)\\bRemove-Item\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in permanent data loss. Please proceed with caution."
   },
@@ -215,11 +219,23 @@ const linux = {
   }
 }
 
+// system alias
+
+const system_alias: t_command_schema[string] = {
+  "rim": {
+    id: 'SYS001',
+    time: '2026/4/19 10:44:03',
+    abs: 're install modules',
+    desc: 'delete node modules folder and package-lock.json, then run npm install',
+    cmd: 'Remove-Item -r -force node_modules package-lock.json && npm install',
+    tags: [],
+  }
+}
+
 
 // initialization functions
 
 import Conf from 'conf';
-import type { t_command_schema, t_config_schema } from '../forms/schema.ts'
 
 type config_conf = Conf<t_config_schema>
 

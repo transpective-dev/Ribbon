@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 process.on('uncaughtException', (err) => {
     console.log(`program encountered an error: ${err.message}`); 
