@@ -13,7 +13,16 @@ export const type_checker = async (cmdString: string, type: string[]) => {
     let i_cmd = '';
 
     // split command for type mapping
-    const parts = cmdString.split(/(<T:?\s?\w*>)/) as string[];
+    const parts = (cmdString.split(/(<T(?:\s*:\s*\w+)?>(?:\([^\\n]*\))?)/) as string[]).filter((item) => {
+
+        if (item === undefined || item === null || item === '' || item.trim() === '') {
+            return false;
+        }
+
+        return true;
+    }).map((item) => {
+        return item.trim();
+    });
 
     const isAsk = (() => {
 
@@ -110,15 +119,23 @@ export const type_checker = async (cmdString: string, type: string[]) => {
 
         // check type existence
         const checkExistence = async () => {
+
+            
             if (type === undefined || type.length === 0) {
+
+                if (item.match(/(\([^\\n]*\))/)) {
+    
+                    const match = item.match(/\(([^\\n]*)\)/);
+    
+                    return match?.[1];
+                }
+                
                 return await askForType();
+
             }
+            
             return type.shift()?.trim();
         }
-
-        item = item.trim();
-
-        if (item === '') continue;
 
         if (item.match(/<T:\s?\w*>/)) {
 
