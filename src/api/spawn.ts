@@ -26,7 +26,7 @@ export class Spawn {
         return new Promise((resolve, reject) => {
 
             this.child = spawn(cmd, {
-                shell: true,
+                shell: process.platform === 'win32' ? 'powershell.exe' : '/bin/bash',
                 stdio: 'pipe',
             });
 
@@ -57,13 +57,12 @@ export class Spawn {
             });
 
             this.child.on('exit', (code) => {
-                code === 0 ? resolve(true) : reject(false)
-                this.kill()
+                this.emit.emit('exit', code);
+                resolve(code)
             });
 
             this.child.on('error', (err) => {
-                reject(false)
-                this.kill()
+                resolve(1)
             });
 
         })
@@ -71,19 +70,3 @@ export class Spawn {
     }
 
 }
-
-// // events.ts (共享文件)
-// import { EventEmitter } from 'events';
-// export const bus = new EventEmitter();
-
-// // main-pipe.ts (处理 Pipe 的文件)
-// child.stdout.on('data', (data) => {
-//     const msg = data.toString();
-//     bus.emit('new-log', msg); // 发射信号
-// });
-
-// // logger.ts (另一个文件)
-// import { bus } from './events';
-// bus.on('new-log', (msg) => {
-//     console.log('监控到新日志:', msg);
-// });
