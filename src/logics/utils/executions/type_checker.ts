@@ -3,190 +3,188 @@ import _interface from "../../forms/interface.ts";
 import enquirer from "enquirer";
 const { prompt } = enquirer;
 import { colored_prefix } from "../color.ts";
+import { assign_slots, type Slot } from "./slot_assigner.ts";
 
-export const type_checker = async (cmdString: string, type: string[]) => {
+// regex to match <T>, <T: type>, and optional (default)
+const SLOT_REGEX = /(<T(?:\s*:\s*\w+)?>(?:\([^)]*\))?)/;
 
-    // Validate type; abort if no match found.
+// to match inside content
+const SLOT_DETAIL = /^<T(?:\s*:\s*(\w+))?>(?:\(([^)]*)\))?$/;
+
+export const type_checker = async (cmdString: string, userValues: string[]) => {
+
+    // is type exist
     let isValid = true;
 
-    // aggregate command here
-    let i_cmd = '';
+    // split command into chunks (text vs slots)
+    const parts = cmdString
+        .split(SLOT_REGEX)
+        .filter(p => p && p.trim() !== '')
+        .map(p => p.trim());
 
-    // split command for type mapping
-    const parts = (cmdString.split(/(<T(?:\s*:\s*\w+)?>(?:\([^\\n]*\))?)/) as string[]).filter((item) => {
 
-        if (item === undefined || item === null || item === '' || item.trim() === '') {
-            return false;
-        }
+    // --- Pass 1: scan all slots ---
 
-        return true;
-    }).map((item) => {
-        return item.trim();
-    });
+    // transiest extends.
+    // raw: original placeholder. example: <T: type>(default)， <T>， <T: type>
+    // typeName: type name. example: type: [string, number, boolean]
 
-    const isAsk = (() => {
+    const slots: (Slot & { raw: string, typeName: string })[] = [];
 
-        const i = rib_conf.all('config').settings.asking;
+    // current slot index
+    // Using a separate counter to ensure slot indexing ignores non-slot elements.
+    let slotIndex = 0;
 
-        const to: {
-            typeMissing?: boolean,
-            typeNotMatched?: boolean
-        } = {
-        }
+    // traverse parts 
+    for (const part of parts) {
 
-        if ('whenTypeMissing' in i) {
-            to.typeMissing = true;
-        }
+        // find out slot 
+        const m = part.match(SLOT_DETAIL);
 
-        if ('whenTypeNotMatched' in i) {
-            to.typeNotMatched = true;
-        }
+        // if not slot, then skip
+        if (!m) continue;
 
-        return to;
-    })();
 
-    const requiredType = _interface.supported_type;
+        slots.push({
+            index: slotIndex,
+            type: (m[1] || '').trim(), // get type
+            defaultVal: m[2] !== undefined ? m[2] : null, // get default value
+            raw: part,
+            typeName: (m[1] || '').trim()
+        });
 
-    const validateType = async (value: string, type: string): Promise<string | false> => {
-
-        let valType: typeof requiredType[number] | 'unknown' = 'unknown';
-
-        if (['true', 'false'].includes(value.toLowerCase())) {
-            valType = 'boolean';
-        } else if (!isNaN(Number(value)) && value.trim() !== '') {
-            valType = 'number';
-        } else {
-            valType = 'string';
-        }
-
-        // string can broadly accept numbers/booleans as text, but based on strict typing for others
-        if (valType === type || type === 'string') {
-            return value;
-        }
-
-        if (isAsk.typeNotMatched) {
-
-            const res = await prompt({
-                type: 'select',
-                name: 'action',
-                message: `Type mismatch! Expected [${type}] but got [${valType}] ('${value}')`,
-                choices: [
-                    { name: 'modify', message: 'Modify' },
-                    { name: 'ignore', message: 'Ignore' },
-                ]
-            });
-
-            if ('action' in res) {
-                if ((res as any)['action'] === 'ignore') {
-                    return false;
-                }
-
-                if ((res as any)['action'] === 'modify') {
-                    const newInput = await prompt({
-                        type: 'input',
-                        name: 'new_val',
-                        message: `Enter new ${type} value:`
-                    });
-
-                    if ('new_val' in newInput) {
-                        // Recursively call for the newly provided value
-                        return await validateType((newInput as any)['new_val'], type);
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        return false;
-    };
-
-    for (let item of parts) {
-
-        // handle type missing 
-        const askForType = async () => {
-            const res = await prompt({
-                type: 'input',
-                name: 'missing type',
-                message: `missing parameter for ${item}, please input: `
-            });
-
-            if ('missing type' in res) {
-                return (res as any)['missing type'];
-            }
-            return '';
-        }
-
-        // check type existence
-        const checkExistence = async () => {
-
-            
-            if (type === undefined || type.length === 0) {
-
-                if (item.match(/(\([^\\n]*\))/)) {
-    
-                    const match = item.match(/\(([^\\n]*)\)/);
-    
-                    return match?.[1];
-                }
-                
-                return await askForType();
-
-            }
-            
-            return type.shift()?.trim();
-        }
-
-        if (item.match(/<T:\s?\w*>/)) {
-
-            const match = item.match(/<T:\s*(\w*)>/);
-
-            const type = (match ? match[1] : '')?.trim() as typeof requiredType[number];
-
-            const val = await checkExistence();
-
-            if (!requiredType.includes(type)) {
-
-                console.log(colored_prefix.error + `invalid type ${type}`);
-
-                isValid = false;
-
-                break;
-
-            }
-
-            const finalVal = await validateType(val, type);
-
-            if (finalVal !== false) {
-
-                const configData = rib_conf.all('config').settings as any;
-
-                if ("appendDQWhenTString" in configData && configData.appendDQWhenTString && type === 'string') {
-                    i_cmd += ' ' + JSON.stringify(finalVal);
-                } else {
-                    i_cmd += ' ' + finalVal;
-                }
-
-            } else {
-                console.log(colored_prefix.error + `invalid value for type ${type}`);
-                isValid = false;
-                break;
-            }
-
-            continue;
-        }
-
-        if (item === '<T>') {
-            const val = await checkExistence();
-            i_cmd += ' ' + val;
-            continue;
-        }
-
-        // Normal command chunk
-        i_cmd += (i_cmd.length > 0 ? ' ' : '') + item;
-
+        slotIndex++;
     }
 
-    return i_cmd;
+    // --- Pass 2: distribute values ---
+    const values = userValues ? [...userValues] : [];
+    
+    // read config to check slot filling feature toggle
+    const config_data = rib_conf.all('config').settings as any;
+    const enableSlotFilling = config_data.enableSlotFilling ?? true;
 
+    const assigned = assign_slots(slots, values, enableSlotFilling);
+
+    // ask for any slot that has no value and no default
+    for (const slot of slots) {
+        if (!assigned.has(slot.index) && slot.defaultVal === null) {
+            const res = await prompt({
+                type: 'input',
+                name: 'val',
+                message: `missing parameter for <T: ${slot.typeName || 'any'}>, please input: `
+            });
+            if ('val' in res) {
+                assigned.set(slot.index, (res as any).val);
+            }
+        }
+    }
+
+    // --- Pass 3: assemble final command ---
+    const requiredType = _interface.supported_type;
+    const configData = rib_conf.all('config').settings as any;
+    const appendDQ = configData.appendDQWhenTString ?? true;
+
+    let i_cmd = '';
+    let cursor = 0;
+
+    for (const part of parts) {
+        const m = part.match(SLOT_DETAIL);
+
+        // normal text chunk
+        if (!m) {
+            i_cmd += (i_cmd.length > 0 ? ' ' : '') + part;
+            continue;
+        }
+
+        // slot chunk
+        const slot = slots[cursor++];
+        const val = assigned.get(slot!.index) ?? '';
+        const typeName = slot!.typeName as typeof requiredType[number];
+
+        // validate type if specified
+        if (typeName && requiredType.includes(typeName)) {
+            const finalVal = await validateType(val, typeName, requiredType);
+
+            if (finalVal === false) {
+                console.log(colored_prefix.error + `invalid value for type ${typeName}`);
+                isValid = false;
+                break;
+            }
+
+            // wrap string values in double quotes if setting enabled
+            if (appendDQ && typeName === 'string') {
+                i_cmd += ' ' + JSON.stringify(finalVal);
+            } else {
+                i_cmd += ' ' + finalVal;
+            }
+
+        } else if (typeName && !requiredType.includes(typeName)) {
+            console.log(colored_prefix.error + `invalid type ${typeName}`);
+            isValid = false;
+            break;
+
+        } else {
+            // untyped <T>
+            i_cmd += ' ' + val;
+        }
+    }
+
+    if (!isValid) return null;
+
+    return i_cmd.trim();
 }
+
+// --- Type validator (extracted for clarity) ---
+
+const validateType = async (
+    value: string,
+    expectedType: string,
+    supportedTypes: readonly string[]
+): Promise<string | false> => {
+
+    // infer actual type
+    let actualType: string = 'string';
+    if (['true', 'false'].includes(value.toLowerCase())) {
+        actualType = 'boolean';
+    } else if (!isNaN(Number(value)) && value.trim() !== '') {
+        actualType = 'number';
+    }
+
+    // string accepts anything
+    if (actualType === expectedType || expectedType === 'string') {
+        return value;
+    }
+
+    const asking = rib_conf.all('config').settings.asking;
+
+    if (asking.whenTypeNotMatched) {
+
+        const res = await prompt({
+            type: 'select',
+            name: 'action',
+            message: `Type mismatch! Expected [${expectedType}] but got [${actualType}] ('${value}')`,
+            choices: [
+                { name: 'modify', message: 'Modify' },
+                { name: 'ignore', message: 'Ignore' },
+            ]
+        });
+
+        if ('action' in res) {
+            if ((res as any).action === 'ignore') return false;
+
+            if ((res as any).action === 'modify') {
+                const newInput = await prompt({
+                    type: 'input',
+                    name: 'new_val',
+                    message: `Enter new ${expectedType} value:`
+                });
+
+                if ('new_val' in newInput) {
+                    return await validateType((newInput as any).new_val, expectedType, supportedTypes);
+                }
+            }
+        }
+    }
+
+    return false;
+};

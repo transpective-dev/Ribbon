@@ -42,6 +42,23 @@ const config_schema = z.object({
     // append double quotes when using <T: string>
     appendDQWhenTString: z.boolean().default(true),
 
+    /**
+     * when enabled, plain slot has higher priority than default slot.
+     * it means, plain slot will be filled first, then default slot will be filled in order.
+     * 
+     * for example: [a, B, c, D, e]
+     * 
+     * lowercase: plain slot
+     * uppercase: default slot
+     * 
+     * - when 2 argument provided: fill [a, c]
+     * - when 3 argument provided: fill [a, c, e]
+     * - when 4 argument provided: fill [a, B, c, e]
+     * - when 5 argument provided: fill [a, B, c, e, D]
+     * 
+     */
+    enableSlotFilling: z.boolean().default(true),
+
     asking: z.object({
       whenTypeMissing: z.boolean().default(true),
       whenTypeNotMatched: z.boolean().default(true),
@@ -55,6 +72,7 @@ const config_schema = z.object({
     askBeforeDelete: true,
     showMacro: true,
     appendDQWhenTString: true,
+    enableSlotFilling: true,
     asking: {
       whenTypeMissing: true,
       whenTypeNotMatched: true
@@ -67,6 +85,7 @@ const config_schema = z.object({
     askBeforeDelete: true,
     showMacro: true,
     appendDQWhenTString: true,
+    enableSlotFilling: true,
     asking: {
       whenTypeMissing: true,
       whenTypeNotMatched: true

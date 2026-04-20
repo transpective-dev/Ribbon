@@ -1,4 +1,4 @@
-import { rib_conf, config } from "../src/logics/manage.ts";
+import { rib_conf } from "../src/logics/manage.ts";
 import _interface from "../src/logics/forms/interface.ts";
 import enquirer from "enquirer";
 const { prompt } = enquirer;
