@@ -59,6 +59,10 @@ const config_schema = z.object({
      */
     enableSlotFilling: z.boolean().default(true),
 
+    // true:  Use PowerShell (supports advanced scripts like 'throw')
+    // false: Use standard CMD (default system shell)
+    useShell: z.boolean().default(false),
+
     asking: z.object({
       whenTypeMissing: z.boolean().default(true),
       whenTypeNotMatched: z.boolean().default(true),
@@ -73,6 +77,7 @@ const config_schema = z.object({
     showMacro: true,
     appendDQWhenTString: true,
     enableSlotFilling: true,
+    useShell: false,
     asking: {
       whenTypeMissing: true,
       whenTypeNotMatched: true
@@ -86,6 +91,7 @@ const config_schema = z.object({
     showMacro: true,
     appendDQWhenTString: true,
     enableSlotFilling: true,
+    useShell: false,
     asking: {
       whenTypeMissing: true,
       whenTypeNotMatched: true

@@ -2,8 +2,16 @@ import { spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from 'events';
 import iconv from 'iconv-lite';
+import { rib_conf } from "../logics/manage.ts";
 
 const isWindows = process.platform === 'win32';
+const shellStatus = () => {
+    const isEnabled = rib_conf.all('config').settings.useShell;
+    if (isEnabled) {
+        return isWindows ? 'powershell.exe' : '/bin/bash';
+    }
+    return true;
+}
 
 export class Spawn {
 
@@ -26,7 +34,7 @@ export class Spawn {
         return new Promise((resolve, reject) => {
 
             this.child = spawn(cmd, {
-                shell: process.platform === 'win32' ? 'powershell.exe' : '/bin/bash',
+                shell: shellStatus(),
                 stdio: 'pipe',
             });
 
@@ -69,4 +77,31 @@ export class Spawn {
 
     }
 
+}
+
+// private
+
+export const spawnChild = (cmd: string) => {
+
+    return new Promise((resolve, reject) => {
+
+        const kill = (status: boolean) => {
+            child.kill();
+            status ? resolve(true) : reject(false)
+        }
+
+        const child = spawn(cmd, {
+            shell: shellStatus(),
+            stdio: 'inherit',
+        });
+
+        child.on('exit', (code) => {
+            code === 0 ? kill(true) : kill(false)
+        });
+
+        child.on('error', (err) => {
+            kill(false)
+        });
+
+    })
 }

@@ -6,11 +6,12 @@ import _path from "../src/logics/path.ts";
 import path from 'path'
 import { colored_prefix } from "../src/logics/utils/color.ts";
 import fs from 'fs-extra'
+import type { cmd_register } from '../src/logics/forms/interface.ts';
 
 const device = process.platform === 'win32' ? 'win' : 'linux'
 
 
-const init_script = async (name: string) => {
+const init_script = async (name: string, requiredShowcase: boolean = true) => {
 
     const {
         scripts
@@ -18,7 +19,7 @@ const init_script = async (name: string) => {
 
     const toTarget = path.join(scripts, name + '.script.ts')
 
-    const template = `
+    const template = requiredShowcase ? `
 
 // Showcase 
 
@@ -73,18 +74,22 @@ for (const i in commandSet) {
     let exit: boolean = false
 
     // Run your command and watch specific logs elegantly
-    await run(cmd, {
-        stdout: [
-            { includes: 'hello', action: () => console.log('Got hello') }
-        ],
-        stderr: [
-            { includes: 'error', action: (data, stop) => {
+    await run(cmd, [
+        {
+            type: 'stdout',
+            satisfied: { includes: 'hello' },
+            action: () => console.log('Got hello')
+        },
+        {
+            type: 'stderr',
+            satisfied: { includes: 'error' },
+            action: (data, stop) => {
                 console.log('Got error')
                 exit = true
                 stop() // immediately abort the running process
-            }}
-        ]
-    });
+            }
+        }
+    ]);
 
     if (exit) {
         console.log('you wont see "after sleep"')
@@ -105,6 +110,16 @@ const template = () => {
     template()
 })()
 
+    ` : `
+import rib_api from '../../api/api-hub.ts'
+
+const template = () => {
+}
+
+(() => {
+    template()
+})()
+    
     `
 
     try {
@@ -162,6 +177,12 @@ export default {
     argument: [
         '<type>'
     ],
+    options: [
+        {
+            option: '-t, --template',
+            desc: 'create template without showcase'
+        }
+    ],
     action: async (type: any, options: any) => {
 
         switch (type) {
@@ -213,4 +234,4 @@ export default {
 
 
     }
-}
+} satisfies cmd_register;

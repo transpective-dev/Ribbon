@@ -3,7 +3,7 @@ import utils from "../src/logics/utils/utils.ts";
 
 export default {
     command: 'register',
-    alias: ['regis', ':$'],
+    alias: ['regis', 'rgs'],
     argument: [
         '<i>'
     ],

@@ -6,37 +6,12 @@ import { colored_prefix } from "../src/logics/utils/color.ts";
 import utils from "../src/logics/utils/utils.ts";
 import { execution_guard } from "../src/logics/utils/executions/execution_guard.ts";
 import { type_checker } from "../src/logics/utils/executions/type_checker.ts";
-import { spawn } from "child_process";
+import { spawnChild } from "../src/api/spawn.ts";
 import _path from "../src/logics/path.ts"
 import fs from 'fs-extra'
 import path from 'path'
 
 import type { cmd_register } from "../src/logics/forms/interface.ts";
-
-const spawnChild = (cmd: string) => {
-
-    return new Promise((resolve, reject) => {
-
-        const kill = (status: boolean) => {
-            child.kill();
-            status ? resolve(true) : reject(false)
-        }
-
-        const child = spawn(cmd, {
-            shell: true,
-            stdio: 'inherit',
-        });
-
-        child.on('exit', (code) => {
-            code === 0 ? kill(true) : kill(false)
-        });
-
-        child.on('error', (err) => {
-            kill(false)
-        });
-
-    })
-}
 
 const runScript = async (filename: string) => {
     
@@ -50,7 +25,7 @@ const runScript = async (filename: string) => {
 
     console.log(toTarget)
 
-    return await spawnChild('npx bun ' + JSON.stringify(toTarget))
+    return await spawnChild('bun ' + JSON.stringify(toTarget))
 
 }
 

@@ -1,5 +1,15 @@
 import { Spawn } from "./spawn.ts";
 
+interface exec {
+    type: 'stdout' | 'stderr',
+    satisfied: {
+        includes?: string | RegExp,
+        notIncludes?: string | RegExp,
+        func?: (data: string) => boolean
+    }
+    action: (data: string, stop: () => void) => void
+}
+
 /* Direct assignment creates a stale reference, 
 so I used a getter for live access and a cleaner syntax without parentheses. */
 
@@ -39,40 +49,66 @@ export const spawn = (showInConsole: boolean = true) => {
         },
 
         // run command with optional watch conditions
-        run: async (cmd: string, watch?: {
-            stdout?: { includes?: string, action: (data: string, stop: () => void) => void }[],
-            stderr?: { includes?: string, action: (data: string, stop: () => void) => void }[]
-        }) => {
+
+        run: async (cmd: string, watch?: exec[]) => {
 
             const stopFunc = () => instance?.kill();
 
-            // create binding wrappers
-            const outBinders = watch?.stdout?.map(opt => {
-                return (data: string) => {
-                    if (!opt.includes || data.includes(opt.includes)) opt.action(data, stopFunc);
-                };
-            }) || [];
+            const binders: { type: 'stdout' | 'stderr', func: any }[] = [];
+            watch?.forEach(w => {
+                
+                // inject intercepted data
+                const wrapper = (data: string) => {
+                    const opt = w.satisfied || {};
 
-            const errBinders = watch?.stderr?.map(opt => {
-                return (data: string) => {
-                    if (!opt.includes || data.includes(opt.includes)) opt.action(data, stopFunc);
-                };
-            }) || [];
+                    // filter
 
-            // mount listeners
-            outBinders.forEach(b => instance?.emit.on('stdout', b));
-            errBinders.forEach(b => instance?.emit.on('stderr', b));
+                    // 1. if includes has value but not matched
+                    if (opt.includes) {
+
+                        if (typeof opt.includes === 'string') {
+
+                            // if no content matched
+                            if (!data.includes(opt.includes)) return;
+
+                        } else {
+
+                            // if no regex matched
+                            if (!new RegExp(opt.includes).test(data)) return;
+
+                        }
+                    }
+                    
+                    // 2. if notIncludes has value but matched
+                    if (opt.notIncludes && data.includes(opt.notIncludes.toString())) return;
+
+                    // 3. if func has value and returned false
+                    if (opt.func && !opt.func(data)) return;
+
+                    w.action(
+                        data,
+                        stopFunc,
+                    );
+                };
+
+                binders.push({ type: w.type, func: wrapper });
+                
+                instance?.emit.on(w.type, wrapper);
+
+            });
 
             try {
 
                 return await instance?.spawn(cmd);
-                
-            } catch(e: any) {
-              
-                console.error(e)
 
-                return 1
+            } catch (e: any) {
 
+                process.stderr.write(e);
+                return 1;
+
+            } finally {
+                // guaranteed cleanup of all active listeners
+                binders.forEach(b => instance?.emit.off(b.type, b.func));
             }
         }
     }
