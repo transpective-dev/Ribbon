@@ -5,6 +5,8 @@ import schemas from './forms/schema.ts'
 import path from './path.ts';
 import _init from './utils/config_init.ts';
 import {colored_prefix } from './utils/color.ts';
+import chalk from 'chalk';
+import { pallete } from './utils/color.ts';
 
 const platform = process.platform;
 
@@ -14,6 +16,28 @@ class RibbonConfig {
         command: Conf<t_command_schema>
         config: Conf<t_config_schema>
     };
+
+    toggle(key: string) {
+
+        const settings = this.all('config').settings;
+
+        const prev = settings[key];
+
+        settings[key] = !settings[key];
+
+        this.config.config.set('settings', settings);
+
+        const isTrue = (val: boolean) => {
+            return val ? chalk.hex(pallete.green_alt)('true') : chalk.hex(pallete.red)('false');
+        }
+
+        console.log(`\n${key}: `)
+        console.log('-'.repeat(20))
+        console.log(`${isTrue(prev)} → ${isTrue(settings[key])}\n`) 
+
+
+
+    }
 
     load() {
 
@@ -125,6 +149,7 @@ class RibbonConfig {
 
             // get user section 
             const userGroup = this.config.command.get('user') || {};
+
             this.config.command.set('user', { ...(userGroup as any), [key]: value });
 
             return { status: true, msg: 'Command registered successfully' }
@@ -189,8 +214,10 @@ class RibbonConfig {
 
     }
 
-    all(type: 'command' | 'config') {
+    all(type: 'command' | 'config', reload?: boolean) {
+
         return this.config[type].store;
+
     }
 
     // single 

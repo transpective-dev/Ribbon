@@ -7,120 +7,34 @@ import path from 'path'
 import { colored_prefix } from "../src/logics/utils/color.ts";
 import fs from 'fs-extra'
 import type { cmd_register } from '../src/logics/forms/interface.ts';
+import script_temp from './create_temps/script.ts'
 
-const device = process.platform === 'win32' ? 'win' : 'linux'
+const platform = process.platform === 'win32' ? 'win' : 'linux'
 
+const _init = async ({
+    name, showcase, type
+}: {
+    name: string,
+    showcase: boolean,
+    type: 'script' | 'cmd'
+}) => {
 
-const init_script = async (name: string, requiredShowcase: boolean = true) => {
+    const targetFolder = type === 'script' ? _path.paths.scripts : _path.paths.custom
 
-    const {
-        scripts
-    } = _path.paths
+    const toTarget = path.join(targetFolder, name + `.${type}.ts`)
 
-    const toTarget = path.join(scripts, name + '.script.ts')
+    const template: string = (() => {
 
-    const template = requiredShowcase ? `
-
-// Showcase 
-
-// import api from this relative path.
-// you can change the name as you want.
-import rib_api from '../../api/api-hub.ts'
-
-// in this showcase, we use spawn.
-// spawn_api is makes you able to spawn a process and run commands.
-// if you are js programmer, you can import spawn from child_process. 
-// and do more fancy things.
-
-const { spawn } = rib_api
-
-// how to use spawn ?
-
-/* there is several method we provided.
-1. get: you can get instance and call inside functions
-2. dispose: when you don't need this instance anymore, you can dispose it to avoid memory leaks.
-3. onStdout/onStderr: you can listen strout and stderr dynamically. 
-4. when: if you are not good at js-coding, you can use this mothod to take some easy actions. we will demonstrate it later.
-5. run: you can run command here.
-6. log: every log we've catched. you can do more complex task with this.
-*/
-
-// example
-
-// first, we are going to destructure the spawn
-// although we can call it like a method, but destructuring is more clean visually.
-
-const spawn_a = spawn() 
-
-const { get, dispose, onStdout, onStderr, run } = spawn_a
-
-// create your command set
-
-const commandSet = [
-'echo hello world',
-${device === 'win' ? '\'Write-Error "Something went wrong"\'' : 'echo "Error message" >&2'},
-'sleep 3',
-'echo after sleep'
-]
-
-// start running command set
-
-for (const i in commandSet) {
-
-    const cmd = commandSet[i]!
-
-    console.log('hello from index ', i)
-
-    let exit: boolean = false
-
-    // Run your command and watch specific logs elegantly
-    await run(cmd, [
-        {
-            type: 'stdout',
-            satisfied: { includes: 'hello' },
-            action: () => console.log('Got hello')
-        },
-        {
-            type: 'stderr',
-            satisfied: { includes: 'error' },
-            action: (data, stop) => {
-                console.log('Got error')
-                exit = true
-                stop() // immediately abort the running process
+        switch (type) {
+            case 'script': {
+                return showcase ? script_temp.showcase(platform) : script_temp.template
+            }
+            case 'cmd': {
+                return script_temp.template
             }
         }
-    ]);
 
-    if (exit) {
-        console.log('you wont see "after sleep"')
-        break
-    }
-
-}
-
-dispose()
-
-// you also can write a function and run commands inside
-const template = () => {
-    // command to run
-}
-
-// you can IFE it self or call at here
-(() => {
-    template()
-})()
-
-    ` : `
-import rib_api from '../../api/api-hub.ts'
-
-const template = () => {
-}
-
-(() => {
-    template()
-})()
-    
-    `
+    })()
 
     try {
 
@@ -173,51 +87,56 @@ const template = () => {
 
 export default {
     command: 'create',
-    desc: 'create something',
+    desc: 'create template for script and new command file',
     argument: [
         '<type>'
     ],
     options: [
         {
-            option: '-t, --template',
-            desc: 'create template without showcase'
+            option: '-s, --showcase',
+            desc: 'create template with showcase'
         }
     ],
     action: async (type: any, options: any) => {
 
+        const askForName = async () => {
+
+            const res = await prompt({
+                type: 'input',
+                name: 'name',
+                message: 'Enter script name',
+            });
+
+            if ('name' in res) {
+
+                const val = (res.name as string).trim();
+
+                if (!val) {
+
+                    console.log('\nName is required\n');
+
+                    return await askForName();
+
+                }
+
+                return val;
+            }
+
+        };
+
         switch (type) {
+
             case "script": {
-
-                const askForName = async () => {
-
-                    const res = await prompt({
-                        type: 'input',
-                        name: 'name',
-                        message: 'Enter script name',
-                    });
-
-                    if ('name' in res) {
-
-                        const val = (res.name as string).trim();
-
-                        if (!val) {
-
-                            console.log('\nName is required\n');
-
-                            return await askForName();
-
-                        }
-
-                        return val;
-                    }
-
-                };
 
                 const scriptName = await askForName();
 
                 if (scriptName) {
 
-                    const res = await init_script(scriptName);
+                    const res = await _init({
+                        name: scriptName,
+                        showcase: options.showcase,
+                        type: 'script'
+                    });
 
                     if (!res.status) {
                         console.log(colored_prefix.error + res.message);
@@ -228,6 +147,35 @@ export default {
 
                 }
 
+                break;
+            }
+
+            case 'command': {
+
+                const commandName = await askForName();
+
+                if (commandName) {
+
+                    const res = await _init({
+                        name: commandName,
+                        showcase: options.showcase,
+                        type: 'cmd'
+                    });
+
+                    if (!res.status) {
+                        console.log(colored_prefix.error + res.message);
+                        return;
+                    }
+
+                    console.log('Command created at: ' + res.message);
+
+                }
+
+                break;
+            }
+
+            default: {
+                console.log(colored_prefix.error + 'Invalid type');
                 break;
             }
         }

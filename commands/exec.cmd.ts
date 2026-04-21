@@ -163,5 +163,3 @@ export default {
     }
 
 } satisfies cmd_register;
-
-
