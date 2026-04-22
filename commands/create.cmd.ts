@@ -1,13 +1,16 @@
 // for creating something. like schema and temp
 
-import enquirer from 'enquirer'
-const { prompt } = enquirer
+import al from "../src/async_loader.ts"
+
+// @ts-ignore
+const { prompt, fs } = al
+
 import _path from "../src/logics/path.ts";
 import path from 'path'
 import { colored_prefix } from "../src/logics/utils/color.ts";
-import fs from 'fs-extra'
-import type { cmd_register } from '../src/logics/forms/interface.ts';
-import script_temp from './create_temps/script.ts'
+import type { cmd_register } from '../src/logics/templates/interface.ts';
+import script_temp from '../src/logics/templates/create_temps/script.ts'
+import command_temp from '../src/logics/templates/create_temps/command.ts'
 
 const platform = process.platform === 'win32' ? 'win' : 'linux'
 
@@ -30,15 +33,13 @@ const _init = async ({
                 return showcase ? script_temp.showcase(platform) : script_temp.template
             }
             case 'cmd': {
-                return script_temp.template
+                return showcase ? command_temp.showcase() : command_temp.template
             }
         }
 
     })()
 
     try {
-
-        await fs.ensureFile(toTarget)
 
         const isExist = await fs.pathExists(toTarget)
 
@@ -47,7 +48,7 @@ const _init = async ({
             const recover = await prompt({
                 type: 'select',
                 name: 'recover',
-                message: 'Script already exists. Recover it?',
+                message: `${type} already exists. Recover it? \n\n ${toTarget}`,
                 choices: [
                     { name: 'Yes', value: true },
                     { name: 'No', value: false }
@@ -66,6 +67,8 @@ const _init = async ({
             }
         }
 
+        await fs.ensureFile(toTarget)
+
         await fs.writeFile(toTarget, template)
 
         return {
@@ -79,6 +82,10 @@ const _init = async ({
             status: false,
             message: error
         }
+
+    } finally {
+
+        console.log('\n')
 
     }
 

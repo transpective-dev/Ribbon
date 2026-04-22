@@ -27,7 +27,7 @@ function generate_local_time() {
     return new Date().toLocaleString();
 }
 
-import type { t_command_schema } from "../forms/schema.ts";
+import type { t_command_schema } from "../templates/schema.ts";
 
 function log_formatter(msg: string, detail: t_command_schema[string]) {
 
@@ -62,7 +62,7 @@ function list_up(ls: (typeof header)[]) {
             'left': '│', 'left-mid': '├', 'mid': '─', 'mid-mid': '┼',
             'right': '│', 'right-mid': '┤', 'middle': '│'
         },
-        style: { 'padding-left': 1, 'padding-right': 1, 'head': ['cyan'],  }
+        style: { 'padding-left': 1, 'padding-right': 1, 'head': ['cyan'], }
     })
 
     console.log('\n');

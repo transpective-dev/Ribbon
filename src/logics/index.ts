@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
 
+import al from "../async_loader.ts";
+export { al };
+
 process.on('uncaughtException', (err) => {
     console.log(`program encountered an error: ${err.message}`); 
     process.exit(1); 

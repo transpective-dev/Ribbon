@@ -2,18 +2,18 @@ import { rib_conf } from "../src/logics/manage.ts";
 import utils from "../src/logics/utils/utils.ts";
 
 // Try to import interface
-import _interface from "../src/logics/forms/interface.ts";
+import _interface, { type cmd_register } from "../src/logics/templates/interface.ts";
 
 export default {
-    command: 'src',
-    description: 'search for commands',
+    command: 'find',
+    desc: 'find commands',
+    argument: ['<value>'],
     options: [
         { option: '-t, --type <value>', desc: 'Type of search' },
         { option: '-g, --group <value>', desc: 'Group of search' },
-        { option: '-v --value <value>', desc: 'Value of search' },
         { option: '-m --minified', desc: 'Show minified version' }
     ],
-    action: (options: any) => {
+    action: (value: any, options: any) => {
 
         const searchTypes = _interface.search_types || ['tag', 'cmd', 'desc', 'code', 'all'];
 
@@ -24,7 +24,7 @@ export default {
 
         const res = rib_conf.src({
             type: options.type,
-            keywords: options.value,
+            keywords: value,
             isMinified: options.minified,
             group: options.group
         });
@@ -46,4 +46,4 @@ export default {
         console.log(res)
 
     }
-};
+} satisfies cmd_register

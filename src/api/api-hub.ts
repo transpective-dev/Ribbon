@@ -1,5 +1,7 @@
 import { Spawn } from "./spawn.ts";
 
+import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
+
 interface exec {
     type: 'stdout' | 'stderr',
     satisfied: {
@@ -50,7 +52,7 @@ export const spawn = (showInConsole: boolean = true) => {
 
         // run command with optional watch conditions
 
-        run: async (cmd: string, watch?: exec[]) => {
+        run: async (cmd: string, watch?: exec[], useEG: boolean = true) => {
 
             const stopFunc = () => instance?.kill();
 
@@ -99,6 +101,13 @@ export const spawn = (showInConsole: boolean = true) => {
 
             try {
 
+                if (useEG) {
+                    const isSafe = await execution_guard(cmd);
+                    if (!isSafe) {
+                        return;
+                    }
+                }
+
                 return await instance?.spawn(cmd);
 
             } catch (e: any) {
@@ -114,7 +123,6 @@ export const spawn = (showInConsole: boolean = true) => {
     }
 }
 
-import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
 import path from "../logics/path.ts";
 
 export default {

@@ -1,12 +1,13 @@
 import Conf from 'conf'
-import _schema from './forms/schema.ts'
-import type { t_command_schema, t_config_schema } from './forms/schema.ts';
-import schemas from './forms/schema.ts'
+import _schema from './templates/schema.ts'
+import type { t_command_schema, t_config_schema } from './templates/schema.ts';
+import schemas from './templates/schema.ts'
 import path from './path.ts';
-import _init from './utils/config_init.ts';
-import {colored_prefix } from './utils/color.ts';
+import _init from './templates/config_init.ts';
+import { colored_prefix } from './utils/color.ts';
 import chalk from 'chalk';
 import { pallete } from './utils/color.ts';
+import { system_init } from './templates/command_init.ts';
 
 const platform = process.platform;
 
@@ -33,7 +34,7 @@ class RibbonConfig {
 
         console.log(`\n${key}: `)
         console.log('-'.repeat(20))
-        console.log(`${isTrue(prev)} → ${isTrue(settings[key])}\n`) 
+        console.log(`${isTrue(prev)} → ${isTrue(settings[key])}\n`)
 
 
 
@@ -42,34 +43,41 @@ class RibbonConfig {
     load() {
 
         return {
-    
+
             command: new Conf<t_command_schema>({
-                configName: 'registered',
-                cwd: path.usr
+                configName: 'alias',
+                cwd: path.usr,
             }),
-    
+
             config: new Conf<t_config_schema>({
                 configName: 'config',
                 cwd: path.usr
             })
-    
+
         };
-    
-        
+
+
     }
-    
+
     init() {
-        
+
         const config = this.config.config
-    
+        const command = this.config.command
+
         _init.initConditional(config, 'filter', () => {
             if (platform === 'win32') return _init.windows;
             if (platform === 'darwin') return _init.darwin;
             return _init.linux;
         });
-    
+
         const defaultSettings = schemas.config_schema.parse({}).settings;
+        const defaultCommand = schemas.command_schema.parse({
+            system: system_init
+        });
+        
         _init.initBatch(config, { settings: defaultSettings });
+        _init.initBatch(command, defaultCommand);
+        _init.initIfMissing(command, 'user', {});
 
     }
 
@@ -90,7 +98,7 @@ class RibbonConfig {
     }
 
     // src command
-    src({type, keywords, isMinified, group}: {type: string, keywords?: string, isMinified?: boolean, group?: string}) {
+    src({ type, keywords, isMinified, group }: { type: string, keywords?: string, isMinified?: boolean, group?: string }) {
 
         const entried = (() => {
 
@@ -129,8 +137,8 @@ class RibbonConfig {
         );
 
         if (isMinified) {
-            
-            return this.ls({provided: res})
+
+            return this.ls({ provided: res })
 
         }
 
@@ -145,7 +153,7 @@ class RibbonConfig {
         try {
 
             // check existence
-            if ( key in this.config.command.get('user') ) return { status: false, msg: 'Command already exists in user' };
+            if (key in this.config.command.get('user')) return { status: false, msg: 'Command already exists in user' };
 
             // get user section 
             const userGroup = this.config.command.get('user') || {};
@@ -192,12 +200,12 @@ class RibbonConfig {
     ): (any[] | t_command_schema) {
 
         if (isFull) {
-            return this.src({type: 'all'}) as t_command_schema
+            return this.src({ type: 'all' }) as t_command_schema
         }
 
         const arr: any[] = []
 
-        Object.entries( provided || this.allFlatCommands()).forEach(([key, value]: any) => {
+        Object.entries(provided || this.allFlatCommands()).forEach(([key, value]: any) => {
 
             arr.push({
                 id: value.id,
@@ -231,12 +239,12 @@ class RibbonConfig {
         if (key === undefined) return null;
 
         const _key = key.trim()
-        
+
         if (group !== undefined) {
 
             try {
                 return this.config.command.get(group)?.[_key];
-            } catch(e: any) {
+            } catch (e: any) {
                 console.log(colored_prefix.error + e.message);
                 return null;
             }

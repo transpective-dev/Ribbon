@@ -1,7 +1,8 @@
 import { rib_conf } from "../../manage.ts";
-import _interface from "../../forms/interface.ts";
-import enquirer from "enquirer";
-const { prompt } = enquirer;
+import _interface from "../../templates/interface.ts";
+import al from "../../../async_loader.ts"
+
+const { prompt } = al;
 import { colored_prefix } from "../color.ts";
 import { assign_slots, type Slot } from "./slot_assigner.ts";
 
@@ -58,7 +59,7 @@ export const type_checker = async (cmdString: string, userValues: string[]) => {
 
     // --- Pass 2: distribute values ---
     const values = userValues ? [...userValues] : [];
-    
+
     // read config to check slot filling feature toggle
     const config_data = rib_conf.all('config').settings as any;
     const enableSlotFilling = config_data.enableSlotFilling ?? true;

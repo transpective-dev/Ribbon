@@ -4,9 +4,9 @@ import path from 'path'
 const root = appRoot.path;
 
 // dont forget to delete src when publish
-const usr = path.join(root, 'src', 'usr');
+const usr = path.join(root, 'usr');
 const usr_config = path.join(usr, 'config.json');
-const usr_command = path.join(usr, 'registered.json');
+const usr_command = path.join(usr, 'alias.json');
 const scripts = path.join(usr, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
@@ -18,7 +18,8 @@ const paths = {
     custom,
 }
 
-import fs from 'fs-extra';
+import al from '../async_loader.ts';
+const { fs } = al;
 
 export const init_path = async () => {
 

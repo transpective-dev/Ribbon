@@ -6,7 +6,7 @@ return `
 
 // import api from this relative path.
 // you can change the name as you want.
-import rib_api from '../../api/api-hub.ts'
+import rib_api from '../../src/api/api-hub.ts'
 
 // in this showcase, we use spawn.
 // spawn_api is makes you able to spawn a process and run commands.
@@ -55,6 +55,8 @@ for (const i in commandSet) {
     let exit: boolean = false
 
     // Run your command and watch specific logs elegantly
+
+    // structure: cmd, watch, useExecutionGuard(optional. default is true) 
     await run(cmd, [
         {
             type: 'stdout',
@@ -70,7 +72,7 @@ for (const i in commandSet) {
                 stop() // immediately abort the running process
             }
         }
-    ]);
+    ], true);
 
     if (exit) {
         console.log('you wont see "after sleep"')
@@ -96,7 +98,7 @@ const template = () => {
 }
 
 const template = `
-import rib_api from '../../api/api-hub.ts'
+import rib_api from '../../src/api/api-hub.ts'
 
 const template = () => {
 }

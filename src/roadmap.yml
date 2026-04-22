@@ -1,0 +1,29 @@
+src: {
+  
+  description: 'source code root',
+
+  api: {
+    description: 'exposed api for user scripts (spawn, path, etc)',
+    files: {
+      api-hub: 'central utility exporter',
+      spawn: 'process execution & stream monitor'
+    }
+  },
+
+  logics: {
+    description: 'core logics of ribbon',
+    files: {
+      cmd-hub: 'dynamic command loader',
+      manage: 'configuration & state manager',
+      path: 'path constants',
+      index: 'cli entry point'
+    },
+    directories: {
+      templates: 'zod schemas and interfaces',
+      utils: 'helpers (color, executions, init)'
+    }
+  },
+
+  async_loader: 'parallel module preloader to accelerate launch speed'
+
+}

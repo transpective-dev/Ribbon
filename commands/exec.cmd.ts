@@ -1,21 +1,24 @@
 import { rib_conf } from "../src/logics/manage.ts";
-import _interface from "../src/logics/forms/interface.ts";
-import enquirer from "enquirer";
-const { prompt } = enquirer;
+import _interface from "../src/logics/templates/interface.ts";
+import al from "../src/async_loader.ts"
+
+// @ts-ignore
+const { prompt, fs } = al
+
 import { colored_prefix } from "../src/logics/utils/color.ts";
+
 import utils from "../src/logics/utils/utils.ts";
 import { execution_guard } from "../src/logics/utils/executions/execution_guard.ts";
 import { type_checker } from "../src/logics/utils/executions/type_checker.ts";
 import { spawnChild } from "../src/api/spawn.ts";
 import _path from "../src/logics/path.ts"
-import fs from 'fs-extra'
 import path from 'path'
 
-import type { cmd_register } from "../src/logics/forms/interface.ts";
+import type { cmd_register } from "../src/logics/templates/interface.ts";
 
 const runScript = async (filename: string) => {
     
-    const files = (await fs.readdir(_path.paths.scripts)).filter((file) => file.endsWith('.script.ts'))
+    const files = (await fs.readdir(_path.paths.scripts)).filter((file: string) => file.endsWith('.script.ts'))
     
     if (!files.includes(filename + '.script.ts')) {
         return false
@@ -53,7 +56,7 @@ export default {
             const res = await runScript(value);
 
             if (!res) {
-                console.log(colored_prefix.error + 'script not found');
+                return console.log(colored_prefix.error + 'script not found');
             }
 
             return console.log(colored_prefix.success + 'script executed successfully');

@@ -1,8 +1,9 @@
 import { rib_conf } from "../src/logics/manage.ts";
 import utils from "../src/logics/utils/utils.ts";
-import enquirer from 'enquirer';
+import al from "../src/async_loader.ts"
 
-const { prompt } = enquirer;
+// @ts-ignore
+const { prompt } = al
 
 export default {
     command: 'del',
@@ -29,7 +30,7 @@ export default {
 
             (() => {
                 if (config.settings.showMacro) {
-                    return [...utils.log_formatter('Command to delete: ', rib_conf.get({key: name}))];
+                    return [...utils.log_formatter('Command to delete: ', rib_conf.get({ key: name }))];
                 }
             })();
 

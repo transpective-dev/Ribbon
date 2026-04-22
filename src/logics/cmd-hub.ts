@@ -16,17 +16,18 @@ program
     .usage('<command> [options]')
     .helpOption('-h, --help', 'display help for command')
 
-import type { cmd_register } from "./forms/interface.ts";
+import type { cmd_register } from "./templates/interface.ts";
 
 const registerCommand = (
     {
-    command,
-    alias,
-    argument,
-    options,
-    desc,
-    action
-}: cmd_register
+        command,
+        alias,
+        argument,
+        options,
+        desc,
+        action
+    }: cmd_register
+
 ) => {
 
     const cmd = program.command(command);
@@ -48,11 +49,17 @@ const registerCommand = (
 await (async () => {
 
     const commandsDir = _path.paths.commands;
-    const files = fs.readdirSync(commandsDir);
+    const files = fs.readdirSync(commandsDir).map((file: any) => {
+        return path.join(commandsDir, file)
+    });
+
+    fs.readdirSync(_path.paths.custom).forEach((file: any) => {
+        files.push(path.join(_path.paths.custom, file))
+    })
 
     for (const file of files) {
         if (file.endsWith('.cmd.ts')) {
-            const filePath = pathToFileURL(path.join(commandsDir, file)).href;
+            const filePath = pathToFileURL(file).href;
             const module = await import(filePath);
             registerCommand(module.default);
         }

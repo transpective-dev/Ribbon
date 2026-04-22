@@ -1,11 +1,12 @@
 import al from "../../async_loader.ts";
+import { system_init } from "./command_init.ts";
 
 const { z } = al;
 
 const command_schema = z.record(
   z.string().min(1, "group name cannot be empty"),
   z.record(
-    z.string().min(1, "Command name cannot be empty"),
+    z.string(),
     z.object({
 
       // unique-id: format: base32
@@ -18,12 +19,10 @@ const command_schema = z.record(
       abs: z.string(),
 
       desc: z.string().default("No description provided"),
-      cmd: z.string().min(1, "Command cannot be empty"),
+      cmd: z.string(),
       tags: z.array(z.string()).default([]),
     })).default({})
 ).default({
-  'system': {},
-  'user': {}
 })
 
 const config_schema = z.object({

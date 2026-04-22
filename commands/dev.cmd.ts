@@ -1,4 +1,4 @@
-import type { cmd_register } from "../src/logics/forms/interface.ts";
+import type { cmd_register } from "../src/logics/templates/interface.ts";
 
 const guard_test = {
     "delete": [

@@ -1,8 +1,8 @@
-import _interface from "../../forms/interface.ts";
+import _interface from "../../templates/interface.ts";
 import { rib_conf } from "../../manage.ts";
-import enquirer from "enquirer";
-const { prompt } = enquirer;
-import chalk from "chalk";
+import al from "../../../async_loader.ts"
+
+const { prompt, chalk } = al;
 import { colored_prefix } from "../color.ts";
 
 /**

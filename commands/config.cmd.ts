@@ -1,8 +1,9 @@
-import type { cmd_register } from "../src/logics/forms/interface.ts";
+import type { cmd_register } from "../src/logics/templates/interface.ts";
 import { rib_conf } from "../src/logics/manage.ts";
-import enquire from 'enquirer'
-const { prompt } = enquire
-import chalk from 'chalk'
+
+import al from "../src/async_loader.ts";
+const { chalk, prompt } = al;
+
 import { pallete } from "../src/logics/utils/color.ts";
 
 export default {

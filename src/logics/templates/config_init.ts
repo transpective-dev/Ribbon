@@ -1,6 +1,13 @@
-import type { t_command_schema, t_config_schema } from '../forms/schema.ts'
+import type { t_command_schema, t_config_schema } from './schema.ts'
 
 // filters
+
+/**
+ * (?: ) = Non-capturing group.
+ * (?:^|\\s) = starts by or preceded by a whitespace
+ * \\b = to prevent matching substrings like "rm". garanteeing that only valid whole commands are captured.
+ * between \\b-\\b = the commands that you want to capture
+ *  */ 
 
 const windows = {
   "delete": {
@@ -59,58 +66,58 @@ const windows = {
 const darwin = {
   "darwin-delete": {
     "keywords": [
-      "rm -",
-      "rmdir ",
-      "unlink ",
-      "srm ",
-      "rm -rf",
-      "rm -r",
-      "rm -f",
-      "rm *"
+      "(?:^|\\s)\\brm\\s+-(?:\\s|$)",
+      "(?:^|\\s)\\brmdir\\b(?:\\s|$)",
+      "(?:^|\\s)\\bunlink\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsrm\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-rf\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-r\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-f\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+\\*(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in permanent data loss. Please proceed with caution.",
   },
   "darwin-disk": {
     "keywords": [
-      "diskutil eraseDisk",
-      "diskutil partitionDisk",
-      "diskutil zeroDisk",
-      "diskutil randomDisk",
-      "dd ",
-      "hdiutil burn",
-      "newfs ",
-      "mkfs "
+      "(?:^|\\s)\\bdiskutil\\s+eraseDisk\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdiskutil\\s+partitionDisk\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdiskutil\\s+zeroDisk\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdiskutil\\s+randomDisk\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdd\\b(?:\\s|$)",
+      "(?:^|\\s)\\bhdiutil\\s+burn\\b(?:\\s|$)",
+      "(?:^|\\s)\\bnewfs\\b(?:\\s|$)",
+      "(?:^|\\s)\\bmkfs\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system disk erase, partition, or overwrite operation. Please proceed with caution.",
   },
   "darwin-shutdown": {
     "keywords": [
-      "shutdown -h",
-      "shutdown -r",
-      "shutdown -s",
-      "reboot ",
-      "halt ",
-      "poweroff "
+      "(?:^|\\s)\\bshutdown\\s+-h\\b(?:\\s|$)",
+      "(?:^|\\s)\\bshutdown\\s+-r\\b(?:\\s|$)",
+      "(?:^|\\s)\\bshutdown\\s+-s\\b(?:\\s|$)",
+      "(?:^|\\s)\\breboot\\b(?:\\s|$)",
+      "(?:^|\\s)\\bhalt\\b(?:\\s|$)",
+      "(?:^|\\s)\\bpoweroff\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system shutdown or restart. Please proceed with caution.",
   },
   "darwin-sysctl": {
     "keywords": [
-      "sysctl -w",
-      "nvram -d",
-      "nvram ",
-      "csrutil disable",
-      "csrutil enable"
+      "(?:^|\\s)\\bsysctl\\s+-w\\b(?:\\s|$)",
+      "(?:^|\\s)\\bnvram\\s+-d\\b(?:\\s|$)",
+      "(?:^|\\s)\\bnvram\\b(?:\\s|$)",
+      "(?:^|\\s)\\bcsrutil\\s+disable\\b(?:\\s|$)",
+      "(?:^|\\s)\\bcsrutil\\s+enable\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system core parameter or security setting modification. Please proceed with caution.",
   },
   "darwin-permission": {
     "keywords": [
-      "chmod 777",
-      "chmod -R",
-      "chown ",
-      "xattr -c",
-      "sudo "
+      "(?:^|\\s)\\bchmod\\s+777\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchmod\\s+-R\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchown\\b(?:\\s|$)",
+      "(?:^|\\s)\\bxattr\\s+-c\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsudo\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system permission modification or deletion. Please proceed with caution.",
   }
@@ -119,101 +126,101 @@ const darwin = {
 const linux = {
   "linux-delete": {
     "keywords": [
-      "rm -",
-      "rm ",
-      "rmdir ",
-      "unlink ",
-      "shred ",
-      "wipe ",
-      "rm -rf",
-      "rm -r",
-      "rm -f",
-      "rm --no-preserve-root",
-      "find -delete"
+      "(?:^|\\s)\\brm\\s+-(?:\\s|$)",
+      "(?:^|\\s)\\brm\\b(?:\\s|$)",
+      "(?:^|\\s)\\brmdir\\b(?:\\s|$)",
+      "(?:^|\\s)\\bunlink\\b(?:\\s|$)",
+      "(?:^|\\s)\\bshred\\b(?:\\s|$)",
+      "(?:^|\\s)\\bwipe\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-rf\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-r\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+-f\\b(?:\\s|$)",
+      "(?:^|\\s)\\brm\\s+--no-preserve-root\\b(?:\\s|$)",
+      "(?:^|\\s)\\bfind\\s+-delete\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in permanent data loss. Please proceed with caution.",
   },
   "linux-disk": {
     "keywords": [
-      "mkfs.",
-      "mkfs ",
-      "mke2fs ",
-      "fdisk ",
-      "parted ",
-      "dd ",
-      "wipefs ",
-      "hdparm ",
-      "blkdiscard ",
-      "fstrim "
+      "(?:^|\\s)\\bmkfs\\.\\b(?:\\s|$)",
+      "(?:^|\\s)\\bmkfs\\b(?:\\s|$)",
+      "(?:^|\\s)\\bmke2fs\\b(?:\\s|$)",
+      "(?:^|\\s)\\bfdisk\\b(?:\\s|$)",
+      "(?:^|\\s)\\bparted\\b(?:\\s|$)",
+      "(?:^|\\s)\\bdd\\b(?:\\s|$)",
+      "(?:^|\\s)\\bwipefs\\b(?:\\s|$)",
+      "(?:^|\\s)\\bhdparm\\b(?:\\s|$)",
+      "(?:^|\\s)\\bblkdiscard\\b(?:\\s|$)",
+      "(?:^|\\s)\\bfstrim\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system disk erase, partition, or overwrite operation. Please proceed with caution.",
   },
   "linux-shutdown": {
     "keywords": [
-      "shutdown -h",
-      "shutdown -r",
-      "shutdown -P",
-      "reboot ",
-      "halt ",
-      "poweroff ",
-      "systemctl poweroff",
-      "systemctl reboot",
-      "systemctl suspend",
-      "systemctl hibernate"
+      "(?:^|\\s)\\bshutdown\\s+-h\\b(?:\\s|$)",
+      "(?:^|\\s)\\bshutdown\\s+-r\\b(?:\\s|$)",
+      "(?:^|\\s)\\bshutdown\\s+-P\\b(?:\\s|$)",
+      "(?:^|\\s)\\breboot\\b(?:\\s|$)",
+      "(?:^|\\s)\\bhalt\\b(?:\\s|$)",
+      "(?:^|\\s)\\bpoweroff\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsystemctl\\s+poweroff\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsystemctl\\s+reboot\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsystemctl\\s+suspend\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsystemctl\\s+hibernate\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system shutdown or restart. Please proceed with caution.",
   },
   "linux-root-destroy": {
     "keywords": [
-      ":(){ :|:& };:",
-      "chmod -R 777 /",
-      "chown -R root:root /",
-      "rm -rf /",
-      "dd of=/dev/",
-      "> /dev/sd",
-      "echo c > /proc/sysrq-trigger",
-      "mkfs. /dev/",
-      "fdisk /dev/"
+      "(?:^|\\s):\\(\\)\\{\\s+:\\|:&\\s+\\}\\s*;",
+      "(?:^|\\s)\\bchmod\\s+-R\\s+777\\s+/",
+      "(?:^|\\s)\\bchown\\s+-R\\s+root:root\\s+/",
+      "(?:^|\\s)\\brm\\s+-rf\\s+/",
+      "(?:^|\\s)\\bdd\\s+of=/dev/",
+      "(?:^|\\s)>\\s+/dev/sd",
+      "(?:^|\\s)\\becho\\s+c\\s+>\\s+/proc/sysrq-trigger",
+      "(?:^|\\s)\\bmkfs\\.\\s+/dev/",
+      "(?:^|\\s)\\bfdisk\\s+/dev/"
     ],
     "msg": "DENGER: You are executing a command that may result in system self-destruct. Please proceed with caution.",
   },
   "linux-permission": {
     "keywords": [
-      "chmod 777",
-      "chmod -R",
-      "chmod +s",
-      "chown ",
-      "chgrp ",
-      "sudo ",
-      "su -",
-      "setuid",
-      "setgid"
+      "(?:^|\\s)\\bchmod\\s+777\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchmod\\s+-R\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchmod\\s+\\+s\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchown\\b(?:\\s|$)",
+      "(?:^|\\s)\\bchgrp\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsudo\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsu\\s+-\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsetuid\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsetgid\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system permission modification or deletion. Please proceed with caution.",
   },
   "linux-network": {
     "keywords": [
-      "iptables -F",
-      "iptables -X",
-      "ufw disable",
-      "firewall-cmd --stop",
-      "ip link set down",
-      "ifconfig down",
-      "nmcli networking off"
+      "(?:^|\\s)\\biptables\\s+-F\\b(?:\\s|$)",
+      "(?:^|\\s)\\biptables\\s+-X\\b(?:\\s|$)",
+      "(?:^|\\s)\\bufw\\s+disable\\b(?:\\s|$)",
+      "(?:^|\\s)\\bfirewall-cmd\\s+--stop\\b(?:\\s|$)",
+      "(?:^|\\s)\\bip\\s+link\\s+set\\s+down\\b(?:\\s|$)",
+      "(?:^|\\s)\\bifconfig\\s+down\\b(?:\\s|$)",
+      "(?:^|\\s)\\bnmcli\\s+networking\\s+off\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system network rule modification or network interface disabling. Please proceed with caution.",
   },
   "linux-system-config": {
     "keywords": [
-      "/etc/passwd",
-      "/etc/shadow",
-      "/etc/sudoers",
-      "/etc/fstab",
-      "/etc/hosts",
-      "sysctl -w",
-      "modprobe -r",
-      "rmmod ",
-      "insmod "
+      "(?:^|\\s)/etc/passwd\\b(?:\\s|$)",
+      "(?:^|\\s)/etc/shadow\\b(?:\\s|$)",
+      "(?:^|\\s)/etc/sudoers\\b(?:\\s|$)",
+      "(?:^|\\s)/etc/fstab\\b(?:\\s|$)",
+      "(?:^|\\s)/etc/hosts\\b(?:\\s|$)",
+      "(?:^|\\s)\\bsysctl\\s+-w\\b(?:\\s|$)",
+      "(?:^|\\s)\\bmodprobe\\s+-r\\b(?:\\s|$)",
+      "(?:^|\\s)\\brmmod\\b(?:\\s|$)",
+      "(?:^|\\s)\\binsmod\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system configuration or kernel module modification. Please proceed with caution.",
   }
