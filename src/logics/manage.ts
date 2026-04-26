@@ -74,7 +74,7 @@ class RibbonConfig {
         const defaultCommand = schemas.command_schema.parse({
             system: system_init
         });
-        
+
         _init.initBatch(config, { settings: defaultSettings });
         _init.initBatch(command, defaultCommand);
         _init.initIfMissing(command, 'user', {});

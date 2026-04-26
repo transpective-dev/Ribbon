@@ -15,7 +15,7 @@ export default {
     ],
     action: (value: any, options: any) => {
 
-        const searchTypes = _interface.search_types || ['tag', 'cmd', 'desc', 'code', 'all'];
+        const searchTypes = _interface.search_types || ['tag', 'cmd', 'desc', 'id', 'all'];
 
         if (!options.type || !searchTypes.includes(options.type)) {
             console.log("Invalid search type. We'll use 'all' as default");
