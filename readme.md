@@ -50,7 +50,6 @@ Below is the foundational list of commands currently available.
 | :--------: | :-----: | :-----------------------------------------------: |
 | `register` | `regis`, `rgs` | create new command macro into your Ribbon library |
 |   `del`    |    -    |             delete macro from library             |
-|    `ls`    |    -    |              list all command macros              |
 |   `find`   |    -    |                 find a macro                      |
 |   `exec`   |  `run`  |               execute saved command               |
 |  `create`  |    -    |                  create template                  |
@@ -101,28 +100,6 @@ rib del <key>
 **Example**
 ```bash
 rib del commit
-```
-
----
-
-#### 📌 `list` (alias: `ls`)
-*List all registered command macros.*
-
-**Structure**
-```bash
-rib ls [options]
-```
-
-**Options**
-| Flag | Description |
-| :--- | :--- |
-| `-f` | Output the full, unminified macro JSON |
-
-> **Note:** The default mode is *minified*. You will see a clean overview of the id, alias, slot count, abstract, and group location.
-
-**Example**
-```bash
-rib ls
 ```
 
 ---

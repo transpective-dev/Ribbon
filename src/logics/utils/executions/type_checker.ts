@@ -2,7 +2,7 @@ import { rib_conf } from "../../manage.ts";
 import _interface from "../../templates/interface.ts";
 import al from "../../../async_loader.ts"
 
-const { prompt } = al;
+const { prompt, chalk } = al;
 import { colored_prefix } from "../color.ts";
 import { assign_slots, type Slot } from "./slot_assigner.ts";
 
@@ -69,14 +69,46 @@ export const type_checker = async (cmdString: string, userValues: string[]) => {
     // ask for any slot that has no value and no default
     for (const slot of slots) {
         if (!assigned.has(slot.index) && slot.defaultVal === null) {
+
+            const sliced = (() => {
+                const matches = Array.from(cmdString.matchAll(new RegExp(SLOT_REGEX, 'g')));
+                const target = matches[slot.index];
+                if (!target) return '';
+
+                const begin = target.index!;
+                const end = begin + target[0].length;
+                const expected = 15;
+
+                const start = Math.max(0, begin - expected);
+                const finish = Math.min(cmdString.length, end + expected);
+
+                let res = cmdString.slice(start, finish);
+
+                const relBegin = begin - start;
+                const relEnd = end - start;
+                res = res.slice(0, relBegin) + chalk.red.bold(res.slice(relBegin, relEnd)) + res.slice(relEnd);
+
+                if (start > 0) res = chalk.gray('... ') + res;
+                if (finish < cmdString.length) res = res + chalk.gray(' ...');
+
+                return res;
+            })()
+
+
             const res = await prompt({
-                type: 'input',
+                type: 'form',
                 name: 'val',
-                message: `missing parameter for <T: ${slot.typeName || 'any'}>, please input: `
+                message: `Missing slot: ${sliced}`,
+                choices: [{
+                    name: 'val',
+                    message: `Please provide value for <T${slot.typeName ? `: ${slot.typeName}` : ''}>`,
+                }]
             });
+            
             if ('val' in res) {
-                assigned.set(slot.index, (res as any).val);
+                assigned.set(slot.index, (res as any).val.val);
             }
+
         }
     }
 
