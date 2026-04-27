@@ -97,8 +97,8 @@ class RibbonConfig {
         return flattened;
     }
 
-    // src command
-    src({ type, keywords, isMinified, group }: { type: string, keywords?: string, isMinified?: boolean, group?: string }) {
+    // find command
+    find({ type, keywords, isMinified, group }: { type: string, keywords?: string, isMinified?: boolean, group?: string }) {
 
         const entried = (() => {
 
@@ -111,34 +111,64 @@ class RibbonConfig {
             return Object.entries(this.config.command.get(group) || {});
 
         })()
+        
+        const _key_regex = keywords ? new RegExp(keywords, "i") : null
 
         const res = Object.fromEntries(
+
             entried.filter(([key, value]) => {
 
                 if (type === 'all') {
-                    if (!keywords) return true;
+
+                    if (!_key_regex) return true;
+
                     // Global search across multiple fields
-                    const searchStr = `${key} ${value.id} ${value.abs} ${value.cmd} ${value.tags.join(' ')}`.toLowerCase();
-                    return searchStr.includes(keywords.toLowerCase());
+                    const searchStr = `${key} ${value.id} ${value.abs} ${value.cmd} ${value.tags.join(' ')}`;
+
+                    return _key_regex.test(searchStr);
+
                 }
 
                 // filter by keywords if provided
-                if (keywords) {
+                if (_key_regex) {
+
+                    // get matched field
                     const fieldValue = (value as any)[type];
+
+                    // handle array case 
                     if (Array.isArray(fieldValue)) {
-                        return fieldValue.includes(keywords);
+                        return fieldValue.some(i => _key_regex.test(i));
                     }
-                    return String(fieldValue).includes(keywords);
+
+                    // handle other case
+                    return _key_regex.test(fieldValue as string);
+
                 }
 
-                // otherwise return everything
+                // return all if no value provided
                 return true;
             })
+
         );
 
         if (isMinified) {
 
-            return this.ls({ provided: res })
+            const arr: any[] = []
+
+            Object.entries(res).forEach(([key, value]: any) => {
+
+                arr.push({
+                    id: value.id,
+                    alia: key,
+                    t: ' ' + (value.cmd.split(/<T:?\s?\w*>/).length - 1).toString(),
+                    abs: value.abs,
+                    time: value.time,
+                    group: value._group || 'unknown'
+                });
+
+            })
+
+            return arr
 
         }
 
@@ -189,38 +219,6 @@ class RibbonConfig {
 
     }
 
-    // show command list
-    ls({
-        isFull,
-        provided
-    }: {
-        isFull?: boolean,
-        provided?: t_command_schema
-    } = {}
-    ): (any[] | t_command_schema) {
-
-        if (isFull) {
-            return this.src({ type: 'all' }) as t_command_schema
-        }
-
-        const arr: any[] = []
-
-        Object.entries(provided || this.allFlatCommands()).forEach(([key, value]: any) => {
-
-            arr.push({
-                id: value.id,
-                alia: key,
-                t: ' ' + (value.cmd.split(/<T:?\s?\w*>/).length - 1).toString(),
-                abs: value.abs,
-                time: value.time,
-                group: value._group || 'unknown'
-            });
-
-        })
-
-        return arr
-
-    }
 
     all(type: 'command' | 'config', reload?: boolean) {
 

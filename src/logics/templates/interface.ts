@@ -2,7 +2,7 @@
 const search_types = [
     'tag', // search by tag
     'cmd', // search by command
-    'desc', // search by description
+    'abs', // search by description
     'id', // search by code
     'all'
 ] as const

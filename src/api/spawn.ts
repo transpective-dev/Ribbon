@@ -13,6 +13,7 @@ const shellStatus = () => {
     return true;
 }
 
+
 export class Spawn {
 
     public emit = new EventEmitter();

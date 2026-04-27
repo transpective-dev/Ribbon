@@ -7,7 +7,7 @@ import _interface, { type cmd_register } from "../src/logics/templates/interface
 export default {
     command: 'find',
     desc: 'find commands',
-    argument: ['<value>'],
+    argument: ['[value]'],
     options: [
         { option: '-t, --type <value>', desc: 'Type of search' },
         { option: '-g, --group <value>', desc: 'Group of search' },
@@ -15,14 +15,14 @@ export default {
     ],
     action: (value: any, options: any) => {
 
-        const searchTypes = _interface.search_types || ['tag', 'cmd', 'desc', 'id', 'all'];
+        const searchTypes = _interface.search_types || ['tag', 'cmd', 'abs', 'id', 'all'];
 
         if (!options.type || !searchTypes.includes(options.type)) {
             console.log("Invalid search type. We'll use 'all' as default");
             options.type = 'all';
         }
 
-        const res = rib_conf.src({
+        const res = rib_conf.find({
             type: options.type,
             keywords: value,
             isMinified: options.minified,

@@ -1,15 +1,18 @@
+// zod
 import type { z } from "zod";
-import type { prompt as PromptType } from "enquirer";
-import type { ChalkInstance } from "chalk";
-import type fsExtraType from "fs-extra";
+const zod = await import("zod");
 
-// parallel load — total time = slowest module, not sum of all
-const [zod, enq, chalkModule, fsModule] = await Promise.all([
-    import("zod"),
-    import("enquirer"),
-    import("chalk"),
-    import("fs-extra"),
-]);
+// enquirer
+import type { prompt as PromptType } from "enquirer";
+const enq = await import("enquirer");
+
+// chalk
+import type { ChalkInstance } from "chalk";
+const chalkModule = await import("chalk");
+
+// fs-extra
+import type fsExtraType from "fs-extra";
+const fsModule = await import("fs-extra");
 
 const al: {
     z: typeof z,
@@ -24,4 +27,3 @@ const al: {
 };
 
 export default al;
-
