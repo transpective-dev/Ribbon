@@ -2,7 +2,7 @@
   "name": "ribbon",
   "version": "0.0.0-beta",
   "type": "module",
-  "description": "",
+  "description": "safe command execution with great management",
   "main": "./src/logics/index.ts",
   "bin": {
     "rib": "./launcher.js"

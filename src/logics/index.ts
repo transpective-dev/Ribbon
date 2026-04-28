@@ -16,6 +16,8 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
+import './env.ts'
+
 import './cmd-hub.ts'
 
 import "./path.ts";

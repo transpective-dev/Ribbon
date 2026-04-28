@@ -12,7 +12,9 @@ import { execution_guard } from "../src/logics/utils/executions/execution_guard.
 import { type_checker } from "../src/logics/utils/executions/type_checker.ts";
 import { spawnChild } from "../src/api/spawn.ts";
 import _path from "../src/logics/path.ts"
-import path from 'path'
+import path from 'path';
+
+import {runtime} from '../src/logics/env.ts';
 
 import type { cmd_register } from "../src/logics/templates/interface.ts";
 
@@ -26,9 +28,11 @@ const runScript = async (filename: string) => {
 
     const toTarget = path.join(_path.paths.scripts, filename + '.script.ts')
 
-    console.log(toTarget)
+    const cmd = runtime === 'bun' ? 
+        `bun "${toTarget}"` : 
+        `npx tsx "${toTarget}"`;
 
-    return await spawnChild('bun ' + JSON.stringify(toTarget))
+    return await spawnChild(cmd)
 
 }
 
@@ -53,6 +57,7 @@ export default {
     action: async (value: string, type: any, options: any) => {
 
         if (options.script) {
+
             const res = await runScript(value);
 
             if (!res) {
