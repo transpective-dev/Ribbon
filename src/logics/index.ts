@@ -1,5 +1,3 @@
-#!/usr/bin/env bun
-
 import al from "../async_loader.ts";
 export { al };
 
