@@ -21,11 +21,11 @@ export default {
             try {
 
                 await spawnChild(`${cmd()} "${path}"`);
-                
+
             } catch (error) {
-                
+
                 console.log(error);
-                
+
             }
         }
 

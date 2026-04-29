@@ -94,7 +94,6 @@ export const type_checker = async (cmdString: string, userValues: string[]) => {
                 return res;
             })()
 
-
             const res = await prompt({
                 type: 'form',
                 name: 'val',

@@ -5,7 +5,7 @@ export default {
     command: 'register',
     alias: ['regis', 'rgs', 'add'],
     argument: [
-        '<i>'
+        '<i...>'
     ],
     options: [
         { option: '-d, --desc <value>', desc: 'Description of the command' },
@@ -14,6 +14,8 @@ export default {
     ],
     desc: "register new command \n\ngrammer: rib $/regis name='command' -d 'desc' -a 'abstract' -t 'tag1, tag2...'",
     action: (i: any, options: any) => {
+
+        i = i.join(' ');
 
         // split into two parts 
         const parts = i.split(/=(.*)/s).filter(Boolean);

@@ -3,6 +3,7 @@
 import path from "path";
 import { spawnSync } from "child_process";
 import { fileURLToPath } from "url";
+import { registerHooks } from "module";
 
 // Node.js ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +17,18 @@ const index = `"${path.join(__dirname, "src", "logics", "index.ts")}"`;
 // like, node [arg1] [arg2] [arg3] ...
 
 const args = process.argv.slice(2);
+
+const register_regex = /(.*)=(.*)/;
+
+if (['add', 'regis', 'register', 'rgs'].includes(args[0])) {
+
+  args.forEach((v, i) => {
+    if (v.match(register_regex)) {
+      args[i] = `"${v}"`
+    }
+  });
+
+}
 
 try {
   const bunArgs = [index, ...args];

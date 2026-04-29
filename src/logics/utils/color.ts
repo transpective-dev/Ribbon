@@ -28,6 +28,7 @@ export const pallete = {
 }
 
 export const colored_prefix = {
-    error: chalk.hex(pallete.red)('[ error ]: '),
-    success: chalk.hex(pallete.green)('[ success ]: '),
+    error: chalk.hex(pallete.red)('[ Error ]: '),
+    success: chalk.hex(pallete.green)('[ Success ]: '),
+    not_found: chalk.hex(pallete.grey_3)('[ Not Found ]: '),
 }

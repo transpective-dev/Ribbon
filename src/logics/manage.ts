@@ -254,6 +254,22 @@ class RibbonConfig {
 
     }
 
+    set({
+        key, value
+    }: {
+        key: string,
+        value: string
+    }) {
+
+        const user = this.config.command.get('user');
+
+        user[key] = value;
+
+        this.config.command.set('user', user);
+
+        return 
+    }
+
     has(key: string) {
         return !!this.allFlatCommands()[key];
     }
