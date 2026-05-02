@@ -5,7 +5,7 @@
   "description": "A safe CLI. Protect you from unexpected executing.",
   "main": "./src/logics/index.ts",
   "bin": {
-    "rib": "./launcher.js"
+    "rib": "./launcher.ts"
   },
   "scripts": {},
   "author": "Transpective_dev_team",

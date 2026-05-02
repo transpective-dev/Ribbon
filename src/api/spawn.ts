@@ -3,6 +3,7 @@ import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from 'events';
 import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
+import { string } from "zod";
 
 const isWindows = process.platform === 'win32';
 const shellStatus = () => {
@@ -82,7 +83,13 @@ export class Spawn {
 
 // private
 
-export const spawnChild = (cmd: string, signal?: AbortSignal) => {
+export const spawnChild = ({
+    cmd,
+    signal,
+}: {
+    cmd: string;
+    signal?: AbortSignal;
+}) => {
 
     return new Promise((resolve, reject) => {
 
@@ -91,8 +98,27 @@ export const spawnChild = (cmd: string, signal?: AbortSignal) => {
             status ? resolve(true) : reject(false)
         }
 
-        const child = spawn(cmd, {
-            shell: shellStatus(),
+        const shell = shellStatus();
+        
+        let executable = cmd;
+        let processArgs: string[] = [];
+        let useShell: boolean | string = true;
+
+        if (shell === 'powershell.exe') {
+            executable = 'powershell.exe';
+
+            // reject interaction and return error
+            // prevent direct exit from system
+            processArgs = ['-NonInteractive', '-NoProfile', '-Command', cmd];
+            useShell = false;
+        } else if (shell === '/bin/bash') {
+            executable = '/bin/bash';
+            processArgs = ['-c', cmd];
+            useShell = false;
+        }
+
+        const child = spawn(executable, processArgs, {
+            shell: useShell,
             stdio: 'inherit',
             signal: signal
         });
@@ -100,7 +126,7 @@ export const spawnChild = (cmd: string, signal?: AbortSignal) => {
         child.on('exit', (code) => {
             code === 0 ? kill(true) : kill(false)
         });
-
+        
         child.on('error', (err) => {
             if (err.name === 'AbortError') {
                 kill(false);
@@ -110,4 +136,4 @@ export const spawnChild = (cmd: string, signal?: AbortSignal) => {
         });
 
     })
-}
+}

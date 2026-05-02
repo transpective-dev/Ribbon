@@ -32,7 +32,9 @@ const runScript = async (filename: string) => {
         `bun "${toTarget}"` : 
         `npx tsx "${toTarget}"`;
 
-    return await spawnChild(cmd)
+    return await spawnChild({
+        cmd
+    })
 
 }
 
@@ -77,7 +79,9 @@ export default {
                 return;
             }
 
-            spawnChild(cmd);
+            spawnChild({
+                cmd
+            });
 
             return;
         }
@@ -160,13 +164,9 @@ export default {
             return console.log(colored_prefix.error + 'command execution failed');
         }
 
-        const isSafe = await execution_guard(i);
-
-        if (!isSafe) {
-            return;
-        }
-
-        spawnChild(i);
+        spawnChild({
+            cmd: i
+        });
 
     }
 

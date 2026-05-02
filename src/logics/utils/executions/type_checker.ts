@@ -88,8 +88,8 @@ export const type_checker = async (cmdString: string, userValues: string[]) => {
                 const relEnd = end - start;
                 res = res.slice(0, relBegin) + chalk.red.bold(res.slice(relBegin, relEnd)) + res.slice(relEnd);
 
-                if (start > 0) res = chalk.gray('... ') + res;
-                if (finish < cmdString.length) res = res + chalk.gray(' ...');
+                if (start > 0) res = chalk.gray('...') + res;
+                if (finish < cmdString.length) res = res + chalk.gray('...');
 
                 return res;
             })()

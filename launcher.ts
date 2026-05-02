@@ -4,7 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import al from "./src/async_loader.ts";
 import { pallete } from "./src/logics/utils/color.ts";
-import {spawnChild} from "./src/api/spawn.ts";
+import { spawnChild } from "./src/api/spawn.ts";
+import { execution_guard } from "./src/logics/utils/executions/execution_guard.ts";
 
 const { chalk } = al;
 
@@ -25,26 +26,22 @@ const root_path = {
 
 const exeName = "ribbon.exe";
 
-process.env.ROOT_STATUS = false; // allow user to switch admin mode
-process.env.GET_ROOT = undefined; // get the root path
-process.env.INDEX_FILE = undefined; // get the entry point of the application
+const env = process.env;
+
+env.ROOT_STATUS = 'false'; // allow user to switch admin mode
+env.GET_ROOT = undefined; // get the root path
+env.INDEX_FILE = undefined; // get the entry point of the application
 
 if (root_path.fromExec.includes(exeName)) {
   // top dir
-  process.env.GET_ROOT = path.join(root_path.fromExec, "..");
+  env.GET_ROOT = path.join(root_path.fromExec, "..");
   // point to exe file
-  process.env.INDEX_FILE = root_path.fromExec;
+  env.INDEX_FILE = root_path.fromExec;
 } else {
   // dev mode
-  process.env.GET_ROOT = root_path.fromDev;
-  process.env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
+  env.GET_ROOT = root_path.fromDev;
+  env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
 }
-
-const index = () => {
-  if (process.env.INDEX_FILE.includes(".ts"))
-    return `bun "${process.env.INDEX_FILE}"`;
-  else return `"${process.env.INDEX_FILE}"`;
-};
 
 // readline logic
 const rl = readline.createInterface({
@@ -52,7 +49,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-let activeController = null;
+let activeController: AbortController | null = null;
 
 // Global SIGINT handler to prevent memory leaks and handle aborts properly
 rl.on("SIGINT", () => {
@@ -66,11 +63,12 @@ rl.on("SIGINT", () => {
   }
 });
 
+
 const startLoop = async () => {
   rl.question(
-    `(${process.env.ROOT_STATUS ? "root" : "normal"}) Ribbon > `,
+    `(${process.env.ROOT_STATUS === 'true' ? "root" : "normal"}) Ribbon > `,
     async (answer) => {
-      
+
       const trimmed = answer.trim();
 
       if (trimmed === "rib exit") {
@@ -84,27 +82,48 @@ const startLoop = async () => {
       }
 
       try {
-        if (answer.startsWith("rib ")) {
-          answer = answer.replace("rib ", index());
+
+        if ((/(?:^|\s)\brib\b(?:\s|$)/g).test(answer)) {
+          answer = answer.replace(/(?:^|\s)\brib\b(?:\s|$)/g, `bun run "${env.INDEX_FILE}" `);
+        }
+
+        // Create the controller early so Ctrl+C during prompt doesn't exit the whole app
+        activeController = new AbortController();
+
+        // Pause readline early so it doesn't steal keypresses from execution_guard's enquirer prompt!
+        rl.pause();
+
+        if (!await execution_guard(answer)) {
+          return 
         }
 
         console.log(`\n${chalk.hex(pallete.grey_4)("Running : ")}${answer}\n`);
 
-        // Create a new AbortController for this specific command execution
-        activeController = new AbortController();
-        
         // Pass the signal down to spawnChild
-        await spawnChild(answer, activeController.signal);
+        await spawnChild({
+            cmd: answer,
+            signal: activeController.signal,
+        });
 
       } catch (e) {
+        
         if (e !== false) {
+          
           console.log("something went wrong: ", e);
+          
         }
+        
       } finally {
+                        
         // Clear the controller once the process naturally exits or gets killed
         activeController = null;
+
+        // Resume readline to accept user input again
+        rl.resume();
+
         // Resume the loop to show the prompt again
         startLoop();
+        
       }
 
     },
