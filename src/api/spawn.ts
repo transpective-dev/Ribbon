@@ -82,7 +82,7 @@ export class Spawn {
 
 // private
 
-export const spawnChild = (cmd: string) => {
+export const spawnChild = (cmd: string, signal?: AbortSignal) => {
 
     return new Promise((resolve, reject) => {
 
@@ -94,6 +94,7 @@ export const spawnChild = (cmd: string) => {
         const child = spawn(cmd, {
             shell: shellStatus(),
             stdio: 'inherit',
+            signal: signal
         });
 
         child.on('exit', (code) => {
@@ -101,8 +102,12 @@ export const spawnChild = (cmd: string) => {
         });
 
         child.on('error', (err) => {
-            kill(false)
+            if (err.name === 'AbortError') {
+                kill(false);
+            } else {
+                kill(false);
+            }
         });
 
     })
-}
+}
