@@ -1,14 +1,14 @@
 {
-  "name": "ribbon",
+  "name": "blooklyn-ai-cli",
   "version": "0.0.0-beta",
   "type": "module",
-  "description": "safe command execution with great management",
+  "description": "A safe CLI. Protect you from unexpected executing.",
   "main": "./src/logics/index.ts",
   "bin": {
     "rib": "./launcher.js"
   },
   "scripts": {},
-  "author": "Transpective_dev_team, Triton",
+  "author": "Transpective_dev_team",
   "license": "MIT",
   "dependencies": {
     "app-root-path": "3.1.0",
