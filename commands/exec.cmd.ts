@@ -42,8 +42,8 @@ export default {
     command: 'exec',
     alias: ['run', 'r'],
     argument: [
-        '<value>',
-        '[type...]',
+        '<alia>',
+        '[args...]',
     ],
     options: [
         {
@@ -56,11 +56,11 @@ export default {
         },
     ],
     desc: 'Execute a command',
-    action: async (value: string, type: any, options: any) => {
+    action: async (alia: string, args: any, options: any) => {
 
         if (options.script) {
 
-            const res = await runScript(value);
+            const res = await runScript(alia);
 
             if (!res) {
                 return console.log(colored_prefix.error + 'script not found');
@@ -71,7 +71,7 @@ export default {
 
         if (options.direct) {
 
-            const cmd = value;
+            const cmd = alia;
 
             const isSafe = await execution_guard(cmd);
 
@@ -89,7 +89,7 @@ export default {
         const {
             group,
             key
-        } = utils.getGroupAndKey(value);
+        } = utils.getGroupAndKey(alia);
 
         const get_cmd = async (key: string = '', group?: string) => {
 
@@ -158,14 +158,14 @@ export default {
             return;
         }
 
-        const i = await type_checker(get.cmd, type);
+        const replaced_cmd = await type_checker(get.cmd, args);
 
-        if (!i) {
+        if (!replaced_cmd) {
             return console.log(colored_prefix.error + 'command execution failed');
         }
 
         spawnChild({
-            cmd: i
+            cmd: replaced_cmd
         });
 
     }

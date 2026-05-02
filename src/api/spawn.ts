@@ -3,7 +3,8 @@ import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from 'events';
 import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
-import { string } from "zod";
+import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
+import { type_checker } from "../logics/utils/executions/type_checker.ts";
 
 const isWindows = process.platform === 'win32';
 const shellStatus = () => {
@@ -33,7 +34,7 @@ export class Spawn {
 
     public spawn = (cmd: string) => {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
 
             this.child = spawn(cmd, {
                 shell: shellStatus(),
@@ -91,15 +92,20 @@ export const spawnChild = ({
     signal?: AbortSignal;
 }) => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
 
         const kill = (status: boolean) => {
             child.kill();
             status ? resolve(true) : reject(false)
         }
 
+        if (!await execution_guard(cmd)) {
+            kill(false);
+            return;
+        }
+
         const shell = shellStatus();
-        
+
         let executable = cmd;
         let processArgs: string[] = [];
         let useShell: boolean | string = true;
@@ -126,7 +132,7 @@ export const spawnChild = ({
         child.on('exit', (code) => {
             code === 0 ? kill(true) : kill(false)
         });
-        
+
         child.on('error', (err) => {
             if (err.name === 'AbortError') {
                 kill(false);

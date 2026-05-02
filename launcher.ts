@@ -1,11 +1,20 @@
 #!/usr/bin/env node
 
+// FOLDER
+// |- launcher.exe (start up a new terminal) 
+// |- ribbon.exe (handle ribbon logics)
+// |- misc (miscelaneous things)
+// /-- ribbon_config.json (config for ribbon)
+// /-- alias-macro.json (saving macro)
+// /-- scripts (saving script)
+// /-- commands (saving commands)
+// |- launcher_config.json (config for launcher)
+
 import path from "path";
 import { fileURLToPath } from "url";
 import al from "./src/async_loader.ts";
 import { pallete } from "./src/logics/utils/color.ts";
 import { spawnChild } from "./src/api/spawn.ts";
-import { execution_guard } from "./src/logics/utils/executions/execution_guard.ts";
 
 const { chalk } = al;
 
@@ -92,10 +101,6 @@ const startLoop = async () => {
 
         // Pause readline early so it doesn't steal keypresses from execution_guard's enquirer prompt!
         rl.pause();
-
-        if (!await execution_guard(answer)) {
-          return 
-        }
 
         console.log(`\n${chalk.hex(pallete.grey_4)("Running : ")}${answer}\n`);
 
