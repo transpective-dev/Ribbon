@@ -3,3 +3,5 @@ $memo
 usr
 .vscode
 commands/custom/*
+.git
+.ribbon

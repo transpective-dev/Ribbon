@@ -144,6 +144,15 @@ export const system_init: Record<string, CommandObject> = {
         desc: "Search for a given string in files, showing line numbers.",
         cmd: "rg -t <T: string> <T: string>",
         tags: ["search", "rg", "code"]
+    },
+
+    pack: {
+        id: "SYS016",
+        time: "1955-02-24 00:00:00",
+        abs: "search code ripgrep",
+        desc: "Search for a given string in files, showing line numbers.",
+        cmd: "bun build --compile ./launcher.ts --bundle --outfile=./.ribbon/launcher.exe && bun build --compile ./src/logics/index.ts --outfile=./.ribbon/ribbon.exe",
+        tags: ["search", "rg", "code"]
     }
 
 };

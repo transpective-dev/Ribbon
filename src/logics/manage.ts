@@ -45,13 +45,13 @@ class RibbonConfig {
         return {
 
             command: new Conf<t_command_schema>({
-                configName: 'alias',
-                cwd: path.usr,
+                configName: 'alias_macro',
+                cwd: path.misc,
             }),
 
             config: new Conf<t_config_schema>({
-                configName: 'config',
-                cwd: path.usr
+                configName: 'ribbon_config',
+                cwd: path.misc
             })
 
         };
@@ -111,7 +111,7 @@ class RibbonConfig {
             return Object.entries(this.config.command.get(group) || {});
 
         })()
-        
+
         const _key_regex = keywords ? new RegExp(keywords, "i") : null
 
         const res = Object.fromEntries(
@@ -267,7 +267,7 @@ class RibbonConfig {
 
         this.config.command.set('user', user);
 
-        return 
+        return
     }
 
     has(key: string) {

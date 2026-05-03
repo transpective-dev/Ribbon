@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// FOLDER
+// FOLDER (.ribbon)
 // |- launcher.exe (start up a new terminal) 
 // |- ribbon.exe (handle ribbon logics)
 // |- misc (miscelaneous things)
@@ -33,7 +33,9 @@ const root_path = {
   fromDev: __dirname,
 };
 
-const exeName = "ribbon.exe";
+const index_name = "ribbon.exe";
+
+const launcher_name = "launcher.exe";
 
 const env = process.env;
 
@@ -41,16 +43,27 @@ env.ROOT_STATUS = 'false'; // allow user to switch admin mode
 env.GET_ROOT = undefined; // get the root path
 env.INDEX_FILE = undefined; // get the entry point of the application
 
-if (root_path.fromExec.includes(exeName)) {
-  // top dir
-  env.GET_ROOT = path.join(root_path.fromExec, "..");
+if (execPath.endsWith(launcher_name)) {
+
+  // top dir (the folder containing launcher.exe)
+  env.GET_ROOT = root_path.fromExec;
+  
   // point to exe file
-  env.INDEX_FILE = root_path.fromExec;
+  env.INDEX_FILE = path.join(env.GET_ROOT, index_name);
+  
 } else {
+  
   // dev mode
   env.GET_ROOT = root_path.fromDev;
+  
   env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
+  
 }
+
+console.log(process.env.GET_ROOT)
+
+await import("./src/logics/path.ts");
+
 
 // readline logic
 const rl = readline.createInterface({
@@ -75,7 +88,7 @@ rl.on("SIGINT", () => {
 
 const startLoop = async () => {
   rl.question(
-    `(${process.env.ROOT_STATUS === 'true' ? "root" : "normal"}) Ribbon > `,
+    `[${process.env.ROOT_STATUS === 'true' ? chalk.hex(pallete.red)('ROOT') : chalk.hex(pallete.green)('NORMAL')}] Ribbon > `,
     async (answer) => {
 
       const trimmed = answer.trim();
@@ -92,8 +105,12 @@ const startLoop = async () => {
 
       try {
 
-        if ((/(?:^|\s)\brib\b(?:\s|$)/g).test(answer)) {
-          answer = answer.replace(/(?:^|\s)\brib\b(?:\s|$)/g, `bun run "${env.INDEX_FILE}" `);
+        const regex = /(?:^|\s)\brib\b(?:\s|$)/g
+
+        const ifRib = env.INDEX_FILE?.endsWith('.exe') ? `"${env.INDEX_FILE}"` : `bun run \"${env.INDEX_FILE}\" `
+
+        if (regex.test(answer)) {
+          answer = answer.replace(regex, ifRib);
         }
 
         // Create the controller early so Ctrl+C during prompt doesn't exit the whole app

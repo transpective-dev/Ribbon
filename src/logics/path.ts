@@ -1,20 +1,21 @@
-import appRoot from 'app-root-path'
 import path from 'path'
 
-const root = appRoot.path;
+const root = process.env.GET_ROOT || '';
 
 // dont forget to delete src when publish
-const usr = path.join(root, 'usr');
-const usr_config = path.join(usr, 'config.json');
-const usr_command = path.join(usr, 'alias.json');
-const scripts = path.join(usr, 'scripts');
+const misc = path.join(root, 'misc');
+const usr_config = path.join(misc, 'ribbon_config.json');
+const usr_command = path.join(misc, 'alias_macro.json');
+const scripts = path.join(root, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
+const launcher_config = path.join(root, 'launcher_config.json');
 
 const paths = {
-    usr,
+    misc,
     scripts,
     commands,
+    launcher_config,
     custom,
 }
 
@@ -29,7 +30,9 @@ export const init_path = async () => {
 
         let t: 'folder' | 'file' | undefined = undefined
 
-        if (i.match(/\.[^.]+$/)) {
+        const suffix = ['.json', '.js', 'ts']
+
+        if (suffix.some((s) => i.endsWith(s))) {
             t = 'file'
         } else {
             t = 'folder'
@@ -49,8 +52,9 @@ await init_path();
 
 export default {
     root,
-    usr,
+    misc,
     paths,
     usr_config,
     usr_command,
+    custom
 }

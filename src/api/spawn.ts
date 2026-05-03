@@ -4,9 +4,9 @@ import { EventEmitter } from 'events';
 import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
 import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
-import { type_checker } from "../logics/utils/executions/type_checker.ts";
 
 const isWindows = process.platform === 'win32';
+
 const shellStatus = () => {
     const isEnabled = rib_conf.all('config').settings.useShell;
     if (isEnabled) {

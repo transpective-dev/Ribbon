@@ -1,3 +1,6 @@
+// paths
+import "./path.ts";
+
 import al from "../async_loader.ts";
 export { al };
 
@@ -11,13 +14,10 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
 });
 
-process.on('SIGINT', () => {
-    console.log('Aborted By User');
-    process.exit(0);
-});
-
+// user's platform etc
 import './env.ts'
 
+// cmd-load logic
 import './cmd-hub.ts'
 
-import "./path.ts";
+import './manage.ts'

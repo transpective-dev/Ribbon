@@ -7,7 +7,7 @@ import type { t_command_schema, t_config_schema } from './schema.ts'
  * (?:^|\\s) = starts by or preceded by a whitespace
  * \\b = to prevent matching substrings like "rm". garanteeing that only valid whole commands are captured.
  * between \\b-\\b = the commands that you want to capture
- *  */ 
+ *  */
 
 const windows = {
   "delete": {
@@ -223,19 +223,6 @@ const linux = {
       "(?:^|\\s)\\binsmod\\b(?:\\s|$)"
     ],
     "msg": "DENGER: You are executing a command that may result in system configuration or kernel module modification. Please proceed with caution.",
-  }
-}
-
-// system alias
-
-const system_alias: t_command_schema[string] = {
-  "rim": {
-    id: 'SYS001',
-    time: '2026/4/19 10:44:03',
-    abs: 're install modules',
-    desc: 'delete node modules folder and package-lock.json, then run npm install',
-    cmd: 'Remove-Item -r -force node_modules package-lock.json && npm install',
-    tags: [],
   }
 }
 
