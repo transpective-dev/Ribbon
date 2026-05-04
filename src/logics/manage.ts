@@ -1,28 +1,30 @@
-import Conf from 'conf'
+import Conf from 'conf';
 import _schema from './templates/schema.ts'
 import type { t_command_schema, t_config_schema } from './templates/schema.ts';
 import schemas from './templates/schema.ts'
 import path from './path.ts';
-import _init from './templates/config_init.ts';
+import _init from './templates/cfg_init.ts';
 import { colored_prefix } from './utils/color.ts';
 import chalk from 'chalk';
 import { pallete } from './utils/color.ts';
-import { system_init } from './templates/command_init.ts';
+import { system_init } from './templates/alias_init.ts';
 
 const platform = process.platform;
 
 class RibbonConfig {
 
     private config: {
+
         command: Conf<t_command_schema>
+
         config: Conf<t_config_schema>
     };
 
-    toggle(key: string) {
+    toggle<key extends keyof t_config_schema['settings']>(key: key) {
 
-        const settings = this.all('config').settings;
+        const settings = this.all('config').settings as t_config_schema['settings'];
 
-        const prev = settings[key];
+        const prev: boolean = settings[key] as boolean;
 
         settings[key] = !settings[key];
 
@@ -47,6 +49,10 @@ class RibbonConfig {
             command: new Conf<t_command_schema>({
                 configName: 'alias_macro',
                 cwd: path.misc,
+                defaults: {
+                    system: system_init,
+                    user: {}
+                }
             }),
 
             config: new Conf<t_config_schema>({
@@ -62,7 +68,6 @@ class RibbonConfig {
     init() {
 
         const config = this.config.config
-        const command = this.config.command
 
         _init.initConditional(config, 'filter', () => {
             if (platform === 'win32') return _init.windows;
@@ -71,13 +76,9 @@ class RibbonConfig {
         });
 
         const defaultSettings = schemas.config_schema.parse({}).settings;
-        const defaultCommand = schemas.command_schema.parse({
-            system: system_init
-        });
+
 
         _init.initBatch(config, { settings: defaultSettings });
-        _init.initBatch(command, defaultCommand);
-        _init.initIfMissing(command, 'user', {});
 
     }
 
@@ -258,7 +259,7 @@ class RibbonConfig {
         key, value
     }: {
         key: string,
-        value: string
+        value: t_command_schema['user'][string]
     }) {
 
         const user = this.config.command.get('user');

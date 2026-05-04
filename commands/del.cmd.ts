@@ -1,9 +1,8 @@
 import { rib_conf } from "../src/logics/manage.ts";
 import utils from "../src/logics/utils/utils.ts";
-import al from "../src/async_loader.ts"
-
-// @ts-ignore
-const { prompt } = al
+import enquirer from 'enquirer'
+const { prompt } = enquirer
+    ;
 
 export default {
     command: 'del',
@@ -18,7 +17,13 @@ export default {
 
         if (ask) {
 
-            const askObj = {
+            (() => {
+                if (config.settings.showMacro) {
+                    return [...utils.log_formatter('Command to delete: ', rib_conf.get({ key: name }))];
+                }
+            })();
+
+            const res = await prompt({
                 type: 'select',
                 name: 'ask',
                 message: 'Are you sure you want to delete this command?',
@@ -26,15 +31,7 @@ export default {
                     'yes',
                     'no'
                 ]
-            };
-
-            (() => {
-                if (config.settings.showMacro) {
-                    return [...utils.log_formatter('Command to delete: ', rib_conf.get({ key: name }))];
-                }
-            })();
-
-            const res = await prompt(askObj)
+            });
 
             if ('ask' in res && (res as any).ask === 'no') {
                 return console.log('Deletion cancelled')

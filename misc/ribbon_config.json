@@ -53,15 +53,13 @@
 		}
 	},
 	"settings": {
-		"alwaysRejectExecution": true,
+		"alwaysRejectExecution": false,
 		"askBeforeDelete": true,
 		"showMacro": true,
 		"appendDQWhenTString": true,
 		"enableSlotFilling": true,
-		"useShell": false,
-		"asking": {
-			"whenTypeMissing": true,
-			"whenTypeNotMatched": true
-		}
+		"useShell": true,
+		"whenTypeMissing": true,
+		"whenTypeNotMatched": true
 	}
 }

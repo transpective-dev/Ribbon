@@ -6,7 +6,6 @@ import * as path from 'path';
 import { pathToFileURL } from "node:url";
 
 
-
 const program = new Command();
 
 program
@@ -43,6 +42,7 @@ const registerCommand = (
     if (options) options.forEach((option) => cmd.option(option.option, option.desc));
     if (desc) cmd.description(desc);
     if (action) cmd.action(action);
+    
 
 }
 

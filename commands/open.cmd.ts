@@ -20,7 +20,9 @@ export default {
         const forRunning = async (path: string) => {
             try {
 
-                await spawnChild(`${cmd()} "${path}"`);
+                await spawnChild({
+                    cmd: `${cmd()} "${path}"`
+                });
 
             } catch (error) {
 

@@ -1,8 +1,10 @@
 import type { cmd_register } from "../src/logics/templates/interface.ts";
-import { rib_conf } from "../src/logics/manage.ts";
+const { rib_conf } = globalThis._rib_manage;
+import chalk from 'chalk'
+import enquirer from 'enquirer'
+const { prompt } = enquirer;
 
-import al from "../src/async_loader.ts";
-const { chalk, prompt } = al;
+import type { t_config_schema } from "../src/logics/templates/schema.ts";
 
 import { pallete } from "../src/logics/utils/color.ts";
 
@@ -69,7 +71,7 @@ export default {
 
 
                     return Object.entries(value).forEach(([k, v]) => {
-                        push(k, v)
+                        push(k, v as string)
                     })
 
                 }
@@ -87,8 +89,8 @@ export default {
                 choices
             })
 
-            if (select && typeof select === 'object' && 'key' in select) {
-                rib_conf.toggle(select.key as string)
+            if (select && typeof select === 'object' && 'key' in select && select.key) {
+                rib_conf.toggle(select.key as keyof t_config_schema['settings'])
             }
 
         }

@@ -197,7 +197,7 @@
 			"time": "1955-02-24 00:00:00",
 			"abs": "search code ripgrep",
 			"desc": "Search for a given string in files, showing line numbers.",
-			"cmd": "bun build --compile ./launcher.ts --bundle --outfile=./.ribbon/launcher.exe && bun build --compile ./src/logics/index.ts --outfile=./.ribbon/ribbon.exe",
+			"cmd": "bun build --minify --compile ./launcher.ts --bundle --outfile=./.ribbon/launcher.exe && bun build --target=bun --compile --bundle --target=bun ./src/logics/index.ts --outfile=./.ribbon/ribbon.exe --minify",
 			"tags": [
 				"search",
 				"rg",

@@ -100,7 +100,6 @@ export const spawnChild = ({
         }
 
         if (!await execution_guard(cmd)) {
-            kill(false);
             return;
         }
 

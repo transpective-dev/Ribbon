@@ -1,9 +1,10 @@
 import { rib_conf } from "../src/logics/manage.ts";
 import _interface from "../src/logics/templates/interface.ts";
-import al from "../src/async_loader.ts"
 
-// @ts-ignore
-const { prompt, fs } = al
+import enquirer from 'enquirer'
+const { prompt } = enquirer
+
+import fs from 'fs-extra'
 
 import { colored_prefix } from "../src/logics/utils/color.ts";
 
@@ -14,22 +15,22 @@ import { spawnChild } from "../src/api/spawn.ts";
 import _path from "../src/logics/path.ts"
 import path from 'path';
 
-import {runtime} from '../src/logics/env.ts';
+import { runtime } from '../src/logics/env.ts';
 
 import type { cmd_register } from "../src/logics/templates/interface.ts";
 
 const runScript = async (filename: string) => {
-    
+
     const files = (await fs.readdir(_path.paths.scripts)).filter((file: string) => file.endsWith('.script.ts'))
-    
+
     if (!files.includes(filename + '.script.ts')) {
         return false
     }
 
     const toTarget = path.join(_path.paths.scripts, filename + '.script.ts')
 
-    const cmd = runtime === 'bun' ? 
-        `bun "${toTarget}"` : 
+    const cmd = runtime === 'bun' ?
+        `bun "${toTarget}"` :
         `npx tsx "${toTarget}"`;
 
     return await spawnChild({

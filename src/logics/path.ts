@@ -19,8 +19,7 @@ const paths = {
     custom,
 }
 
-import al from '../async_loader.ts';
-const { fs } = al;
+import fs from "fs-extra";
 
 export const init_path = async () => {
 
@@ -30,7 +29,7 @@ export const init_path = async () => {
 
         let t: 'folder' | 'file' | undefined = undefined
 
-        const suffix = ['.json', '.js', 'ts']
+        const suffix = ['.json', '.js', '.ts']
 
         if (suffix.some((s) => i.endsWith(s))) {
             t = 'file'

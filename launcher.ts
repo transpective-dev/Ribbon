@@ -12,11 +12,9 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
-import al from "./src/async_loader.ts";
 import { pallete } from "./src/logics/utils/color.ts";
 import { spawnChild } from "./src/api/spawn.ts";
-
-const { chalk } = al;
+import chalk from "chalk";
 
 import readline from "readline";
 import { execPath } from "process";
@@ -107,7 +105,7 @@ const startLoop = async () => {
 
         const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-        const ifRib = env.INDEX_FILE?.endsWith('.exe') ? `"${env.INDEX_FILE}"` : `bun run \"${env.INDEX_FILE}\" `
+        const ifRib = env.INDEX_FILE?.endsWith('.exe') ? `"${env.INDEX_FILE}" ` : `bun run \"${env.INDEX_FILE}\" `
 
         if (regex.test(answer)) {
           answer = answer.replace(regex, ifRib);

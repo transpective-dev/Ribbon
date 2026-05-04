@@ -1,7 +1,6 @@
-import al from "../../async_loader.ts";
-import { system_init } from "./command_init.ts";
+import { system_init } from "./alias_init.ts";
 
-const { z } = al;
+import { z } from 'zod'
 
 const command_schema = z.record(
   z.string().min(1, "group name cannot be empty"),
@@ -23,6 +22,7 @@ const command_schema = z.record(
       tags: z.array(z.string()).default([]),
     })).default({})
 ).default({
+
 })
 
 const config_schema = z.object({
@@ -62,13 +62,8 @@ const config_schema = z.object({
     // false: Use standard CMD (default system shell)
     useShell: z.boolean().default(false),
 
-    asking: z.object({
-      whenTypeMissing: z.boolean().default(true),
-      whenTypeNotMatched: z.boolean().default(true),
-    }).default({
-      whenTypeMissing: true,
-      whenTypeNotMatched: true
-    })
+    whenTypeMissing: z.boolean().default(true),
+    whenTypeNotMatched: z.boolean().default(true),
 
   }).default({
     alwaysRejectExecution: true,
@@ -77,10 +72,8 @@ const config_schema = z.object({
     appendDQWhenTString: true,
     enableSlotFilling: true,
     useShell: false,
-    asking: {
-      whenTypeMissing: true,
-      whenTypeNotMatched: true
-    }
+    whenTypeMissing: true,
+    whenTypeNotMatched: true,
   })
 }).default({
   filter: {},
@@ -91,10 +84,8 @@ const config_schema = z.object({
     appendDQWhenTString: true,
     enableSlotFilling: true,
     useShell: false,
-    asking: {
-      whenTypeMissing: true,
-      whenTypeNotMatched: true
-    }
+    whenTypeMissing: true,
+    whenTypeNotMatched: true
   }
 });
 
@@ -103,7 +94,5 @@ export default {
   config_schema
 }
 
-// @ts-ignore
 export type t_config_schema = z.infer<typeof config_schema>
-// @ts-ignore
 export type t_command_schema = z.infer<typeof command_schema>

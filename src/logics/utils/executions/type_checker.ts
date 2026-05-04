@@ -1,8 +1,10 @@
 import { rib_conf } from "../../manage.ts";
 import _interface from "../../templates/interface.ts";
-import al from "../../../async_loader.ts"
+import enquirer from 'enquirer'
+const { prompt } = enquirer
 
-const { prompt, chalk } = al;
+
+import chalk from 'chalk'
 import { colored_prefix } from "../color.ts";
 import { assign_slots, type Slot } from "./slot_assigner.ts";
 
@@ -103,7 +105,7 @@ export const type_checker = async (cmdString: string, userValues: string[]) => {
                     message: `Please provide value for <T${slot.typeName ? `: ${slot.typeName}` : ''}>`,
                 }]
             });
-            
+
             if ('val' in res) {
                 assigned.set(slot.index, (res as any).val.val);
             }
@@ -187,7 +189,7 @@ const validateType = async (
         return value;
     }
 
-    const asking = rib_conf.all('config').settings.asking;
+    const asking = rib_conf.all('config').settings;
 
     if (asking.whenTypeNotMatched) {
 

@@ -1,3 +1,14 @@
+<div align="center">
+<img src="icon.svg" width="100">
+<p style="margin-top: 15px; scale: 1.8"><strong>Ribbon</strong></p>
+<p style="scale: 1.1; margin-top: -5px">Your best CLI partner</p>
+</div>
+<div align="center" style="display:flex; gap: 10px; align-items: center; justify-content: center;">
+    <img src="https://img.shields.io/github/stars/transpective-dev/Ribbon-AI-Guard" alt="GitHub stars">
+    <img src="https://img.shields.io/github/forks/transpective-dev/Ribbon-AI-Guard" alt="GitHub forks">
+    <img src="https://img.shields.io/github/license/transpective-dev/Ribbon-AI-Guard" alt="GitHub license">
+</div>
+
 Ribbon is an alias tool.
 
 What can we provide but other can't ?

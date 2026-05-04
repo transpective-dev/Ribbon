@@ -1,8 +1,7 @@
+import './global.ts'
+
 // paths
 import "./path.ts";
-
-import al from "../async_loader.ts";
-export { al };
 
 process.on('uncaughtException', (err) => {
     console.log(`program encountered an error: ${err.message}`); 
@@ -19,5 +18,3 @@ import './env.ts'
 
 // cmd-load logic
 import './cmd-hub.ts'
-
-import './manage.ts'
