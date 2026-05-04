@@ -5,4 +5,4 @@ usr
 commands/custom/*
 .git
 .ribbon
-misc
+./misc
