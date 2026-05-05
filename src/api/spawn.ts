@@ -83,7 +83,7 @@ export class Spawn {
 }
 
 export const isRibCmd = (cmd: string) => {
-    
+
     const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
     const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `"${process.env.INDEX_FILE}" ` : `bun run \"${process.env.INDEX_FILE}\" `
@@ -100,16 +100,28 @@ export const isRibCmd = (cmd: string) => {
 export const spawnChild = ({
     cmd,
     signal,
+    pipe = false
 }: {
     cmd: string;
     signal?: AbortSignal;
+    pipe?: boolean;
 }) => {
 
     return new Promise(async (resolve, reject) => {
 
+        // return msg if pipe
+        let message: string | undefined;
+
+        // kill child process
         const kill = (status: boolean) => {
             child.kill();
-            status ? resolve(true) : reject(false)
+            status ? resolve({
+                status: true,
+                message
+            }) : reject({
+                status: false,
+                message
+            })
         }
 
         if (!await execution_guard(cmd)) {
@@ -137,8 +149,21 @@ export const spawnChild = ({
 
         const child = spawn(executable, processArgs, {
             shell: useShell,
-            stdio: 'inherit',
+            stdio: pipe ? 'pipe' : 'inherit',
             signal: signal
+        });
+
+        // decode
+        const toString = (data: Buffer) => {
+            return isWindows ? iconv.decode(data, 'utf8') : data.toString();
+        }
+
+        child.stdout?.on('data', (data) => {
+            message = (message || '') + toString(data);
+        });
+
+        child.stderr?.on('data', (data) => {
+            message = (message || '') + toString(data);
         });
 
         child.on('exit', (code) => {
@@ -146,11 +171,7 @@ export const spawnChild = ({
         });
 
         child.on('error', (err) => {
-            if (err.name === 'AbortError') {
-                kill(false);
-            } else {
-                kill(false);
-            }
+            kill(false);
         });
 
     })

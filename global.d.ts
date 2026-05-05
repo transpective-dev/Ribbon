@@ -8,7 +8,7 @@ import * as egModule from './src/logics/utils/executions/execution_guard';
 
 import * as tkModule from './src/logics/utils/executions/type_checker';
 
-import * as pathModule from './src/logics/path';
+import pathModule from './src/logics/path';
 
 import * as colorModule from './src/logics/utils/color';
 

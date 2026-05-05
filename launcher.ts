@@ -45,20 +45,18 @@ if (execPath.endsWith(launcher_name)) {
 
   // top dir (the folder containing launcher.exe)
   env.GET_ROOT = root_path.fromExec;
-  
+
   // point to exe file
   env.INDEX_FILE = path.join(env.GET_ROOT, index_name);
-  
+
 } else {
-  
+
   // dev mode
   env.GET_ROOT = root_path.fromDev;
-  
-  env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
-  
-}
 
-console.log(process.env.GET_ROOT)
+  env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
+
+}
 
 await import("./src/logics/path.ts");
 
@@ -84,9 +82,10 @@ rl.on("SIGINT", () => {
 });
 
 
+
 const startLoop = async () => {
   rl.question(
-    `[${process.env.ROOT_STATUS === 'true' ? chalk.hex(pallete.red)('ROOT') : chalk.hex(pallete.green)('NORMAL')}] Ribbon > `,
+    `[${process.env.ROOT_STATUS === 'true' ? chalk.hex(pallete.red)('ROOT') : chalk.hex(pallete.green)('NORMAL')}] MOOD-CORE> `,
     async (answer) => {
 
       const trimmed = answer.trim();
@@ -115,20 +114,20 @@ const startLoop = async () => {
 
         // Pass the signal down to spawnChild
         await spawnChild({
-            cmd: answer,
-            signal: activeController.signal,
+          cmd: answer,
+          signal: activeController.signal,
         });
 
       } catch (e) {
-        
+
         if (e !== false) {
-          
+
           console.log("something went wrong: ", e);
-          
+
         }
-        
+
       } finally {
-                        
+
         // Clear the controller once the process naturally exits or gets killed
         activeController = null;
 
@@ -137,7 +136,7 @@ const startLoop = async () => {
 
         // Resume the loop to show the prompt again
         startLoop();
-        
+
       }
 
     },

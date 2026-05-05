@@ -13,7 +13,7 @@ export default {
         const p = platform;
 
         const cmd = () => {
-            if (p === 'win') return 'start';
+            if (p === 'win') return 'explorer';
             if (p === 'mac') return 'open';
             if (p === 'lnx') return 'xdg-open';
         };
@@ -21,13 +21,15 @@ export default {
         const forRunning = async (path: string) => {
             try {
 
+                console.log('now opening ', path, '...')
+
                 await spawnChild({
                     cmd: `${cmd()} "${path}"`
                 });
 
             } catch (error) {
 
-                console.log(error);
+                console.log('\nsomething went wrong...\n\n', error);
 
             }
         }
