@@ -1,16 +1,37 @@
 import chalk from "chalk";
 import { pallete } from "../src/logics/utils/color.ts";
 import strWidth from 'string-width'
+import { isRibCmd, spawnChild } from '../src/api/spawn.ts'
+import { direction, type t_direction } from './interface.ts'
 
 // keymap 
 
 export const keyMap = {
 	'ctrl+c': '\u0003',
-	'move_cursor': (direction: 'r' | 'l' | 'd' | 'u', step: number = 1) => {
+	'move_cursor': (direction: t_direction, step: number = 1) =>
+	{
 
-		const assign = (char: string) => {
-			return `\x1b[${step}${char}`
+		type t_assign = (char: string) => string;
+
+		let assign: t_assign;
+
+		// for extract keymap and debug
+		if (step === 0) {
+
+			assign = (char: string) =>
+			{
+				return `\x1b[${char}`
+			}
+
+		} else {
+
+			assign = (char: string) =>
+			{
+				return `\x1b[${step}${char}`
+			}
+
 		}
+
 
 		switch (direction) {
 			case 'r': return assign('C'); // move right
@@ -19,7 +40,8 @@ export const keyMap = {
 			case 'u': return assign('A'); // move up
 		}
 	},
-	'erase': (type: 'l' | 'd') => {
+	'erase': (type: 'l' | 'd') =>
+	{
 
 		switch (type) {
 			case 'l': return "\x1b[k" // erase in line
@@ -31,7 +53,8 @@ export const keyMap = {
 
 export type T_keyMap = keyof typeof keyMap;
 
-export const isKey = (key: string, targetKey: T_keyMap): T_keyMap | 'no_found_key' => {
+export const isKey = (key: string, targetKey: T_keyMap): T_keyMap | 'no_found_key' =>
+{
 
 	if (key === keyMap[targetKey]) {
 		return targetKey;
@@ -40,17 +63,18 @@ export const isKey = (key: string, targetKey: T_keyMap): T_keyMap | 'no_found_ke
 	return 'no_found_key';
 }
 
-let activeController: AbortController | undefined;
+let activeController: AbortController | null;
 
 export const handler = {
 
-	'exit': () => {
+	'exit': () =>
+	{
 		if (activeController) {
 			console.log("\n[!] aborted by user\n");
 			activeController.abort(); // Kills the running child process via AbortSignal
 		} else {
 			// If no process is running, Ctrl+C closes the REPL entirely
-			console.log("\n\nExiting Ribbon...");
+			console.log("\n\nExiting mood-core ...");
 			process.exit(0);
 		}
 	},
@@ -60,7 +84,8 @@ export const handler = {
 		direction: 'u' | 'd' | 'l' | 'r',
 		step: number
 		start: boolean
-	}) => {
+	}) =>
+	{
 
 		let converted = keyMap.move_cursor(direction, step);
 
@@ -76,8 +101,26 @@ export const handler = {
 
 // controller 
 
-const prefix = () => {
-	return `[${process.env.ROOT_STATUS === 'true' ? chalk.hex(pallete.red)('ROOT') : chalk.hex(pallete.green)('NORMAL')}] MOOD-CORE > `
+const prefix = () =>
+{
+	const user_status = () =>
+	{
+
+		const rs = process.env.ROOT_STATUS;
+
+		switch (rs) {
+
+			case 'true': return chalk.hex(pallete.red)('ROOT')
+
+			case 'false': return chalk.hex(pallete.green)('NORMAL')
+
+			default: return chalk.hex(pallete.grey_4)('UNKNOWN')
+
+		}
+
+	}
+
+	return `[${user_status()}] MOOD-CORE > `
 };
 
 import { stdin, stdout } from 'node:process';
@@ -86,24 +129,23 @@ stdin.setRawMode(true);
 stdin.resume();
 stdin.setEncoding('utf8');
 
+// main buffers
 let buffer = "";
 let visual_buffer = "";
 let visual_length = 0;
-let suggestion = "run-test-command"; // 假设这是匹配到的建议
+let suggestion = "run-test-command"; // auto-fill
 
 let is_prefix_initialized = false
 
-import bci from '../src/background_console/index.ts'
-
-const { backlander } = bci;
-
-const bc = await backlander({
-	dispose: 'auto'
-});
-
+// get display column dynamically
 const display_col = () => stdout.columns;
 
-const handle_buffer_change = (type: 'add' | 'del', char?: string) => {
+import backlander from '../src/background_console/index.ts'
+
+const bc = await backlander.backlander({ dispose: 'auto' })
+
+const handle_buffer_change = (type: 'add' | 'del', char?: string) =>
+{
 
 
 	switch (type) {
@@ -111,10 +153,6 @@ const handle_buffer_change = (type: 'add' | 'del', char?: string) => {
 		case 'add':
 
 			let build_up: string | null = null
-
-			if (visual_length > 100) {
-				bc.log('detected' + ' ' + visual_length)
-			}
 
 			if (char) {
 
@@ -140,6 +178,8 @@ const handle_buffer_change = (type: 'add' | 'del', char?: string) => {
 
 		case 'del':
 
+			bc.log(visual_length + ' ' + buffer.length)
+
 			stdout.write('\b \b');
 
 			const split_by_newline = buffer.split('\n')
@@ -158,55 +198,41 @@ const handle_buffer_change = (type: 'add' | 'del', char?: string) => {
 
 			buffer = rebuild;
 
-			// +1 for handling \n character.
-
 			// visual length only calc printable characters
+			const K = display_col() - 1;
 
-			const is_second_last = visual_length > display_col();
+			const is_line_start = (visual_length - 1) > 0 && (visual_length - 1) % K === 0;
 
-			// check is first line
-			const is_in_fl = visual_length < display_col();
-
-			const calc_remain = visual_length % display_col() - 1 === display_col() - 2;
-
-			const move_up_condition = {
-				in_line_2: !is_second_last && !is_in_fl,
-				in_line_n: calc_remain && is_second_last && !is_in_fl
-			}
-
-			// if exist delete current line and move up
-			if (move_up_condition.in_line_2 || move_up_condition.in_line_n) {
-
-				bc.log(JSON.stringify(move_up_condition))
-
-				bc.log(calc_remain + ' ' + display_col() + ' ' + visual_length)
-
+			if (is_line_start) {
 				stdout.write(keyMap.move_cursor('u', 1) + '\x1b[999C');
-				break;
-
 			}
 
+			break;
 	}
 
 }
 
-const render = () => {
+const render = () =>
+{
 
 	visual_buffer = prefix() + buffer;
 
 	visual_length = strWidth(visual_buffer) + 1;
 
 	if (!is_prefix_initialized) {
+
 		// initialize prefix
 		stdout.write(prefix())
 		is_prefix_initialized = true
+
 	}
 
 	// 注意：不再调用 stdout.write(buffer) 导致全局重绘！
 	// 输入和删除的字符变更已经由 handle_buffer_change 处理完毕。
 
 	// 3. 如果有建议，打印灰色部分
-	const ghostText = (): string => {
+	const ghostText = (): string =>
+	{
 		if (suggestion.startsWith(buffer) && buffer.length > 0) {
 			return suggestion.slice(buffer.length)
 		}
@@ -216,11 +242,10 @@ const render = () => {
 	const current_ghost = ghostText();
 
 	if (current_ghost.length > 0) {
-		stdout.write(`\x1b[90m${current_ghost}\x1b[0m`); // 90m 是灰色
+		stdout.write(`\x1b[90m${current_ghost}\x1b[0m`); // 90m is gray
 	}
 
-	// 利用 [K 清除当前光标到行尾的残余字符（比如旧的更长的 ghost text，或退格后留下的残余）
-	// 这样不用清空整行重绘，彻底避免了前缀和已输入内容的闪烁
+	// use [K to clear current cursor to the end of the line
 	stdout.write('\x1b[K');
 
 	if (current_ghost.length > 0) {
@@ -230,36 +255,78 @@ const render = () => {
 
 };
 
-stdin.on('data', (key: string) => {
-	// 处理 Ctrl+C 退出
-	if (key === '\u0003') process.exit();
+stdin.on('data', async (key: string) =>
+{
 
-	// 处理 Enter (回车)
+	// handle ctrl + c (exit)
+	if (key === '\u0003') handler.exit();
+
 	if (key === '\r' || key === '\n') {
-		// 回车前先清除屏幕上的 ghost text，避免它作为实体字符保留在输出记录中
+
+		// clean output
 		stdout.write('\x1b[K');
-		console.log('\n执行指令:', buffer);
-		buffer = "";
-		is_prefix_initialized = false; // 重置前缀标志，保证下一行重新打印前缀
-		render();
-		return;
+
+		const cleaned = buffer.replace(/\n|\r/g, '')
+
+		try {
+
+			const answer = isRibCmd(cleaned);
+
+			// Create the controller early so Ctrl+C during prompt doesn't exit the whole app
+			activeController = new AbortController();
+
+			console.log(`\n\n${chalk.hex(pallete.grey_4)("Running : ")}${answer}\n`);
+
+			// Pass the signal down to spawnChild
+			await spawnChild({
+				cmd: answer,
+				signal: activeController.signal,
+			});
+
+		} catch (e) {
+
+			if (e !== false) {
+
+				console.log("something went wrong: ", e);
+
+			}
+
+		} finally {
+
+			// Clear the controller once the process naturally exits or gets killed
+			activeController = null;
+
+		}
+
+
+		const resetter = () =>
+		{
+			buffer = "";
+			is_prefix_initialized = false;
+			render();
+		}
+
+		return resetter();
+
 	}
 
-	// 处理 Backspace (退格)
+	// handle cursor move
+	handle_arrow_key(key);
+
+	// handle backspace
 	if (key === '\u007f' || key === '\u0008') {
 		if (buffer.length > 0) {
 			handle_buffer_change('del');
 		}
 	}
-	// 处理 Tab (补全)
+	// handle tab (auto complete)
 	else if (key === '\t') {
 		if (suggestion.startsWith(buffer) && buffer.length < suggestion.length) {
 			const remainder = suggestion.slice(buffer.length);
-			buffer = suggestion;
 			handle_buffer_change('add', remainder);
 		}
 	}
-	// 普通字符输入 (过滤掉控制字符)
+	// handle normal chars
 	else if (key.length === 1 && key.charCodeAt(0) >= 32) {
 
 		handle_buffer_change('add', key);
@@ -271,3 +338,20 @@ stdin.on('data', (key: string) => {
 });
 
 render();
+
+const handle_arrow_key = (key: string) => 
+{
+
+	const extracted: string[] = [];
+
+	direction.forEach((i: string) =>
+	{
+		extracted.push(keyMap.move_cursor(i as t_direction, 0));
+	});
+
+	if (extracted.includes(key)) {
+		bc.log('a')
+		stdout.write(key)
+	}
+
+}

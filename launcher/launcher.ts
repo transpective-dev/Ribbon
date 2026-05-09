@@ -12,11 +12,10 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
-import { pallete } from "../src/logics/utils/color.ts";
-import { spawnChild, isRibCmd } from "../src/api/spawn.ts";
+
+// import controller
 import "./controller.ts";
 
-import readline from "readline";
 import { execPath } from "process";
 
 // Node.js ESM equivalent of __dirname
@@ -52,71 +51,8 @@ if (execPath.endsWith(launcher_name)) {
 } else {
 
   // dev mode
-  env.GET_ROOT = root_path.fromDev;
+  env.GET_ROOT = path.join(root_path.fromDev, '..');
 
-  env.INDEX_FILE = path.join(__dirname, "src", "logics", "index.ts");
+  env.INDEX_FILE = path.join(env.GET_ROOT, "src", "logics", "index.ts");
 
 }
-
-
-
-// const startLoop = async () => {
-//   rl.question(
-//     async (answer) => {
-
-//       const trimmed = answer.trim();
-
-//       if (trimmed === "rib exit") {
-//         rl.close();
-//         return;
-//       }
-
-//       if (!trimmed) {
-//         startLoop();
-//         return;
-//       }
-
-//       try {
-
-//         answer = isRibCmd(answer);
-
-//         // Create the controller early so Ctrl+C during prompt doesn't exit the whole app
-//         activeController = new AbortController();
-
-//         // Pause readline early so it doesn't steal keypresses from execution_guard's enquirer prompt!
-//         rl.pause();
-
-//         console.log(`\n${chalk.hex(pallete.grey_4)("Running : ")}${answer}\n`);
-
-//         // Pass the signal down to spawnChild
-//         await spawnChild({
-//           cmd: answer,
-//           signal: activeController.signal,
-//         });
-
-//       } catch (e) {
-
-//         if (e !== false) {
-
-//           console.log("something went wrong: ", e);
-
-//         }
-
-//       } finally {
-
-//         // Clear the controller once the process naturally exits or gets killed
-//         activeController = null;
-
-//         // Resume readline to accept user input again
-//         rl.resume();
-
-//         // Resume the loop to show the prompt again
-//         startLoop();
-
-//       }
-
-//     },
-//   );
-// };
-
-// startLoop();
