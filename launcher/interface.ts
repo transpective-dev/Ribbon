@@ -4,14 +4,19 @@ export const direction = ['r', 'l', 'd', 'u'] as const;
 
 export type t_direction = typeof direction[number];
 
-const suggestion = z.record(
-	z.string(),
-	z.string()
+export const suggestion = z.array(
+	z.object({
+		name: z.string(),
+		cmd: z.string(),
+		point: z.number(),
+	})
 )
 
-const suggestion_group = z.record(
+export const suggestion_group = z.record(
 	z.string(),
 	suggestion	
 )
 
 export type t_suggestion_group = z.infer<typeof suggestion_group>
+
+export type t_suggestion = z.infer<typeof suggestion>

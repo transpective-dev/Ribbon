@@ -3,6 +3,10 @@ import { pallete } from "../src/logics/utils/color.ts";
 import strWidth from 'string-width'
 import { isRibCmd, spawnChild } from '../src/api/spawn.ts'
 import { type t_direction } from './interface.ts'
+import fs from "fs-extra"
+import _path from '../src/logics/path.ts'
+import path from 'path'
+import { saveIntoFile } from './utils/beforeClosing.ts'
 
 import backlander from '../src/background_console/index.ts'
 
@@ -79,6 +83,17 @@ export const handler = {
 		} else {
 			// If no process is running, Ctrl+C closes the REPL entirely
 			console.log("\n\nExiting mood-core ...");
+
+			Object.entries(suggestion_list).forEach(([key, value]) => {
+				
+				const file_path = path.join(_path.paths.suggestions, key)
+
+				saveIntoFile({
+					path: file_path,
+					data: value
+				})
+
+			})
 			process.exit();
 		}
 	},
@@ -131,8 +146,7 @@ const prefix = () =>
 
 import { stdin, stdout } from 'node:process';
 
-import { type t_suggestion_group } from "./interface.ts";
-import { boolean } from "zod";
+import { type t_suggestion_group, suggestion as validate_suggestion } from "./interface.ts";
 
 stdin.setRawMode(true);
 stdin.resume();
@@ -141,12 +155,37 @@ stdin.setEncoding('utf8');
 // main buffers
 let buffer = "";
 let visual_length = 0;
-let suggestion_list: t_suggestion_group = {
-	'test': {
-		'run-test-command': 'echo helloworld',
-		'run-test-command2': 'echo hello not world'
-	},
-};
+let suggestion_list: t_suggestion_group = {};
+
+(() => {
+	
+	const file_list = fs.readdirSync(_path.paths.suggestions);
+
+	for (const file of file_list) {
+
+		const fullPath = path.join(_path.paths.suggestions, file)
+
+		bc.log(file, fullPath)
+
+		if ((/\.json$/.test(file))) {
+
+			const data = fs.readJsonSync(fullPath);
+	
+			bc.log(data)
+	
+			const validated = validate_suggestion.safeParse(data)
+	
+			if (validated.success) {
+				suggestion_list[file] = validated.data;
+			}
+
+		}
+
+
+	}
+	
+})()
+
 let suggestion: string | null = null;
 
 let is_prefix_initialized = false
@@ -171,14 +210,20 @@ const render = () =>
 	{
 
 		const flatted = Object.values(suggestion_list).flatMap(suggestion =>
-			Object.entries(suggestion).map(([name, command]) => ({ name, command }))
+			
+			Object.entries(suggestion).map(([name, {cmd, point}]) => ({ name, cmd, point }))
+			
 		).map((v) => {
-			if (v.command.startsWith(raw_buffer) && raw_buffer.length > 0) {
-				return v.command
+			
+			if (v.cmd.startsWith(raw_buffer) && raw_buffer.length > 0) {
+				return v
 			}
-		}).filter((v) => typeof v === 'string');
 
-		suggestion = flatted[0] ?? ''
+		}).filter((v) => typeof v?.cmd === 'string');
+
+		flatted.sort((a, b) => (b?.point ?? 0) - (a?.point ?? 0));
+
+		suggestion = flatted[0]?.cmd ?? ''
 
 		return suggestion.slice(raw_buffer.length)
 		
@@ -316,6 +361,20 @@ stdin.on('data', async (key: string) =>
 				type: 'add',
 				char: remainder,
 			});
+
+			for (const group of Object.entries(suggestion_list)) {
+
+				for (const index in group[1]) {
+
+					const macro = group[1][index];
+
+					if (macro !== undefined && macro.cmd === suggestion) {
+						suggestion_list[group[0]]![index]!.point += 1;
+					}
+
+				}
+
+			}
 		}
 	}
 

@@ -12,6 +12,8 @@ const custom = path.join(commands, 'custom');
 const launcher_config = path.join(root, 'launcher_config.json');
 const wasm_loader_file = path.join(root, 'build', 'release.js');
 const wasm_file = path.join(root, 'build', 'release.wasm');
+const suggestions = path.join(root, 'suggestions');
+const history = path.join(root, 'history.json');
 
 const paths = {
 	misc,
@@ -20,11 +22,14 @@ const paths = {
 	launcher_config,
 	custom,
 	wasm_loader_file,
-	wasm_file
+	wasm_file,
+	suggestions,
+	history
 }
 
 const dev = {
 	misc,
+	suggestions,
 }
 
 import fs from "fs-extra";
