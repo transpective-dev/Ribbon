@@ -14,7 +14,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // import controller
-import "./controller.ts";
+import "./launcher/controller.ts";
 
 import { execPath } from "process";
 
@@ -51,7 +51,7 @@ if (execPath.endsWith(launcher_name)) {
 } else {
 
   // dev mode
-  env.GET_ROOT = path.join(root_path.fromDev, '..');
+  env.GET_ROOT = path.join(root_path.fromDev);
 
   env.INDEX_FILE = path.join(env.GET_ROOT, "src", "logics", "index.ts");
 

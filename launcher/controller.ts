@@ -4,6 +4,10 @@ import strWidth from 'string-width'
 import { isRibCmd, spawnChild } from '../src/api/spawn.ts'
 import { type t_direction } from './interface.ts'
 
+import backlander from '../src/background_console/index.ts'
+
+const bc = await backlander.backlander({ dispose: 'auto' })
+
 // keymap 
 
 export const keyMap = {
@@ -103,6 +107,8 @@ export const handler = {
 
 const prefix = () =>
 {
+
+	// currently won't use 
 	const user_status = () =>
 	{
 
@@ -120,10 +126,13 @@ const prefix = () =>
 
 	}
 
-	return `[${user_status()}] MOOD-CORE > `
+	return `\n\u25E6 MOOD-CORE > `
 };
 
 import { stdin, stdout } from 'node:process';
+
+import { type t_suggestion_group } from "./interface.ts";
+import { boolean } from "zod";
 
 stdin.setRawMode(true);
 stdin.resume();
@@ -131,19 +140,21 @@ stdin.setEncoding('utf8');
 
 // main buffers
 let buffer = "";
-let visual_buffer = "";
 let visual_length = 0;
-let suggestion = "run-test-command"; // auto-fill
+let suggestion_list: t_suggestion_group = {
+	'test': {
+		'run-test-command': 'echo helloworld',
+		'run-test-command2': 'echo hello not world'
+	},
+};
+let suggestion: string | null = null;
 
 let is_prefix_initialized = false
 
 const render = () =>
 {
 
-	visual_buffer = prefix() + buffer;
-
-	// +1 for if key was char
-	visual_length = strWidth(visual_buffer) + 1;
+	visual_length = strWidth(prefix() + buffer)
 
 	if (!is_prefix_initialized) {
 
@@ -153,36 +164,73 @@ const render = () =>
 
 	}
 
+	const raw_buffer = buffer.replace(/\n/g, '');
+
 	// auto-conplete and suggestion
 	const ghostText = (): string =>
 	{
-		if (suggestion.startsWith(buffer) && buffer.length > 0) {
-			return suggestion.slice(buffer.length)
-		}
-		return ''
+
+		const flatted = Object.values(suggestion_list).flatMap(suggestion =>
+			Object.entries(suggestion).map(([name, command]) => ({ name, command }))
+		).map((v) => {
+			if (v.command.startsWith(raw_buffer) && raw_buffer.length > 0) {
+				return v.command
+			}
+		}).filter((v) => typeof v === 'string');
+
+		suggestion = flatted[0] ?? ''
+
+		return suggestion.slice(raw_buffer.length)
+		
 	};
 
 	const current_ghost = ghostText();
 
+	// clear old cache.
+	stdout.write('\x1b[J');
+
+	// rewrite if suggestion is available.
 	if (current_ghost.length > 0) {
+
 		stdout.write(`\x1b[90m${current_ghost}\x1b[0m`); // 90m is gray
+
+
 	}
 
-	// use [K to clear current cursor to the end of the line
-	stdout.write('\x1b[K');
-
+	// back to the last position
 	if (current_ghost.length > 0) {
-		// move back to right place
-		stdout.write(`\x1b[${current_ghost.length}D`);
+
+		const lines = (prefix() + buffer).split('\n');
+		const C = strWidth(lines[lines.length - 1]!);
+		const L = current_ghost.length;
+		const W = display_col();
+
+		const lines_to_move_up = Math.floor((C + L) / W) - Math.floor(C / W);
+
+		if (lines_to_move_up > 0) {
+			handler.move_between({
+				direction: 'u',
+				step: lines_to_move_up,
+				start: false,
+			});
+		}
+
+		stdout.write('\r');
+
+		const target_col = C % W;
+		if (target_col > 0) {
+			handler.move_between({
+				direction: 'r',
+				step: target_col,
+				start: false,
+			});
+		}
+
 	}
 
 };
 
 let is_executing = false;
-
-import backlander from '../src/background_console/index.ts'
-
-const bc = await backlander.backlander({ dispose: 'auto' })
 
 stdin.on('data', async (key: string) =>
 {
@@ -253,7 +301,7 @@ stdin.on('data', async (key: string) =>
 
 	// handle backspace
 	if (key === '\u007f' || key === '\u0008') {
-		if (buffer.length > 0 && strWidth(prefix()) < visual_length - 1) {
+		if (buffer.length > 0) {
 			handle_buffer_change({
 				type: 'del',
 			});
@@ -262,7 +310,7 @@ stdin.on('data', async (key: string) =>
 
 	// handle tab (auto complete)
 	if (key === '\t') {
-		if (suggestion.startsWith(buffer) && buffer.length < suggestion.length) {
+		if (suggestion?.startsWith(buffer) && buffer.length < suggestion.length) {
 			const remainder = suggestion.slice(buffer.length);
 			handle_buffer_change({
 				type: 'add',
@@ -314,62 +362,42 @@ export const handle_buffer_change = ({
 
 		case 'add':
 
-			let build_up: string | null = null
-
 			if (char) {
-
-				// handle \n end 
-
-				// save a space for later adding 
-				if (visual_length % (display_col()) === 0) {
-					build_up = char + '\n'
+				replaceBuffer(buffer + char);
+				
+				if ((visual_length + 1) % display_col() === 0) {
+					stdout.write('\n' + char);
 				} else {
-					build_up = char
+					stdout.write(char);
 				}
 
 			}
 
 
-			if (build_up) {
-				stdout.write(build_up)
-			};
-
-			replaceBuffer(buffer + build_up || '');
-
 			break;
 
 		case 'del':
 
-			stdout.write('\b \b');
+			const lines_before = (prefix() + buffer).split('\n');
+			const len_before = strWidth(lines_before[lines_before.length - 1]!);
+			const W_del = display_col();
 
-			const split_by_newline = buffer.split('\n')
-
-			const last_obj = split_by_newline.pop()
-
-			const sliced = last_obj!.slice(0, -1);
-
-			bc.log("last_obj: " + last_obj?.length)
-
-			if (sliced !== undefined && sliced !== "") {
-
-				bc.log(last_obj + " " + sliced)
-				split_by_newline.push(sliced)
-
+			let removed_newline = false;
+			if (buffer.endsWith('\n')) {
+				buffer = buffer.slice(0, -1);
+				removed_newline = true;
 			}
 
-			const rebuild = split_by_newline.join('\n')
+			// slice the actual character
+			buffer = buffer.slice(0, -1);
 
-			buffer = rebuild
-
-			bc.log(buffer);
-
-			// visual length only calc printable characters
-			const K = display_col() - 1;
-
-			const is_line_start = (visual_length - 1) > 0 && (visual_length - 1) % K === 0;
-
-			if (is_line_start) {
-				stdout.write(keyMap.move_cursor('u', 1) + '\x1b[999C');
+			if (removed_newline) {
+				// Move up 1 line, move to rightmost column, clear character
+				stdout.write(keyMap.move_cursor('u', 1) + '\x1b[999C' + '\x1b[K');
+			} else if (len_before > 0 && len_before % W_del === 0) {
+				stdout.write(keyMap.move_cursor('u', 1) + '\x1b[999C' + '\x1b[K');
+			} else {
+				stdout.write('\b \b');
 			}
 
 			break;

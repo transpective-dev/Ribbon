@@ -3,6 +3,8 @@ import dgram from 'dgram';
 import path from 'path'
 import fs from 'fs-extra'
 import * as url from "url";
+import type { string } from 'zod';
+import { ar } from 'zod/locales';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /* 
@@ -83,10 +85,14 @@ class BackgroundConsole {
 		});
 	}
 
-	log(message: Buffer | string) {
+	log(...args: any[]) {
+
+		const mapped = args.map((v: any) => JSON.stringify(v))
+
+		const joined = mapped.join(' ');	
 
 		if (!this.port) return;
-		const buf = Buffer.from(message);
+		const buf = Buffer.from(joined);
 		this.client.send(buf, this.port, 'localhost');
 
 	}
