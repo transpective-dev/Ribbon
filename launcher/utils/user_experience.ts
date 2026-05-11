@@ -58,7 +58,7 @@ class ManageHistory
 
 	private sort()
 	{
-		this.history = this.history.sort((a, b) => b.time - a.time)
+		this.history = this.history.sort((a, b) => a.time - b.time)
 	}
 
 	private conditionCheck(): 'less' | 'much' | 'fine' | null

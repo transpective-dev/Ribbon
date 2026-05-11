@@ -32,6 +32,10 @@ export const keyMap = {
 				return `\x1b[${char}`
 			}
 
+		} else if (step === -1) {
+
+			return ''
+
 		} else {
 
 			assign = (char: string) =>
@@ -57,6 +61,16 @@ export const keyMap = {
 			case 'd': return "\x1b[J" // erase from cursor to the end 
 		}
 
+	},
+	'cursor_state': (state: boolean): string =>
+	{
+
+		return (() =>
+		{
+			const prefix = '\x1b[?25'
+			return state ? prefix + 'h' : prefix + 'l'
+		})()
+
 	}
 }
 
@@ -79,10 +93,10 @@ export const handler = {
 	'exit': () =>
 	{
 		if (activeController) {
-			
+
 			console.log("\n[!] aborted by user\n");
 			activeController.abort(); // Kills the running child process via AbortSignal
-			
+
 		} else {
 			// If no process is running, Ctrl+C closes the REPL entirely
 			console.log("\n\nExiting mood-core ...");
@@ -186,6 +200,25 @@ let suggestion_list: t_suggestion_group = {};
 	}
 
 })()
+
+const backToPrefix = () =>
+{
+
+	const step = Math.trunc(visual_length / display_col())
+
+	handler.move_between({
+		direction: 'u',
+		step: step === 0 ? -1 : step,
+		start: true,
+	})
+
+	handler.move_between({
+		direction: 'r',
+		step: prefix().length - 1,
+		start: false,
+	})
+
+}
 
 let suggestion: string | null = null;
 
@@ -361,23 +394,18 @@ stdin.on('data', async (key: string) =>
 
 	if (history_cmd !== undefined) {
 
-		const step = () =>
-		{
-
-			if (strWidth(buffer) <= 0) {
-				return ''
-			}
-
-			return keyMap.move_cursor('l', strWidth(buffer))
-
-		}
-
-		stdout.write(`${step()}\x1b[J`)
+		stdout.write(keyMap.cursor_state(false));
+		
+		backToPrefix()
+		
+		stdout.write(`\x1b[J`)
 		
 		buffer = history_cmd
 		
 		stdout.write(buffer)
 		
+		stdout.write(keyMap.cursor_state(true));
+
 		return render()
 	}
 
