@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
 import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
+import { startBy } from "../logics/env.ts";
 
 const isWindows = process.platform === 'win32';
 
@@ -86,7 +87,7 @@ export const isRibCmd = (cmd: string) => {
 
     const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-    const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `"${process.env.INDEX_FILE}" ` : `bun run \"${process.env.INDEX_FILE}\" `
+    const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : `bun run \"${process.env.INDEX_FILE}\" `
 
     if (regex.test(cmd)) {
         return cmd.replace(regex, ifRib);
@@ -116,10 +117,10 @@ export const spawnChild = ({
         const kill = (status: boolean) => {
             child.kill();
             status ? resolve({
-                status: true,
+                state: true,
                 message
             }) : reject({
-                status: false,
+                state: false,
                 message
             })
         }
@@ -150,7 +151,11 @@ export const spawnChild = ({
         const child = spawn(executable, processArgs, {
             shell: useShell,
             stdio: pipe ? 'pipe' : 'inherit',
-            signal: signal
+            signal: signal,
+	    env: {
+		...process.env,
+		HLIN_MODE: 'interactive'
+	    }
         });
 
         // decode

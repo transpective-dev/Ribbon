@@ -14,12 +14,11 @@ const command_schema = z.record(
       // datetime: format: localString
       time: z.string(),
 
-      // acstract
-      abs: z.string(),
-
       desc: z.string().default("No description provided"),
       cmd: z.string(),
       tags: z.array(z.string()).default([]),
+      
+      mode: 
     })).default({})
 ).default({
 

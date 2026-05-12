@@ -9,10 +9,6 @@ import path from 'path'
 import { saveIntoFile, saveHistoryIntoFile } from './utils/beforeClosing.ts'
 import ux from "./utils/user_experience.ts"
 
-import backlander from '../src/background_console/index.ts'
-
-// const bc = await backlander.backlander({ dispose: 'auto' })
-
 // keymap 
 
 export const keyMap = {
@@ -162,7 +158,7 @@ const prefix = () =>
 
 	}
 
-	return `MOOD-CORE > `
+	return `Hlin > `
 };
 
 import { stdin, stdout } from 'node:process';
@@ -350,9 +346,9 @@ stdin.on('data', async (key: string) =>
 				signal: activeController.signal,
 			});
 
-		} catch (e) {
+		} catch (e: any) {
 
-			if (e !== false) {
+			if (e.state !== false && e.message !== undefined) {
 
 				console.log("something went wrong: ", e);
 

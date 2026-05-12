@@ -7,3 +7,11 @@
         default: return process.env.USR_PLATFORM = 'unknown';
     }
 })();
+
+export const startBy = () => {
+	switch (process.env.USR_PLATFORM) {
+		case 'win': return 'explorer';
+		case 'mac': return 'open';
+		case 'lnx': return 'xdg-open';
+	}
+}

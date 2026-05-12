@@ -3,8 +3,6 @@ import { history as historySchema, type t_history } from '../interface.ts';
 import _path from '../../src/logics/path.ts';
 
 import backlander from '../../src/background_console/index.ts'
-import { any } from 'zod';
-const bc = await backlander.backlander({ dispose: 'auto' })
 
 class ManageHistory
 {
@@ -24,7 +22,6 @@ class ManageHistory
 				const safeParsed = historySchema.safeParse(data)
 
 				if (safeParsed.success) {
-					bc.log('validation passed')
 					return this.history = safeParsed.data
 				}
 
@@ -38,7 +35,6 @@ class ManageHistory
 
 		} catch (error: any) {
 			this.history = []
-			bc.log('failed', error as string)
 		}
 
 	}
@@ -143,8 +139,6 @@ class ManageHistory
 
 		this.sort()
 
-		bc.log(JSON.stringify(this.history), command)
-
 	}
 
 	public detector(key: string, cmd: string): string | undefined
@@ -156,13 +150,11 @@ class ManageHistory
 
 		if (key === '\x1b[A') {
 			const res = this.changeIndex('d')?.cmd
-			bc.log(this.index, res, this.savingBuffer)
 			return  res
 		}
 		
 		if (key === '\x1b[B') {
 			const res = this.changeIndex('u')?.cmd
-			bc.log(this.index, res, this.savingBuffer)
 			return res
 		}
 
