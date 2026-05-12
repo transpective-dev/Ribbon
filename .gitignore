@@ -4,6 +4,8 @@ usr
 .vscode
 commands/custom/*
 .git
+./suggestions
+history.json
 .ribbon
 misc
 ribbon.zip

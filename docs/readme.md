@@ -1,78 +1,32 @@
-<div align="center">
-<img src="icon.svg" width="100">
-<p style="margin-top: 15px; scale: 1.8"><strong>Ribbon</strong></p>
-<p style="scale: 1.1; margin-top: -5px">Your best CLI partner</p>
-</div>
-<div align="center" style="display:flex; gap: 10px; align-items: center; justify-content: center;">
-    <img src="https://img.shields.io/github/stars/transpective-dev/Ribbon-AI-Guard" alt="GitHub stars">
-    <img src="https://img.shields.io/github/forks/transpective-dev/Ribbon-AI-Guard" alt="GitHub forks">
-    <img src="https://img.shields.io/github/license/transpective-dev/Ribbon-AI-Guard" alt="GitHub license">
-</div>
+### Feature List:
 
-Ribbon is an alias tool.
-
-What can we provide but other can't ?
-
-- intuitive macro : in here, you can see information you have defined for your alias. (e.g. description about command set, created time )
-
-- safe command execution : you don't have to worry about AI will run danger command anymore!. our execution-guard will prevent you from danger in anytime!.
+- execution guard: inject command execution when detected keywords and regex case
+- command alias: create and use command set by input alias.
+- auto-complete: support create and import auto completion
 
 ---
 
-### How to Use
+### how to start using
 
-Here are the primary commands you will use:
-
-| Command  | Description                                 |
-| :------: | :-----------------------------------------: |
-| register | Create a new macro in your Ribbon library   |
-|   del    | Delete a macro from the library             |
-|   find   | Search for a macro                          |
-|   run    | Execute a saved command                     |
-
-For a detailed command reference, check the [Full Documentation](full.md).
+1. download zip file and unzip it.
+2. click `launcher.exe` to open it.
+3. use it like a normal CLI
 
 ---
 
-### Before You Start
+### ribbon command instruction.
 
-1. **Built for Customization**: Ribbon uses raw TypeScript instead of compiled JavaScript. You can use `npm link` to add Ribbon to your global path while keeping the ability to tweak the source code.
-2. **Runtime Requirements**: Ribbon requires either `bun` or `npx` (Node.js). Please verify your installation:
+ribbon is a native command for Hlin.
 
-```bash
-bun --version
-# or
-npx --version
-```
+it helps you to create command macro, toggle config options state etc.
 
-**What's the difference?**
-- **Bun**: Our recommendation. Extremely fast startup and native TypeScript support.
-- **npx**: Slower than Bun, but widely available on most machines via Node.js.
+here is feature list.
 
----
-
-### Installation Guide
-
-Use the following templates to clone and set up Ribbon on your machine:
-
-#### Windows Users
-```powershell
-# Install Bun (optional but recommended)
-powershell -c "irm bun.sh/install.ps1 | iex";
-
-# Setup Ribbon
-git clone https://github.com/transpective-dev/Ribbon;
-cd Ribbon;
-npm link;
-```
-
-#### Linux & macOS Users
-```bash
-# Install Bun (optional but recommended)
-curl -fsSL https://bun.sh/install | bash;
-
-# Setup Ribbon
-git clone https://github.com/transpective-dev/Ribbon;
-cd Ribbon;
-npm link;
-```
+| prefix | alias | usage |
+| :----: | :---: | :----: |
+| register | `add`, `regis` | register command macro |
+| del | - | delete command macro |
+| find | - | find saved macro |
+| exec | `run` | execute command macro |
+| open | - | open config, alias file |
+| config | - | toggle options state |

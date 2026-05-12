@@ -6,7 +6,7 @@ import { type t_direction } from './interface.ts'
 import fs from "fs-extra"
 import _path from '../src/logics/path.ts'
 import path from 'path'
-import { saveIntoFile } from './utils/beforeClosing.ts'
+import { saveIntoFile, saveHistoryIntoFile } from './utils/beforeClosing.ts'
 import ux from "./utils/user_experience.ts"
 
 import backlander from '../src/background_console/index.ts'
@@ -112,6 +112,9 @@ export const handler = {
 				})
 
 			})
+
+			saveHistoryIntoFile();
+
 			process.exit();
 		}
 	},
@@ -159,7 +162,7 @@ const prefix = () =>
 
 	}
 
-	return `\n\u25E6 MOOD-CORE > `
+	return `MOOD-CORE > `
 };
 
 import { stdin, stdout } from 'node:process';

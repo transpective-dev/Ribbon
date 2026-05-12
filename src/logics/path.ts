@@ -10,8 +10,6 @@ const scripts = path.join(root, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
 const launcher_config = path.join(root, 'launcher_config.json');
-const wasm_loader_file = path.join(root, 'build', 'release.js');
-const wasm_file = path.join(root, 'build', 'release.wasm');
 const suggestions = path.join(root, 'suggestions');
 const history = path.join(root, 'history.json');
 
@@ -21,8 +19,6 @@ const paths = {
 	commands,
 	launcher_config,
 	custom,
-	wasm_loader_file,
-	wasm_file,
 	suggestions,
 	history
 }

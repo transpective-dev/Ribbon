@@ -10,5 +10,8 @@ export const saveIntoFile = ({
 	data: t_suggestion
 }) => {
 	fs.writeJSONSync(path, data, {spaces: 2})
+}
+
+export const saveHistoryIntoFile = () => {
 	ux.historyManager.saveIntoFile()
 }

@@ -2,6 +2,6 @@
   {
     "name": "hello",
     "cmd": "echo hello",
-    "point": 2
+    "point": 3
   }
 ]
