@@ -189,9 +189,9 @@ const validateType = async (
         return value;
     }
 
-    const asking = rib_conf.all('config').settings;
+    const asking = rib_conf.getConfig('whenTypeNotMatched');
 
-    if (asking.whenTypeNotMatched) {
+    if (asking) {
 
         const res = await prompt({
             type: 'select',

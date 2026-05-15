@@ -1,5 +1,3 @@
-import { shellMode } from '../../../launcher/interface.ts';
-
 import { z } from 'zod'
 
 const command_schema = z.record(

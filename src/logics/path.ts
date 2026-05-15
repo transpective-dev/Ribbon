@@ -9,24 +9,23 @@ const usr_command = path.join(misc, 'alias_macro.json');
 const scripts = path.join(root, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
-const launcher_config = path.join(root, 'launcher_config.json');
-const suggestions = path.join(root, 'suggestions');
-const history = path.join(root, 'history.json');
+const global_config = path.join(root, 'global_config.json');
+const cache = path.join(root, '.cache');
+const cache_json = path.join(cache, 'cache.json');
 
 const paths = {
 	misc,
 	scripts,
 	commands,
-	launcher_config,
+	global_config,
 	custom,
-	suggestions,
-	history
+	cache,
+	cache_json
 }
 
 const dev = {
 	misc,
-	suggestions,
-	history
+	cache,
 }
 
 import fs from "fs-extra";

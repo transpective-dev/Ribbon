@@ -13,8 +13,11 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
+// initialize files
+import './src/logics/path.ts'
+
 // import controller
-import "./launcher/controller.ts";
+import "./control/controller.ts";
 
 import { execPath } from "process";
 
@@ -48,7 +51,7 @@ if (execPath.endsWith(launcher_name)) {
   // point to exe file
   env.INDEX_FILE = path.join(env.GET_ROOT, index_name);
 
-  env.WHERE_EXE = path.join(env.GET_ROOT, 'launcher.exe');
+  env.WHERE_EXE = path.join(env.GET_ROOT, 'executor.exe');
 
 } else {
 
@@ -57,6 +60,6 @@ if (execPath.endsWith(launcher_name)) {
 
   env.INDEX_FILE = path.join(env.GET_ROOT, "src", "logics", "index.ts");
 
-  env.WHERE_EXE = path.join(env.GET_ROOT, '.ribbon', 'launcher.exe');
+  env.WHERE_EXE = path.join(env.GET_ROOT, 'HlinPSModule', 'bin', 'executor.exe');
 
 }
