@@ -2,16 +2,20 @@ import path from 'path'
 
 const root = process.env.GET_ROOT || '';
 
-// dont forget to delete src when publish
+// need init
 const misc = path.join(root, 'misc');
-const usr_config = path.join(misc, 'ribbon_config.json');
-const usr_command = path.join(misc, 'alias_macro.json');
+const usr_config = path.join(misc, 'config.json');
+const usr_command = path.join(misc, 'macro.json');
 const scripts = path.join(root, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
-const global_config = path.join(root, 'global_config.json');
+const global_config = path.join(root, 'g_cfg.json');
 const cache = path.join(root, '.cache');
 const cache_json = path.join(cache, 'cache.json');
+
+// no need init
+const u_cfg_cache = path.join(misc, 'config.cache.json');
+const u_cmd_cache = path.join(misc, 'macro.cache.json');
 
 const paths = {
 	misc,
@@ -20,7 +24,7 @@ const paths = {
 	global_config,
 	custom,
 	cache,
-	cache_json
+	cache_json,
 }
 
 const dev = {
@@ -66,5 +70,7 @@ export default {
 	paths,
 	usr_config,
 	usr_command,
-	custom
+	custom,
+	u_cfg_cache,
+	u_cmd_cache
 }

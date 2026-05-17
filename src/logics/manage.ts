@@ -8,6 +8,7 @@ import { colored_prefix } from './utils/color.ts';
 import chalk from 'chalk';
 import { pallete } from './utils/color.ts';
 import { system_init } from './templates/alias_init.ts';
+import { _parse } from 'zod/v4/core';
 
 const platform = process.platform;
 
@@ -48,18 +49,36 @@ class RibbonConfig
 	load()
 	{
 
+		const command_config = () =>
+		{
+			const i = path.usr_command.split(/[\/\\]+/)
+			const [filename, filepath] = [i.pop(), i.join('/')]
+			return {
+				configName: filename!,
+				cwd: filepath,
+				defaults: system_init
+			}
+		}
+
+		const config_config = () =>
+		{
+			const i = path.usr_config.split(/[\/\\]+/)
+			const [filename, filepath] = [i.pop(), i.join('/')]
+			return {
+				configName: filename!,
+				cwd: filepath,
+			}
+		}
+
 		return {
 
-			command: new Conf<t_command_schema>({
-				configName: 'alias_macro',
-				cwd: path.misc,
-				defaults: system_init
-			}),
+			command: new Conf<t_command_schema>(
+				command_config()
+			),
 
-			config: new Conf<t_config_schema>({
-				configName: 'ribbon_config',
-				cwd: path.misc
-			})
+			config: new Conf<t_config_schema>(
+				config_config()
+			)
 
 		};
 
