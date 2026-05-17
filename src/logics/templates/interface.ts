@@ -40,6 +40,7 @@ export interface CommandObject
 	time: string;
 	desc: string;
 	cmd: string;
+	safeRun: boolean;
 }
 
 export type CommandGroup = Record<string, CommandObject>;

@@ -31,12 +31,15 @@ import type { t_command_schema } from "../templates/schema.ts";
 
 function log_formatter(msg: string, detail: t_command_schema[string]) {
 
-    return [
-        console.log(`\n${msg}\n`),
-        console.log(detail),
-        console.log("\n")
-    ]
+	const longest = Object.keys(detail).reduce((max, key) => {
+		return Math.max(max, key.length)
+	}, 0) + 2
 
+        console.log(`\n${msg}\n`+'-'.repeat(msg.length + 3))
+	Object.entries(detail).forEach(([key, value]) => {
+		return console.log(`${key.padEnd(longest, " ")} | ${value}`)
+	})
+        console.log("\n")
 }
 
 const header = {

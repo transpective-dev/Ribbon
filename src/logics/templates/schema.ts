@@ -12,6 +12,7 @@ const command_schema = z.record(
 
 		desc: z.string().default("No description provided"),
 		cmd: z.string(),
+		safeRun: z.boolean().default(false),
 	})
 ).default({})
 
@@ -24,7 +25,6 @@ const config_schema = z.object({
 		})
 	).default({}),
 	settings: z.object({
-		alwaysRejectExecution: z.boolean().default(true),
 		askBeforeDelete: z.boolean().default(true),
 		showMacro: z.boolean().default(true),
 
@@ -56,7 +56,6 @@ const config_schema = z.object({
 		whenTypeNotMatched: z.boolean().default(true),
 
 	}).default({
-		alwaysRejectExecution: true,
 		askBeforeDelete: true,
 		showMacro: true,
 		appendDQWhenTString: true,
@@ -68,7 +67,6 @@ const config_schema = z.object({
 }).default({
 	filter: {},
 	settings: {
-		alwaysRejectExecution: true,
 		askBeforeDelete: true,
 		showMacro: true,
 		appendDQWhenTString: true,

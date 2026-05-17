@@ -5,6 +5,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pathToFileURL } from "node:url";
 
+const cmd_file_list = new Set<string>([
+	path.join(_path.paths.commands, 'config.cmd.ts'),
+	path.join(_path.paths.commands, 'del.cmd.ts'),
+	path.join(_path.paths.commands, 'exec.cmd.ts'),
+	path.join(_path.paths.commands, 'find.cmd.ts'),
+	path.join(_path.paths.commands, 'register.cmd.ts'),
+	path.join(_path.paths.commands, 'edit.cmd.ts'),
+]);
+
+
 
 const program = new Command();
 
@@ -49,6 +59,7 @@ const registerCommand = (
 await (async () => {
 
     const commandsDir = _path.paths.commands;
+
     const files = fs.readdirSync(commandsDir).map((file: any) => {
         return path.join(commandsDir, file)
     });
@@ -57,7 +68,11 @@ await (async () => {
         files.push(path.join(_path.paths.custom, file))
     })
 
-    for (const file of files) {
+    files.forEach((file: any) => {
+        cmd_file_list.add(file)
+    })
+
+    for (const file of cmd_file_list) {
         if (file.endsWith('.cmd.ts')) {
             const filePath = pathToFileURL(file).href;
             const module = await import(filePath);

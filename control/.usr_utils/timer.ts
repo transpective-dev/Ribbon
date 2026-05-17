@@ -65,9 +65,9 @@ class CacheManager
 			}
 		}
 
-	private cache: Cache | null = null
+	private cache: Cache
 
-	private key: string | null = null
+	private key: string
 
 	constructor(key: string)
 	{
@@ -90,13 +90,13 @@ class CacheManager
 
 		const current = Date.now()
 
-		const expiry_time = current + 5 * 60 * 1000
+		const expiry_time = current + 1 * 60 * 1000
 
 		const encrypted = crypto.HmacSHA256(expiry_time.toString(), this.key!).toString()
 
 		await keytar.setPassword(srv, acc, encrypted)
 
-		if (this.cache?.expiry_time === null) {
+		if (this.cache.expiry_time === null) {
 
 			this.cache.expiry_time = expiry_time
 
@@ -106,75 +106,85 @@ class CacheManager
 
 	}
 
-	private validateTime = async () =>
+	// check did expiry time manipulated.
+	validateTime = async (): Promise<boolean> =>
 	{
 
 		const { expiry_time } = this.cache as Cache
 
-		const encrypted = crypto.HmacSHA256(expiry_time!.toString(), this.key!).toString()
+		let res: boolean = false
 
-		return encrypted === await keytar.getPassword(srv, acc)
+		if (expiry_time) {
+
+			const encrypted = crypto.HmacSHA256(expiry_time.toString(), this.key!).toString()
+
+			res = encrypted === await keytar.getPassword(srv, acc)
+
+		}
+
+
+		if (!res) {
+
+			await this.reset();
+
+		}
+
+		return this.isExpired()
+
 
 	}
-
-	isExpired = () =>
+	
+	isExpired = async () =>
 	{
 
 		const current = Date.now();
 
 		const { expiry_time } = this.cache as Cache
 
-		if (expiry_time && current > expiry_time && this.cache) {
+		if (expiry_time && current < expiry_time) {
 
-			this.cache.expiry_time = null
-
-			this.cacher.set()
-
-			return true
-
+			
+			return false
+			
 		}
 
-		return false
+		await this.reset();
+
+		return true
 
 	}
 
-	resetter = async (): Promise<boolean> =>
+	login = async () =>
+	{
+		if (this.cache && this.cache.expiry_time === null) {
+			await this.generateTime()
+		}
+	}
+
+	reset = async () =>
 	{
 
-		const res = await this.validateTime()
+		this.cache.expiry_time = null;
 
-		if (!res) {
+		this.cacher.set();
 
-			console.log('Expiry Time Manipulated.')
-
-			return false
-
-		}
-
-		if (this.isExpired() && this.cache) {
-
-
-			await this.generateTime()
-
-			return true
-
-		}
-
-		return false
+		await keytar.deletePassword(srv, acc);
 
 	}
 
 
 }
 
-export const cacheManager = (key: string) =>
+import { general_encrypt_key } from './share.ts'
+
+export const cacheManager = (() =>
 {
 	try {
 
-		return new CacheManager(key);
+		return new CacheManager(general_encrypt_key);
 
 	} catch (e) {
 
 		return undefined
 	}
-}
+})()

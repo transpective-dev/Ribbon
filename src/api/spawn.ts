@@ -2,7 +2,9 @@ import { spawn, spawnSync } from "node:child_process";
 import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
 import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
-import { startBy } from "../logics/env.ts";
+import { startBy } from "../../env.ts";
+import chalk from "chalk";
+import { pallete } from "../logics/utils/color.ts";
 
 const isWindows = process.platform === 'win32';
 
@@ -23,57 +25,58 @@ export const isRibCmd = (cmd: string) =>
 
 	const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : `bun run \"${process.env.INDEX_FILE}\" `
+	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : ['bun', 'run', `\'${process.env.INDEX_FILE}\' `].join(" ")
 
 	if (regex.test(cmd)) {
 		return cmd.replace(regex, ifRib);
 	}
 
 	return cmd;
+
 }
 
-const init_spawn_config = (cmd: string, shell: ReturnType<typeof shellStatus>): { executable: string, processArgs: string[], useShell: boolean | string } =>
+const init_spawn_config = (cmd: string, shell: ReturnType<typeof shellStatus>): string =>
 {
 
-	let executable = cmd;
-	let processArgs: string[] = [];
-	let useShell: boolean | string = true;
+	let executable: string = cmd;
 
 	if (shell === 'powershell.exe') {
-		executable = 'powershell.exe';
 
 		// reject interaction and return error
 		// prevent direct exit from system
-		processArgs = ['-NonInteractive', '-NoProfile', '-Command', cmd];
-		useShell = false;
+		executable = `${shell} -NonInteractive -NoProfile -Command "${cmd}"`;
+
 	} else if (shell === '/bin/bash') {
-		executable = '/bin/bash';
-		processArgs = ['-c', cmd];
-		useShell = false;
+
+		executable = `${shell} --noprofile --norc -c ${cmd}`;
+
 	}
 
-	return {
-		executable,
-		processArgs,
-		useShell
-	};
+	return executable
 
 }
 
-// private
-export const spawnChild = ({
+interface spawner
+{
+	cmd: {
+		cmdString: string;
+		safeRun: boolean;
+	};
+	signal?: AbortSignal;
+}
+
+export const spawner = ({
 	cmd,
 	signal,
-	pipe = false,
-}: {
-	cmd: string;
-	signal?: AbortSignal;
-	pipe?: boolean;
-}) =>
+}: spawner) =>
 {
 
 	return new Promise(async (resolve, reject) =>
 	{
+
+		cmd.cmdString = isRibCmd(cmd.cmdString);
+
+		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(cmd.cmdString)}\n`)
 
 		if (!await execution_guard(cmd)) {
 			return reject(false);
@@ -97,32 +100,16 @@ export const spawnChild = ({
 
 		const shell = shellStatus();
 
-		const { executable, processArgs, useShell } = init_spawn_config(cmd, shell);
+		const spawn_cmd = init_spawn_config(cmd.cmdString, shell);
 
-		const child = spawn(executable, processArgs, {
-			shell: useShell,
-			stdio: pipe ? 'pipe' : 'inherit',
+		const child = spawn(spawn_cmd, {
+			shell: shell,
 			signal: signal,
+			stdio: 'inherit',
 			env: {
 				...process.env,
-				HLIN_MODE: 'interactive'
+				FORCE_COLOR: '1'
 			}
-		});
-
-		// decode
-		const toString = (data: Buffer) =>
-		{
-			return isWindows ? iconv.decode(data, 'utf8') : data.toString();
-		}
-
-		child.stdout?.on('data', (data) =>
-		{
-			message = (message || '') + toString(data);
-		});
-
-		child.stderr?.on('data', (data) =>
-		{
-			message = (message || '') + toString(data);
 		});
 
 		child.on('exit', (code) =>
@@ -138,6 +125,23 @@ export const spawnChild = ({
 	})
 }
 
+export const spawnChild = ({
+	cmd,
+	signal
+}: spawner) =>
+{
+
+	spawner({ cmd, signal } as spawner).then((res: any) =>
+	{
+		if (res && res.message) process.stdout.write(res.message);
+	}).catch((err: any) =>
+	{
+		if (err && err.message) process.stdout.write(err.message);
+	});
+
+}
+
+// spawn agent application
 export const spawnAgent = (agentName: string) =>
 {
 
@@ -145,13 +149,11 @@ export const spawnAgent = (agentName: string) =>
 
 	const newEnv = {
 		...process.env,
-		HLIN_MODE: 'agent',
 		SHELL: interceptor,
 		COMSPEC: interceptor,
 	}
 
-	spawn(agentName, [], {
-		detached: true,
+	spawnSync(agentName, [], {
 		env: newEnv,
 		stdio: 'inherit',
 	})

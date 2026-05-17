@@ -70,13 +70,9 @@ export const branch = async () =>
 
 			if (isKeyExist === getHash) {
 
-				const cache = cacheManager(res.password as string);
+				await cacheManager?.login();
 
-				if (cache?.isExpired()) {
-
-				}
-
-				return console.log('Expiry time: 5min')
+				return 'Login success'
 
 			}
 			
