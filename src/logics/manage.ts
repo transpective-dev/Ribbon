@@ -1,6 +1,6 @@
 import Conf from 'conf';
 import _schema from './templates/schema.ts'
-import type { t_command_schema, t_config_schema } from './templates/schema.ts';
+import { type t_command_schema, type t_config_schema } from './templates/schema.ts';
 import schemas from './templates/schema.ts'
 import path from './path.ts';
 import _init from './templates/cfg_init.ts';
@@ -9,6 +9,10 @@ import chalk from 'chalk';
 import { pallete } from './utils/color.ts';
 import { system_init } from './templates/alias_init.ts';
 import { _parse } from 'zod/v4/core';
+import fs from 'fs-extra';
+import crypto from 'crypto-js';
+import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts';
+import { PassThrough } from 'node:stream';
 
 const platform = process.platform;
 
@@ -49,24 +53,76 @@ class RibbonConfig
 	load()
 	{
 
+		// create cache
+		(() =>
+		{
+
+			try {
+
+				const read = {
+					cmd: fs.readFileSync(path.usr_command).toString(),
+					cfg: fs.readFileSync(path.usr_config).toString(),
+					checksum: fs.readJSONSync(path.paths.checksum)
+				}
+
+				if (crypto.SHA256(read.cmd).toString() != read.checksum.cmd) {
+					throw new Error()
+				}
+				
+				if (crypto.SHA256(read.cfg).toString() != read.checksum.cfg) {
+					throw new Error()
+				}
+
+				const cmdDecrypted = crypto.AES.decrypt(read.cmd, general_encrypt_key).toString(crypto.enc.Utf8);
+				const cfgDecrypted = crypto.AES.decrypt(read.cfg, general_encrypt_key).toString(crypto.enc.Utf8);
+
+				fs.writeJSONSync(path.u_cmd_cache, JSON.parse(cmdDecrypted), { spaces: 2 });
+				fs.writeJSONSync(path.u_cfg_cache, JSON.parse(cfgDecrypted), { spaces: 2 });
+
+			} catch (_) {
+
+				console.log('File is damaged. initializing files...')
+
+				if (fs.existsSync(path.usr_command)) {
+					fs.removeSync(path.usr_command)
+				}
+
+				if (fs.existsSync(path.usr_config)) {
+					fs.removeSync(path.usr_config)
+				}
+
+				if (fs.existsSync(path.u_cmd_cache)) {
+					fs.removeSync(path.u_cmd_cache)
+				}
+
+				if (fs.existsSync(path.u_cfg_cache)) {
+					fs.removeSync(path.u_cfg_cache)
+				}
+
+				this.init();
+
+			}
+
+
+		})();
+
 		const command_config = () =>
 		{
-			const i = path.usr_command.split(/[\/\\]+/)
-			const [filename, filepath] = [i.pop(), i.join('/')]
+			const i = path.u_cmd_cache.split(/[\/\\]+/)
+			const [filename, filepath] = [i.pop()?.replace('.json', ''), i.join('/')]
 			return {
 				configName: filename!,
-				cwd: filepath,
-				defaults: system_init
+				cwd: filepath
 			}
 		}
 
 		const config_config = () =>
 		{
-			const i = path.usr_config.split(/[\/\\]+/)
-			const [filename, filepath] = [i.pop(), i.join('/')]
+			const i = path.u_cfg_cache.split(/[\/\\]+/)
+			const [filename, filepath] = [i.pop()?.replace('.json', ''), i.join('/')]
 			return {
 				configName: filename!,
-				cwd: filepath,
+				cwd: filepath
 			}
 		}
 
@@ -88,26 +144,46 @@ class RibbonConfig
 	init()
 	{
 
-		const config = this.config.config
+		const encrypted = {
+			cmd: crypto.AES.encrypt(JSON.stringify(system_init), general_encrypt_key).toString(),
+			cfg: crypto.AES.encrypt(JSON.stringify(schemas.config_schema.parse({})), general_encrypt_key).toString()
+		}
 
-		_init.initConditional(config, 'filter', () =>
+		if (!fs.existsSync(path.usr_command)) {
+			fs.writeFileSync(path.usr_command, encrypted.cmd)
+			fs.writeJSONSync(path.u_cmd_cache, system_init, { spaces: 2 })
+		}
+
+		const get_filter = (() =>
 		{
+
 			if (platform === 'win32') return _init.windows;
 			if (platform === 'darwin') return _init.darwin;
 			return _init.linux;
-		});
 
-		const defaultSettings = schemas.config_schema.parse({}).settings;
+		})()
 
+		const config_init = {
+			filter: get_filter,
+			settings: schemas.config_schema.parse({}).settings
+		}
 
-		_init.initBatch(config, { settings: defaultSettings });
+		if (!fs.existsSync(path.usr_config)) {
+			fs.writeFileSync(path.usr_config, encrypted.cfg)
+			fs.writeJSONSync(path.u_cfg_cache, config_init, { spaces: 2 })
+		}
+
+		fs.writeJSONSync(path.paths.checksum, {
+			cfg: crypto.SHA256(fs.readFileSync(path.usr_config).toString()).toString(),
+			cmd: crypto.SHA256(fs.readFileSync(path.usr_command).toString()).toString()
+		}, { spaces: 2 })
 
 	}
 
 	constructor()
 	{
-		this.config = this.load()
 		this.init()
+		this.config = this.load()
 	}
 
 	allFlatCommands(): Record<string, any>

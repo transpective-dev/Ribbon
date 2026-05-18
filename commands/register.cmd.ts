@@ -1,5 +1,5 @@
 const { rib_conf } = globalThis._rib_manage;
-const { utils } = globalThis._rib_utils;
+import utils from "../src/logics/utils/utils.ts";
 const { cmd_register } = globalThis._rib_types
 
 export default {
@@ -65,7 +65,8 @@ export default {
             (() => {
                 const config = rib_conf.all('config') as any;
                 if (config.settings.showMacro) {
-                    return [...utils.log_formatter('Command registered: ', rib_conf.get({key}))];
+                    utils.log_formatter('Command registered: ', rib_conf.get({key}));
+		    return
                 }
             })();
         } else {

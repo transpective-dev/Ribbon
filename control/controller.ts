@@ -18,7 +18,8 @@ program.command('open')
 		spawnAgent(name as string)
 	});
 
-import { branch, deleteKey } from './.usr_utils/key_manage.ts'
+import { branch } from './.usr_utils/key_manage.ts'
+import { cleanEverything } from './.usr_utils/encryption_utils.ts';
 
 program.command('login')
 	.description('login/initialize password')
@@ -32,7 +33,7 @@ program.command('logout')
 	.description('delete password')
 	.action(async () =>
 	{
-		await deleteKey();
+		await cleanEverything();
 	})
 
 import { spawnChild } from '../src/api/spawn.ts';

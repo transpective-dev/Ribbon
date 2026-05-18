@@ -2,7 +2,7 @@ import keytar from "keytar";
 import enquirer from 'enquirer'
 import crypto from 'crypto-js'
 
-import { srv, acc_password as acc } from './share.ts'
+import { srv, acc_password as acc } from './encryption_utils.ts'
 import { cacheManager } from "./timer.ts"
 
 const { prompt } = enquirer
@@ -75,15 +75,9 @@ export const branch = async () =>
 				return 'Login success'
 
 			}
-			
+
 			return console.log('Incorrect Password. Please Retry')
 		}
 
 	}
-}
-
-// dev
-export const deleteKey = async () =>
-{
-	await keytar.deletePassword(srv, acc)
 }

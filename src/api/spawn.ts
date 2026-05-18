@@ -25,7 +25,7 @@ export const isRibCmd = (cmd: string) =>
 
 	const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : ['bun', 'run', `\'${process.env.INDEX_FILE}\' `].join(" ")
+	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : ['bun', 'run', `\"${process.env.INDEX_FILE}\" `].join(" ")
 
 	if (regex.test(cmd)) {
 		return cmd.replace(regex, ifRib);

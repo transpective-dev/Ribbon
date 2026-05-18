@@ -1,4 +1,4 @@
-import { srv, acc_expiry as acc } from './share.ts'
+import { srv, acc_expiry as acc } from './encryption_utils.ts'
 import keytar from 'keytar'
 import crypto from 'crypto-js'
 import fs from 'fs-extra'
@@ -133,7 +133,7 @@ class CacheManager
 
 
 	}
-	
+
 	isExpired = async () =>
 	{
 
@@ -143,9 +143,9 @@ class CacheManager
 
 		if (expiry_time && current < expiry_time) {
 
-			
+
 			return false
-			
+
 		}
 
 		await this.reset();
@@ -175,7 +175,7 @@ class CacheManager
 
 }
 
-import { general_encrypt_key } from './share.ts'
+import { general_encrypt_key } from './encryption_utils.ts'
 
 export const cacheManager = (() =>
 {

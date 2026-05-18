@@ -4,18 +4,19 @@ const root = process.env.GET_ROOT || '';
 
 // need init
 const misc = path.join(root, 'misc');
-const usr_config = path.join(misc, 'config.json');
-const usr_command = path.join(misc, 'macro.json');
+const usr_config = path.join(misc, 'config.enc');
+const checksum = path.join(misc, 'checksum.json');
+const usr_command = path.join(misc, 'macro.enc');
 const scripts = path.join(root, 'scripts');
 const commands = path.join(root, 'commands');
 const custom = path.join(commands, 'custom');
 const global_config = path.join(root, 'g_cfg.json');
+
+// cache
 const cache = path.join(root, '.cache');
 const cache_json = path.join(cache, 'cache.json');
-
-// no need init
-const u_cfg_cache = path.join(misc, 'config.cache.json');
-const u_cmd_cache = path.join(misc, 'macro.cache.json');
+const u_cfg_cache = path.join(cache, 'config.cache.json');
+const u_cmd_cache = path.join(cache, 'macro.cache.json');
 
 const paths = {
 	misc,
@@ -25,6 +26,7 @@ const paths = {
 	custom,
 	cache,
 	cache_json,
+	checksum
 }
 
 const dev = {

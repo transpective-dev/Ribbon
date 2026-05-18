@@ -1,0 +1,31 @@
+import crypto from 'crypto-js'
+import keytar from 'keytar'
+
+export const srv = 'HLIN'
+
+export const acc_password = "SUDO_KEY_PRIVATE"
+
+export const acc_expiry = "SUDO_KEY_EXPIRY"
+
+export const acc_unique = "GENERAL_ENCRYPT_KEY"
+
+const unique_key = async (): Promise<string> => {
+	
+	const random = crypto.SHA256(Math.random().toString()).toString(crypto.enc.Base64)
+
+	const get: string | null = await keytar.getPassword(srv, acc_unique)
+
+	if (get === null) {
+		await keytar.setPassword(srv, acc_unique, random)
+	}
+	
+	return get as string;
+}
+
+export const general_encrypt_key = await unique_key();
+
+export const cleanEverything = async () => {
+	await keytar.deletePassword(srv, acc_unique)
+	await keytar.deletePassword(srv, acc_password)
+	await keytar.deletePassword(srv, acc_expiry)
+}
