@@ -1,10 +1,11 @@
+import { number, string } from "zod"
 
-const search_types = [
-	'tag', // search by tag
-	'cmd', // search by command
-	'abs', // search by description
-	'id', // search by code
-	'all'
+const search_types: (keyof CommandObject)[] = [
+	'cmd', 
+	'desc',
+	'id', 
+	'time',
+	'safeRun'
 ] as const
 
 export const supported_type = [
@@ -12,6 +13,8 @@ export const supported_type = [
 	'number',
 	'boolean',
 ] as const
+
+
 
 export default {
 	search_types,

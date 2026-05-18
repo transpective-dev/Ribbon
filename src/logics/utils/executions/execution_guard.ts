@@ -7,9 +7,6 @@ import { cacheManager } from '../../../../control/.usr_utils/timer.ts'
 import chalk from 'chalk'
 
 import { pallete } from "../color.ts";
-import { match } from "node:assert";
-import { object, type keyof } from "zod";
-import { en } from "zod/locales";
 
 /**
  * Independent Execution Guard  
@@ -32,7 +29,7 @@ export const execution_guard = async (cmd: {
 
 		const isValid = await cacheManager?.isExpired()
 
-		return !isValid
+		return !isValid 
 
 	})()
 

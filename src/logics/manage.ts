@@ -12,7 +12,6 @@ import { _parse } from 'zod/v4/core';
 import fs from 'fs-extra';
 import crypto from 'crypto-js';
 import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts';
-import { PassThrough } from 'node:stream';
 
 const platform = process.platform;
 
@@ -68,7 +67,7 @@ class RibbonConfig
 				if (crypto.SHA256(read.cmd).toString() != read.checksum.cmd) {
 					throw new Error()
 				}
-				
+
 				if (crypto.SHA256(read.cfg).toString() != read.checksum.cfg) {
 					throw new Error()
 				}
@@ -186,32 +185,14 @@ class RibbonConfig
 		this.config = this.load()
 	}
 
-	allFlatCommands(): Record<string, any>
-	{
-		const store = this.config.command.store;
-		let flattened: Record<string, any> = {};
-		for (const [groupName, groupData] of Object.entries(store)) {
-			for (const [key, value] of Object.entries(groupData as any)) {
-				flattened[key] = { ...(value as any), _group: groupName };
-			}
-		}
-		return flattened;
-	}
-
 	// find command
-	find({ type, keywords, isMinified, group }: { type: string, keywords?: string, isMinified?: boolean, group?: string })
+	find({ type, keywords }: { type: string, keywords?: string }): t_command_schema
 	{
 
 		const entried = (() =>
 		{
 
-			// global 
-			if (!group) {
-				return Object.entries(this.allFlatCommands())
-			}
-
-			// group
-			return Object.entries(this.config.command.get(group) || {});
+			return Object.entries(this.config.command.store)
 
 		})()
 
@@ -227,7 +208,7 @@ class RibbonConfig
 					if (!_key_regex) return true;
 
 					// Global search across multiple fields
-					const searchStr = `${key} ${value.id} ${value.abs} ${value.cmd} ${value.tags.join(' ')}`;
+					const searchStr = `${key} ${Object.values(value).join(' ')}`;
 
 					return _key_regex.test(searchStr);
 
@@ -255,28 +236,6 @@ class RibbonConfig
 
 		);
 
-		if (isMinified) {
-
-			const arr: any[] = []
-
-			Object.entries(res).forEach(([key, value]: any) =>
-			{
-
-				arr.push({
-					id: value.id,
-					alia: key,
-					t: ' ' + (value.cmd.split(/<T:?\s?\w*>/).length - 1).toString(),
-					abs: value.abs,
-					time: value.time,
-					group: value._group || 'unknown'
-				});
-
-			})
-
-			return arr
-
-		}
-
 		return res
 
 	}
@@ -289,12 +248,9 @@ class RibbonConfig
 		try {
 
 			// check existence
-			if (key in this.config.command.get('user')) return { status: false, msg: 'Command already exists in user' };
+			if (key in this.config.command.store) return { status: false, msg: 'Command already exists in user' };
 
-			// get user section 
-			const userGroup = this.config.command.get('user') || {};
-
-			this.config.command.set('user', { ...(userGroup as any), [key]: value });
+			this.config.command.set(key, value);
 
 			return { status: true, msg: 'Command registered successfully' }
 		} catch (err) {
@@ -370,7 +326,7 @@ class RibbonConfig
 
 	has(key: string)
 	{
-		return !!this.allFlatCommands()[key];
+		return !!this.config.command.store[key];
 	}
 
 	getConfig(key: keyof t_config_schema['settings'])

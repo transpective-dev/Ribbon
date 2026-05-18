@@ -1,0 +1,12 @@
+{
+	"filter": {},
+	"settings": {
+		"askBeforeDelete": true,
+		"showMacro": true,
+		"appendDQWhenTString": true,
+		"enableSlotFilling": true,
+		"useShell": true,
+		"whenTypeMissing": true,
+		"whenTypeNotMatched": true
+	}
+}

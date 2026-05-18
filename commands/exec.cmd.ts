@@ -38,22 +38,25 @@ export default {
 	command: 'exec',
 	alias: ['run', 'r'],
 	argument: [
-		'<alia>',
-		'[args...]',
+		'<args...>',
 	],
 	options: [
 		{
 			option: '-s, --script',
 			desc: 'Execute a script'
 		},
+		{
+			option: '-d, --direct',
+			desc: 'Execute a command directly'
+		},
 	],
 	desc: 'Execute a command',
-	action: async (alia: string, args: any, options: any) =>
+	action: async (args: any, options: any) =>
 	{
 
 		if (options.script) {
 
-			const res = await runScript(alia);
+			const res = await runScript(args[0] as string);
 
 			if (!res) {
 				return console.log(colored_prefix.error + 'script not found');
@@ -64,7 +67,7 @@ export default {
 
 		if (options.direct) {
 
-			const cmd = alia;
+			const cmd = args.join(' ');
 
 			spawnChild({
 				cmd: {
@@ -76,7 +79,7 @@ export default {
 			return;
 		}
 
-		const get_cmd = async (key: string = alia) =>
+		const get_cmd = async (key: string = args[0] as string) =>
 		{
 
 			console.log('[ key ]: ', key, '\n')

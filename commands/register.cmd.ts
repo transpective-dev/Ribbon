@@ -1,6 +1,7 @@
 const { rib_conf } = globalThis._rib_manage;
 import utils from "../src/logics/utils/utils.ts";
 const { cmd_register } = globalThis._rib_types
+import type { t_command_schema } from "../src/logics/templates/schema.ts";
 
 export default {
     command: 'register',
@@ -10,8 +11,6 @@ export default {
     ],
     options: [
         { option: '-d, --desc <value>', desc: 'Description of the command' },
-        { option: '-a, --abstract <value>', desc: 'Abstract of the command' },
-        { option: '-t, --tags <value>', desc: 'Tags of the command. form: "tag1, tag2..."' },
     ],
     desc: "register new command \n\ngrammer: rib $/regis name='command' -d 'desc' -a 'abstract' -t 'tag1, tag2...'",
     action: (i: any, options: any) => {
@@ -48,15 +47,12 @@ export default {
         // Strip quotes and trim
         const cleanCmd = value.replace(/^"(.*)"$/, '$1').trim();
 
-        const tags = options.tags && (options.tags as string).split(',').map((tag) => tag.trim());
-
-        const content = {
+        const content: t_command_schema[string] = {
             id: utils.generate_id(),
             time: utils.generate_local_time(),
-            abs: options.abstract || 'No abstract provided',
             desc: options.desc || "No description provided",
             cmd: cleanCmd,
-            tags: tags || [],
+	    safeRun: false,
         }
 
         const res = rib_conf.register(key, content);
@@ -65,7 +61,7 @@ export default {
             (() => {
                 const config = rib_conf.all('config') as any;
                 if (config.settings.showMacro) {
-                    utils.log_formatter('Command registered: ', rib_conf.get({key}));
+                    utils.log_formatter('Command registered: ', rib_conf.get(key));
 		    return
                 }
             })();

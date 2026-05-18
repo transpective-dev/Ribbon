@@ -51,38 +51,9 @@ const header = {
     group: 'GROUP'
 }
 
-import Table from 'cli-table3';
-
-function list_up(ls: (typeof header)[]) {
-
-    const table = new Table({
-        head: Object.values(header),
-        colWidths: [9, 20, 5, 35, 25, 20],
-        wordWrap: true,
-        chars: {
-            'top': '─', 'top-mid': '┬', 'top-left': '┌', 'top-right': '┐',
-            'bottom': '─', 'bottom-mid': '┴', 'bottom-left': '└', 'bottom-right': '┘',
-            'left': '│', 'left-mid': '├', 'mid': '─', 'mid-mid': '┼',
-            'right': '│', 'right-mid': '┤', 'middle': '│'
-        },
-        style: { 'padding-left': 1, 'padding-right': 1, 'head': ['cyan'], }
-    })
-
-    console.log('\n');
-
-    ls.forEach((i) => table.push(Object.values(i)))
-
-    console.log(table.toString())
-
-    console.log('\n');
-
-    return
-}
-
 export default {
     generate_id,
     generate_local_time,
     log_formatter,
     header,
-    list_up
 }

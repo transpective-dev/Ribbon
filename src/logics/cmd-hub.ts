@@ -11,7 +11,6 @@ const cmd_file_list = new Set<string>([
 	path.join(_path.paths.commands, 'exec.cmd.ts'),
 	path.join(_path.paths.commands, 'find.cmd.ts'),
 	path.join(_path.paths.commands, 'register.cmd.ts'),
-	path.join(_path.paths.commands, 'edit.cmd.ts'),
 ]);
 
 

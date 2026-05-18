@@ -1,10 +1,12 @@
 import { spawn, spawnSync } from "node:child_process";
-import iconv from 'iconv-lite';
 import { rib_conf } from "../logics/manage.ts";
 import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
 import { startBy } from "../../env.ts";
 import chalk from "chalk";
 import { pallete } from "../logics/utils/color.ts";
+import keytar from 'keytar';
+import { acc_password, srv  } from "../../control/.usr_utils/encryption_utils.ts";
+import { string } from "zod";
 
 const isWindows = process.platform === 'win32';
 
@@ -78,6 +80,11 @@ export const spawner = ({
 
 		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(cmd.cmdString)}\n`)
 
+		if (typeof await keytar.getPassword(srv, acc_password) !== 'string') {
+			console.log('Please Initialize Your Account')
+			return reject(false)
+		}
+
 		if (!await execution_guard(cmd)) {
 			return reject(false);
 		}
@@ -101,6 +108,8 @@ export const spawner = ({
 		const shell = shellStatus();
 
 		const spawn_cmd = init_spawn_config(cmd.cmdString, shell);
+
+		console.log(spawn_cmd)
 
 		const child = spawn(spawn_cmd, {
 			shell: shell,
