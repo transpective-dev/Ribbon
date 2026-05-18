@@ -14,8 +14,6 @@ export const supported_type = [
 	'boolean',
 ] as const
 
-
-
 export default {
 	search_types,
 	supported_type

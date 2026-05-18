@@ -10,7 +10,7 @@ import { pallete } from './utils/color.ts';
 import { system_init } from './templates/alias_init.ts';
 import { _parse } from 'zod/v4/core';
 import fs from 'fs-extra';
-import crypto from 'crypto-js';
+import crypto, { enc } from 'crypto-js';
 import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts';
 
 const platform = process.platform;
@@ -143,14 +143,34 @@ class RibbonConfig
 	init()
 	{
 
-		const encrypted = {
-			cmd: crypto.AES.encrypt(JSON.stringify(system_init), general_encrypt_key).toString(),
-			cfg: crypto.AES.encrypt(JSON.stringify(schemas.config_schema.parse({})), general_encrypt_key).toString()
+		const encrypter = (data: string) => {
+			return crypto.AES.encrypt(data, general_encrypt_key).toString()
 		}
+
+		const reader = (path: string) =>
+			{
+				
+				if (path.endsWith('.json')) {
+					
+					return fs.readJSONSync(path).toString()
+					
+			}
+			
+			return fs.readFileSync(path).toString()
+			
+		}
+
+		const encrypted = {
+			cmd: encrypter(JSON.stringify(system_init)),
+			cfg: encrypter(JSON.stringify(schemas.config_schema.parse({})))
+		}
+
+		const counter: (keyof typeof encrypted)[] = [];
 
 		if (!fs.existsSync(path.usr_command)) {
 			fs.writeFileSync(path.usr_command, encrypted.cmd)
 			fs.writeJSONSync(path.u_cmd_cache, system_init, { spaces: 2 })
+			counter.push('cmd')
 		}
 
 		const get_filter = (() =>
@@ -170,12 +190,38 @@ class RibbonConfig
 		if (!fs.existsSync(path.usr_config)) {
 			fs.writeFileSync(path.usr_config, encrypted.cfg)
 			fs.writeJSONSync(path.u_cfg_cache, config_init, { spaces: 2 })
+			counter.push('cfg')
 		}
 
-		fs.writeJSONSync(path.paths.checksum, {
-			cfg: crypto.SHA256(fs.readFileSync(path.usr_config).toString()).toString(),
-			cmd: crypto.SHA256(fs.readFileSync(path.usr_command).toString()).toString()
-		}, { spaces: 2 })
+		if (counter.length === 0) return;
+		
+		const readCheckSum = (() => {
+			try {
+				return fs.readJSONSync(path.paths.checksum)
+			} catch (_) {
+				return {
+					cfg: '',
+					cmd: ''
+				}
+			}
+		})();
+
+		const calcCheckSum = {
+			cfg: crypto.SHA256(reader(path.usr_config)).toString(),
+			cmd: crypto.SHA256(reader(path.usr_command)).toString()
+		}
+
+		counter.forEach((i) => {
+
+			const cs = calcCheckSum[i];
+
+			if (Object.keys(readCheckSum).includes(i) && readCheckSum[i] === cs) return;
+
+			readCheckSum[i] = cs;
+			
+		})
+
+		fs.writeJSONSync(path.paths.checksum, readCheckSum, { spaces: 2 });
 
 	}
 
@@ -264,18 +310,11 @@ class RibbonConfig
 	{
 
 		try {
-			const store = this.config.command.store;
-			let deleted = false;
-			for (const [groupName, groupData] of Object.entries(store)) {
-				if ((groupData as any)[key]) {
-					const newGroup = { ...groupData as any } as any;
-					delete newGroup[key];
-					this.config.command.set(groupName as any, newGroup);
-					deleted = true;
-					break;
-				}
+			if (key in this.config.command.store) {
+				this.config.command.delete(key as any);
+				return { status: true, msg: 'Command deleted successfully' };
 			}
-			return deleted ? { status: true, msg: 'Command deleted successfully' } : { status: false, msg: 'Command not found' };
+			return { status: false, msg: 'Command not found' };
 		} catch (err) {
 			return { status: false, msg: 'Command deletion failed' }
 		}
