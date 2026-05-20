@@ -12,7 +12,7 @@
 export const startBy = () =>
 {
 	switch (process.env.USR_PLATFORM) {
-		case 'win': return 'explorer';
+		case 'win': return 'start';
 		case 'mac': return 'open';
 		case 'lnx': return 'xdg-open';
 	}

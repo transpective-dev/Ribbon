@@ -6,7 +6,6 @@ import chalk from "chalk";
 import { pallete } from "../logics/utils/color.ts";
 import keytar from 'keytar';
 import { acc_password, srv  } from "../../control/.usr_utils/encryption_utils.ts";
-import { string } from "zod";
 
 const isWindows = process.platform === 'win32';
 
@@ -22,12 +21,12 @@ const shellStatus = () =>
 	return true;
 }
 
-export const isRibCmd = (cmd: string) =>
+export const isRibCmd = (cmd: string): string =>
 {
 
 	const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()} "${process.env.INDEX_FILE}" ` : ['bun', 'run', `\"${process.env.INDEX_FILE}\" `].join(" ")
+	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()!} "${process.env.INDEX_FILE}" ` : `bun run "${process.env.INDEX_FILE}" `
 
 	if (regex.test(cmd)) {
 		return cmd.replace(regex, ifRib);
@@ -37,24 +36,18 @@ export const isRibCmd = (cmd: string) =>
 
 }
 
-const init_spawn_config = (cmd: string, shell: ReturnType<typeof shellStatus>): string =>
+const init_spawn_config = (cmdString: string, shell: ReturnType<typeof shellStatus>): string[] =>
 {
 
-	let executable: string = cmd;
-
 	if (shell === 'powershell.exe') {
-
 		// reject interaction and return error
 		// prevent direct exit from system
-		executable = `${shell} -NonInteractive -NoProfile -Command "${cmd}"`;
-
+		return [shell as string, '-NonInteractive', '-NoProfile', '-Command', cmdString];
 	} else if (shell === '/bin/bash') {
-
-		executable = `${shell} --noprofile --norc -c ${cmd}`;
-
+		return [shell as string, '--noprofile', '--norc', '-c', cmdString];
 	}
 
-	return executable
+	return [cmdString];
 
 }
 
@@ -76,9 +69,9 @@ export const spawner = ({
 	return new Promise(async (resolve, reject) =>
 	{
 
-		cmd.cmdString = isRibCmd(cmd.cmdString);
+		let _cmdString = isRibCmd(cmd.cmdString);
 
-		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(cmd.cmdString)}\n`)
+		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(_cmdString)}\n`)
 
 		if (typeof await keytar.getPassword(srv, acc_password) !== 'string') {
 			console.log('Please Initialize Your Account')
@@ -107,12 +100,13 @@ export const spawner = ({
 
 		const shell = shellStatus();
 
-		const spawn_cmd = init_spawn_config(cmd.cmdString, shell);
+		const _arguments = init_spawn_config(_cmdString, shell);
 
-		console.log(spawn_cmd)
+		const executable = _arguments.shift()!;
+		const isShellMode = typeof shell === 'boolean' ? shell : false;
 
-		const child = spawn(spawn_cmd, {
-			shell: shell,
+		const child = spawn(executable, _arguments, {
+			shell: isShellMode,
 			signal: signal,
 			stdio: 'inherit',
 			env: {

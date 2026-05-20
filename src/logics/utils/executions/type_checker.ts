@@ -14,211 +14,199 @@ const SLOT_REGEX = /(<T(?:\s*:\s*\w+)?>(?:\([^)]*\))?)/;
 // to match inside content
 const SLOT_DETAIL = /^<T(?:\s*:\s*(\w+))?>(?:\(([^)]*)\))?$/;
 
-export const type_checker = async (cmdString: string, userValues: string[]) => {
+type t_counter =
+	{
+		name: string,
+		expected: string,
+		received: string
+	}[]
 
-    // is type exist
-    let isValid = true;
+export const type_checker = async (cmdString: string, userValues: string[]) =>
+{
 
-    // split command into chunks (text vs slots)
-    const parts = cmdString
-        .split(SLOT_REGEX)
-        .filter(p => p && p.trim() !== '')
-        .map(p => p.trim());
-
-
-    // --- Pass 1: scan all slots ---
-
-    // transiest extends.
-    // raw: original placeholder. example: <T: type>(default)， <T>， <T: type>
-    // typeName: type name. example: type: [string, number, boolean]
-
-    const slots: (Slot & { raw: string, typeName: string })[] = [];
-
-    // current slot index
-    // Using a separate counter to ensure slot indexing ignores non-slot elements.
-    let slotIndex = 0;
-
-    // traverse parts 
-    for (const part of parts) {
-
-        // find out slot 
-        const m = part.match(SLOT_DETAIL);
-
-        // if not slot, then skip
-        if (!m) continue;
+	// split command into chunks (text vs slots)
+	const parts = cmdString
+		.split(SLOT_REGEX)
+		.filter(p => p && p.trim() !== '')
+		.map(p => p.trim());
 
 
-        slots.push({
-            index: slotIndex,
-            type: (m[1] || '').trim(), // get type
-            defaultVal: m[2] !== undefined ? m[2] : null, // get default value
-            raw: part,
-            typeName: (m[1] || '').trim()
-        });
+	// --- Pass 1: scan all slots ---
 
-        slotIndex++;
-    }
+	// transiest extends.
+	// raw: original placeholder. example: <T: type>(default)， <T>， <T: type>
+	// typeName: type name. example: type: [string, number, boolean]
 
-    // --- Pass 2: distribute values ---
-    const values = userValues ? [...userValues] : [];
+	const slots: (Slot & { raw: string, typeName: string })[] = [];
 
-    // read config to check slot filling feature toggle
-    const config_data = rib_conf.all('config').settings as any;
-    const enableSlotFilling = config_data.enableSlotFilling ?? true;
+	// current slot index
+	// Using a separate counter to ensure slot indexing ignores non-slot elements.
+	let slotIndex = 0;
 
-    const assigned = assign_slots(slots, values, enableSlotFilling);
+	// traverse parts 
+	for (const part of parts) {
 
-    // ask for any slot that has no value and no default
-    for (const slot of slots) {
-        if (!assigned.has(slot.index) && slot.defaultVal === null) {
+		// find out slot 
+		const m = part.match(SLOT_DETAIL);
 
-            const sliced = (() => {
-                const matches = Array.from(cmdString.matchAll(new RegExp(SLOT_REGEX, 'g')));
-                const target = matches[slot.index];
-                if (!target) return '';
+		// if not slot, then skip
+		if (!m) continue;
 
-                const begin = target.index!;
-                const end = begin + target[0].length;
-                const expected = 15;
 
-                const start = Math.max(0, begin - expected);
-                const finish = Math.min(cmdString.length, end + expected);
+		slots.push({
+			index: slotIndex,
+			type: (m[1] || '').trim(), // get type
+			defaultVal: m[2] !== undefined ? m[2] : null, // get default value
+			raw: part,
+			typeName: (m[1] || '').trim()
+		});
 
-                let res = cmdString.slice(start, finish);
+		slotIndex++;
+	}
 
-                const relBegin = begin - start;
-                const relEnd = end - start;
-                res = res.slice(0, relBegin) + chalk.red.bold(res.slice(relBegin, relEnd)) + res.slice(relEnd);
+	// --- Pass 2: distribute values ---
+	const values = userValues ? [...userValues] : [];
 
-                if (start > 0) res = chalk.gray('...') + res;
-                if (finish < cmdString.length) res = res + chalk.gray('...');
+	// read config to check slot filling feature toggle
+	const config_data = rib_conf.all('config').settings as any;
+	const enableSlotFilling = config_data.enableSlotFilling ?? true;
 
-                return res;
-            })()
+	const assigned = assign_slots(slots, values, enableSlotFilling);
 
-            const res = await prompt({
-                type: 'form',
-                name: 'val',
-                message: `Missing slot: ${sliced}`,
-                choices: [{
-                    name: 'val',
-                    message: `Please provide value for <T${slot.typeName ? `: ${slot.typeName}` : ''}>`,
-                }]
-            });
+	// ask for any slot that has no value and no default
+	for (const slot of slots) {
+		if (!assigned.has(slot.index) && slot.defaultVal === null) {
 
-            if ('val' in res) {
-                assigned.set(slot.index, (res as any).val.val);
-            }
+			const sliced = (() =>
+			{
+				const matches = Array.from(cmdString.matchAll(new RegExp(SLOT_REGEX, 'g')));
+				const target = matches[slot.index];
+				if (!target) return '';
 
-        }
-    }
+				const begin = target.index!;
+				const end = begin + target[0].length;
+				const expected = 15;
 
-    // --- Pass 3: assemble final command ---
-    const requiredType = _interface.supported_type;
-    const configData = rib_conf.all('config').settings as any;
-    const appendDQ = configData.appendDQWhenTString ?? true;
+				const start = Math.max(0, begin - expected);
+				const finish = Math.min(cmdString.length, end + expected);
 
-    let i_cmd = '';
-    let cursor = 0;
+				let res = cmdString.slice(start, finish);
 
-    for (const part of parts) {
-        const m = part.match(SLOT_DETAIL);
+				const relBegin = begin - start;
+				const relEnd = end - start;
+				res = res.slice(0, relBegin) + chalk.red.bold(res.slice(relBegin, relEnd)) + res.slice(relEnd);
 
-        // normal text chunk
-        if (!m) {
-            i_cmd += (i_cmd.length > 0 ? ' ' : '') + part;
-            continue;
-        }
+				if (start > 0) res = chalk.gray('...') + res;
+				if (finish < cmdString.length) res = res + chalk.gray('...');
 
-        // slot chunk
-        const slot = slots[cursor++];
-        const val = assigned.get(slot!.index) ?? '';
-        const typeName = slot!.typeName as typeof requiredType[number];
+				return res;
+			})()
 
-        // validate type if specified
-        if (typeName && requiredType.includes(typeName)) {
-            const finalVal = await validateType(val, typeName, requiredType);
+			const res = await prompt({
+				type: 'form',
+				name: 'val',
+				message: `Missing slot: ${sliced}`,
+				choices: [{
+					name: 'val',
+					message: `Please provide value for <T${slot.typeName ? `: ${slot.typeName}` : ''}>`,
+				}]
+			});
 
-            if (finalVal === false) {
-                console.log(colored_prefix.error + `invalid value for type ${typeName}`);
-                isValid = false;
-                break;
-            }
+			if ('val' in res) {
+				assigned.set(slot.index, (res as any).val.val);
+			}
 
-            // wrap string values in double quotes if setting enabled
-            if (appendDQ && typeName === 'string') {
-                i_cmd += ' ' + JSON.stringify(finalVal);
-            } else {
-                i_cmd += ' ' + finalVal;
-            }
+		}
+	}
 
-        } else if (typeName && !requiredType.includes(typeName)) {
-            console.log(colored_prefix.error + `invalid type ${typeName}`);
-            isValid = false;
-            break;
+	// --- Pass 3: assemble final command ---
+	const requiredType = _interface.supported_type;
+	const configData = rib_conf.all('config').settings as any;
+	const appendDQ = configData.appendDQWhenTString ?? true;
 
-        } else {
-            // untyped <T>
-            i_cmd += ' ' + val;
-        }
-    }
+	let i_cmd = '';
+	let cursor = 0;
 
-    if (!isValid) return null;
+	const counter: t_counter = [];
 
-    return i_cmd.trim();
+	for (const part of parts) {
+		const m = part.match(SLOT_DETAIL);
+
+		// normal text chunk
+		if (!m) {
+			i_cmd += (i_cmd.length > 0 ? ' ' : '') + part;
+			continue;
+		}
+
+		// slot chunk
+		const slot = slots[cursor++];
+		const val = assigned.get(slot!.index) ?? '';
+		const typeName = slot!.typeName as typeof requiredType[number];
+
+		// validate type if specified
+		if (typeName && requiredType.includes(typeName)) {
+
+			const finalVal = await validateType(val, typeName, requiredType);
+
+			if (finalVal === false) {
+				console.log(colored_prefix.error + `invalid value for type ${typeName}`);
+				break;
+			}
+
+			// wrap string values in double quotes if setting enabled
+			if (appendDQ && typeName === 'string') {
+				i_cmd += ' ' + JSON.stringify(finalVal);
+			} else {
+				i_cmd += ' ' + finalVal;
+			}
+
+		} else if (typeName && !requiredType.includes(typeName)) {
+			console.log(colored_prefix.error + `invalid type ${typeName}`);
+			break;
+
+		} else {
+			// untyped <T>
+			i_cmd += ' ' + val;
+		}
+	}
+
+	if (counter.length > 0) {
+		return null
+	};
+
+	return i_cmd.trim();
 }
 
 // --- Type validator (extracted for clarity) ---
 
 const validateType = async (
-    value: string,
-    expectedType: string,
-    supportedTypes: readonly string[]
-): Promise<string | false> => {
+	value: string,
+	expectedType: string,
+	supportedTypes: readonly string[]
+): Promise<string | false> =>
+{
 
-    // infer actual type
-    let actualType: string = 'string';
-    if (['true', 'false'].includes(value.toLowerCase())) {
-        actualType = 'boolean';
-    } else if (!isNaN(Number(value)) && value.trim() !== '') {
-        actualType = 'number';
-    }
+	// infer actual type
+	let actualType: string = 'string';
+	if (['true', 'false'].includes(value.toLowerCase())) {
+		actualType = 'boolean';
+	} else if (!isNaN(Number(value)) && value.trim() !== '') {
+		actualType = 'number';
+	}
 
-    // string accepts anything
-    if (actualType === expectedType || expectedType === 'string') {
-        return value;
-    }
+	// string accepts anything
+	if (actualType === expectedType || expectedType === 'string' && supportedTypes.includes(actualType)) {
+		return value;
+	}
 
-    const asking = rib_conf.getConfig('whenTypeNotMatched');
-
-    if (asking) {
-
-        const res = await prompt({
-            type: 'select',
-            name: 'action',
-            message: `Type mismatch! Expected [${expectedType}] but got [${actualType}] ('${value}')`,
-            choices: [
-                { name: 'modify', message: 'Modify' },
-                { name: 'ignore', message: 'Ignore' },
-            ]
-        });
-
-        if ('action' in res) {
-            if ((res as any).action === 'ignore') return false;
-
-            if ((res as any).action === 'modify') {
-                const newInput = await prompt({
-                    type: 'input',
-                    name: 'new_val',
-                    message: `Enter new ${expectedType} value:`
-                });
-
-                if ('new_val' in newInput) {
-                    return await validateType((newInput as any).new_val, expectedType, supportedTypes);
-                }
-            }
-        }
-    }
-
-    return false;
+	return false;
 };
+
+const logger = (counter: t_counter) =>
+{
+	counter.forEach((c) =>
+	{
+		console.log(`Expected type: `, c.expected);
+		console.log(`Received: (${c.name})${c.received}`);
+	})
+}

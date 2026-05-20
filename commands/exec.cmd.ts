@@ -88,36 +88,7 @@ export default {
 
 			if (res === null || res === undefined) {
 
-				const get_select = await prompt({
-					type: 'select',
-					name: 'get',
-					message: 'Command not found',
-					choices: [
-						{ name: 'new', message: 'try new' },
-						{ name: 'exit', message: 'exit' }
-					]
-				})
-
-				if ('get' in get_select) {
-
-					if (get_select.get === 'new') {
-
-						const get_input = await prompt({
-							type: 'input',
-							name: 'get',
-							message: 'Enter group and alias',
-						})
-
-						if ('get' in get_input) {
-							return await get_cmd(get_input.get as string);
-						}
-					}
-
-					if (get_select.get === 'exit') {
-						return;
-					}
-
-				}
+				return null;
 			}
 
 			utils.log_formatter('Found Macro: ', res)

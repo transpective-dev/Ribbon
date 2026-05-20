@@ -25,7 +25,6 @@ const config_schema = z.object({
 		})
 	).default({}),
 	settings: z.object({
-		askBeforeDelete: z.boolean().default(true),
 		showMacro: z.boolean().default(true),
 
 		// append double quotes when using <T: string>
@@ -56,7 +55,6 @@ const config_schema = z.object({
 		whenTypeNotMatched: z.boolean().default(true),
 
 	}).default({
-		askBeforeDelete: true,
 		showMacro: true,
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
@@ -67,7 +65,6 @@ const config_schema = z.object({
 }).default({
 	filter: {},
 	settings: {
-		askBeforeDelete: true,
 		showMacro: true,
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
