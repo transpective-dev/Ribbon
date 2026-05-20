@@ -12,7 +12,7 @@
 
 
 // initialize files
-import './src/logics/path.ts'
+import './src/logics/utils/path.ts'
 
 // initialize env
 import "./env.ts";

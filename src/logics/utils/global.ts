@@ -1,13 +1,13 @@
 // expose pkg and file for when launch from exe file
 
-import * as manage from './manage.ts'
-import * as eg from './utils/executions/execution_guard.ts'
-import * as tk from './utils/executions/type_checker.ts'
-import * as spawn from '../api/spawn.ts'
+import * as manage from '../../manage.ts'
+import * as eg from './executions/execution_guard.ts'
+import * as tk from './executions/type_checker.ts'
+import * as spawn from './spawn.ts'
 import _path from './path.ts'
-import * as color from './utils/color.ts'
-import utils from './utils/utils.ts'
-import * as types from './templates/interface.ts'
+import * as color from './color.ts'
+import utils from './utils.ts'
+import * as types from '../templates/interface.ts'
 
 // node packages
 import enquirer from 'enquirer';
@@ -15,8 +15,8 @@ import fs from 'fs-extra';
 import chalk from 'chalk'
 
 // templates
-import cmd_temp from './templates/create_temps/cmd_temp.ts';
-import schema from './templates/schema.ts';
+import cmd_temp from '../templates/create_temps/cmd_temp.ts';
+import schema from '../templates/schema.ts';
 
 const glob = globalThis;
 

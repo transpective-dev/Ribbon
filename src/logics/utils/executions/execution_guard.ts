@@ -1,5 +1,5 @@
 import _interface from "../../templates/interface.ts";
-import { rib_conf } from "../../manage.ts";
+import { rib_conf } from "../../../manage.ts";
 import { type t_config_schema } from "../../templates/schema.ts";
 
 import { cacheManager } from '../../../../control/.usr_utils/timer.ts'
@@ -29,7 +29,7 @@ export const execution_guard = async (cmd: {
 
 		const isValid = await cacheManager?.isExpired()
 
-		return !isValid 
+		return !isValid
 
 	})()
 
@@ -74,7 +74,7 @@ export const execution_guard = async (cmd: {
 	// Verbose blocking information
 	if (config.settings.showMacro) {
 
-		printReport({ cmd, detected, token: execution_token! });
+		printReport({ cmd, detected, token: execution_token!, isSafeRun: cmd.safeRun });
 
 	}
 
@@ -90,13 +90,15 @@ export const execution_guard = async (cmd: {
 const printReport = ({
 	cmd,
 	detected,
-	token
+	token,
+	isSafeRun
 }: {
 	cmd: {
 		cmdString: string;
 		safeRun: boolean;
 	}
-	token: boolean
+	token: boolean,
+	isSafeRun: boolean
 	detected: { group: string; matched: string[], msg: string }[]
 }) =>
 {
@@ -159,12 +161,24 @@ const printReport = ({
 		'Encounted Threats': Object.values(encounter).reduce((acc, val) =>
 		{
 			return acc + val.count;
-		}, 0)
+		}, 0),
+		'Safe Run': isSafeRun ? chalk.hex(pallete.green)('Enabled') : chalk.hex(pallete.red)('Disabled')
 	}
 
 	const longest_info = Math.max(...Object.entries(infos).map(([key, _]) => key.length)) + 3
 
 	console.log(joiner([bars.b, 'Execution Guard Report', bars.b], ' ', 'l'));
+
+	const getReason = () =>
+	{
+		if (!token) {
+			return "TOKEN EXPIRED"
+		}
+		if (!isSafeRun) {
+			return "SAFE RUN DESABLED"
+		}
+	}
+	console.log(`REASON: ${getReason()}\n\n`)
 	console.log(joiner([chalk.hex(pallete.orange)('INFO:'), bars.a, ...Object.entries(infos).map(([key, value]) => `${key.padEnd(longest_info, ' ')}: ${value}`)], '\n'))
 	console.log(joiner(['\n', chalk.hex(pallete.orange)('COMMAND: '), bars.a, highlighted], '\n', 'l'));
 

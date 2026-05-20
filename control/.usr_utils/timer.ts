@@ -3,7 +3,7 @@ import keytar from 'keytar'
 import crypto from 'crypto-js'
 import fs from 'fs-extra'
 import { type Cache, cache as cacheSchema } from '../schema.ts'
-import _path from '../../src/logics/path.ts'
+import _path from '../../src/logics/utils/path.ts'
 
 interface cacher_returnType
 {

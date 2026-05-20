@@ -1,17 +1,17 @@
 import Conf from 'conf';
-import _schema from './templates/schema.ts'
-import { type t_command_schema, type t_config_schema } from './templates/schema.ts';
-import schemas from './templates/schema.ts'
-import path from './path.ts';
-import _init from './templates/cfg_init.ts';
-import { colored_prefix } from './utils/color.ts';
+import _schema from './logics/templates/schema.ts'
+import { type t_command_schema, type t_config_schema } from './logics/templates/schema.ts';
+import schemas from './logics/templates/schema.ts'
+import path from './logics/utils/path.ts';
+import _init from './logics/templates/cfg_init.ts';
+import { colored_prefix } from './logics/utils/color.ts';
 import chalk from 'chalk';
-import { pallete } from './utils/color.ts';
-import { system_init } from './templates/alias_init.ts';
+import { pallete } from './logics/utils/color.ts';
+import { system_init } from './logics/templates/alias_init.ts';
 import { _parse } from 'zod/v4/core';
 import fs from 'fs-extra';
 import crypto, { enc } from 'crypto-js';
-import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts';
+import { general_encrypt_key } from '../control/.usr_utils/encryption_utils.ts';
 
 const platform = process.platform;
 
@@ -143,35 +143,24 @@ class RibbonConfig
 	init()
 	{
 
-		const encrypter = (data: string) => {
+		const encrypter = (data: string) =>
+		{
 			return crypto.AES.encrypt(data, general_encrypt_key).toString()
 		}
 
 		const reader = (path: string) =>
-			{
-				
-				if (path.endsWith('.json')) {
-					
-					return fs.readJSONSync(path).toString()
-					
+		{
+
+			if (path.endsWith('.json')) {
+
+				return fs.readJSONSync(path).toString()
+
 			}
-			
+
 			return fs.readFileSync(path).toString()
-			
+
 		}
 
-		const encrypted = {
-			cmd: encrypter(JSON.stringify(system_init)),
-			cfg: encrypter(JSON.stringify(schemas.config_schema.parse({})))
-		}
-
-		const counter: (keyof typeof encrypted)[] = [];
-
-		if (!fs.existsSync(path.usr_command)) {
-			fs.writeFileSync(path.usr_command, encrypted.cmd)
-			fs.writeJSONSync(path.u_cmd_cache, system_init, { spaces: 2 })
-			counter.push('cmd')
-		}
 
 		const get_filter = (() =>
 		{
@@ -182,9 +171,23 @@ class RibbonConfig
 
 		})()
 
+
 		const config_init = {
 			filter: get_filter,
 			settings: schemas.config_schema.parse({}).settings
+		}
+
+		const encrypted = {
+			cmd: encrypter(JSON.stringify(system_init)),
+			cfg: encrypter(JSON.stringify(config_init))
+		}
+
+		const counter: (keyof typeof encrypted)[] = [];
+
+		if (!fs.existsSync(path.usr_command)) {
+			fs.writeFileSync(path.usr_command, encrypted.cmd)
+			fs.writeJSONSync(path.u_cmd_cache, system_init, { spaces: 2 })
+			counter.push('cmd')
 		}
 
 		if (!fs.existsSync(path.usr_config)) {
@@ -194,8 +197,9 @@ class RibbonConfig
 		}
 
 		if (counter.length === 0) return;
-		
-		const readCheckSum = (() => {
+
+		const readCheckSum = (() =>
+		{
 			try {
 				return fs.readJSONSync(path.paths.checksum)
 			} catch (_) {
@@ -211,14 +215,15 @@ class RibbonConfig
 			cmd: crypto.SHA256(reader(path.usr_command)).toString()
 		}
 
-		counter.forEach((i) => {
+		counter.forEach((i) =>
+		{
 
 			const cs = calcCheckSum[i];
 
 			if (Object.keys(readCheckSum).includes(i) && readCheckSum[i] === cs) return;
 
 			readCheckSum[i] = cs;
-			
+
 		})
 
 		fs.writeJSONSync(path.paths.checksum, readCheckSum, { spaces: 2 });

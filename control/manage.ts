@@ -1,12 +1,14 @@
-import {type Cache, cache} from "./schema.ts"
+import { type Cache, cache } from "./schema.ts"
 import Conf from "conf"
-import _path from "../src/logics/path.ts";
+import _path from "../src/logics/utils/path.ts";
 
-class ControlManager {
+class ControlManager
+{
 
 	private cache: Conf<Cache>
 
-	constructor () {
+	constructor()
+	{
 
 		this.cache = new Conf<Cache>({
 			configName: 'cache',

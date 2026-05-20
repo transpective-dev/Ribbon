@@ -1,11 +1,11 @@
 import { spawn, spawnSync } from "node:child_process";
-import { rib_conf } from "../logics/manage.ts";
-import { execution_guard } from "../logics/utils/executions/execution_guard.ts";
-import { startBy } from "../../env.ts";
+import { rib_conf } from "../../manage.ts";
+import { execution_guard } from "./executions/execution_guard.ts";
+import { startBy } from "../../../env.ts";
 import chalk from "chalk";
-import { pallete } from "../logics/utils/color.ts";
+import { pallete } from "./color.ts";
 import keytar from 'keytar';
-import { acc_password, srv  } from "../../control/.usr_utils/encryption_utils.ts";
+import { acc_password, srv } from "../../../control/.usr_utils/encryption_utils.ts";
 
 const isWindows = process.platform === 'win32';
 

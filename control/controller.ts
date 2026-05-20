@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import "./manage.ts";
 import { cacheManager } from './.usr_utils/timer.ts'
-import { spawnAgent } from '../src/api/spawn.ts';
+import { spawnAgent } from '../src/logics/utils/spawn.ts';
 
 const program = new Command();
 
@@ -36,7 +36,7 @@ program.command('logout')
 		await cleanEverything();
 	})
 
-import { spawnChild } from '../src/api/spawn.ts';
+import { spawnChild } from '../src/logics/utils/spawn.ts';
 
 program.command('test')
 	.description('test')

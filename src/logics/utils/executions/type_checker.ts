@@ -1,4 +1,4 @@
-import { rib_conf } from "../../manage.ts";
+import { rib_conf } from "../../../manage.ts";
 import _interface from "../../templates/interface.ts";
 
 import chalk from 'chalk'
@@ -94,9 +94,9 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 	let i_cmd = '';
 	let cursor = 0;
 
-	
+
 	for (const part of parts) {
-		
+
 		// slot chunk
 		const slot = slots[cursor++];
 

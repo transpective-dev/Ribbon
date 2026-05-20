@@ -1,0 +1,4 @@
+format: {
+  cmd.ts: 'command file. for register commands.',
+  index.ts: 'index of each .exe and bin'
+}

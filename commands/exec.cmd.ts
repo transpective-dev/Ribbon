@@ -69,7 +69,7 @@ export default {
 
 		if (options.direct) {
 
-			const cmd = args.join(' ');
+			const cmd = name;
 
 			spawnChild({
 				cmd: {

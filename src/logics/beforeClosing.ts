@@ -1,4 +1,4 @@
-import _path from './path.ts'
+import _path from './utils/path.ts'
 import fs from "fs-extra"
 import crypto from 'crypto-js'
 import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts'
