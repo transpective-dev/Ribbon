@@ -1,12 +1,11 @@
 import { rib_conf } from "../../manage.ts";
 import _interface from "../../templates/interface.ts";
-import enquirer from 'enquirer'
-const { prompt } = enquirer
-
 
 import chalk from 'chalk'
 import { colored_prefix } from "../color.ts";
 import { assign_slots, type Slot } from "./slot_assigner.ts";
+import { resolve } from "node:dns";
+import { error } from "node:console";
 
 // regex to match <T>, <T: type>, and optional (default)
 const SLOT_REGEX = /(<T(?:\s*:\s*\w+)?>(?:\([^)]*\))?)/;
@@ -16,13 +15,17 @@ const SLOT_DETAIL = /^<T(?:\s*:\s*(\w+))?>(?:\(([^)]*)\))?$/;
 
 type t_counter =
 	{
-		name: string,
+		value: string,
 		expected: string,
-		received: string
+		received: string,
+		causes: 'type-mismatch' | 'empty' | 'unknown-type' | 'unknown'
 	}[]
 
 export const type_checker = async (cmdString: string, userValues: string[]) =>
 {
+
+	// store failed 
+	const counter: t_counter = [];
 
 	// split command into chunks (text vs slots)
 	const parts = cmdString
@@ -75,47 +78,10 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 
 	// ask for any slot that has no value and no default
 	for (const slot of slots) {
-		
+
 		if (!assigned.has(slot.index) && slot.defaultVal === null) {
 
-			const sliced = (() =>
-			{
-				const matches = Array.from(cmdString.matchAll(new RegExp(SLOT_REGEX, 'g')));
-				const target = matches[slot.index];
-				if (!target) return '';
-
-				const begin = target.index!;
-				const end = begin + target[0].length;
-				const expected = 15;
-
-				const start = Math.max(0, begin - expected);
-				const finish = Math.min(cmdString.length, end + expected);
-
-				let res = cmdString.slice(start, finish);
-
-				const relBegin = begin - start;
-				const relEnd = end - start;
-				res = res.slice(0, relBegin) + chalk.red.bold(res.slice(relBegin, relEnd)) + res.slice(relEnd);
-
-				if (start > 0) res = chalk.gray('...') + res;
-				if (finish < cmdString.length) res = res + chalk.gray('...');
-
-				return res;
-			})()
-
-			const res = await prompt({
-				type: 'form',
-				name: 'val',
-				message: `Missing slot: ${sliced}`,
-				choices: [{
-					name: 'val',
-					message: `Please provide value for <T${slot.typeName ? `: ${slot.typeName}` : ''}>`,
-				}]
-			});
-
-			if ('val' in res) {
-				assigned.set(slot.index, (res as any).val.val);
-			}
+			assigned.set(slot.index, null);
 
 		}
 	}
@@ -128,21 +94,50 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 	let i_cmd = '';
 	let cursor = 0;
 
-	const counter: t_counter = [];
-
+	
 	for (const part of parts) {
+		
+		// slot chunk
+		const slot = slots[cursor++];
+
+		// value that user provided
+		const val = await new Promise<string>((resolve) =>
+		{
+			const i = assigned.get(slot!.index)
+
+			if (!i) {
+				throw new Error()
+			}
+			return i
+
+		}).catch(() => '');
+
+		if (!slot) {
+			continue;
+		}
+
+		// typename
+		const typeName = slot.typeName as typeof requiredType[number];
+
+		// push to counter if failed
+		const pushFailed = (type: t_counter[0]['causes']) =>
+		{
+			counter.push({
+				value: val,
+				expected: typeName,
+				received: val,
+				causes: type
+			})
+		}
+
 		const m = part.match(SLOT_DETAIL);
 
 		// normal text chunk
 		if (!m) {
+			pushFailed("empty")
 			i_cmd += (i_cmd.length > 0 ? ' ' : '') + part;
 			continue;
 		}
-
-		// slot chunk
-		const slot = slots[cursor++];
-		const val = assigned.get(slot!.index) ?? '';
-		const typeName = slot!.typeName as typeof requiredType[number];
 
 		// validate type if specified
 		if (typeName && requiredType.includes(typeName)) {
@@ -150,8 +145,8 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 			const finalVal = await validateType(val, typeName, requiredType);
 
 			if (finalVal === false) {
-				console.log(colored_prefix.error + `invalid value for type ${typeName}`);
-				break;
+				pushFailed('type-mismatch')
+				continue;
 			}
 
 			// wrap string values in double quotes if setting enabled
@@ -162,8 +157,8 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 			}
 
 		} else if (typeName && !requiredType.includes(typeName)) {
-			console.log(colored_prefix.error + `invalid type ${typeName}`);
-			break;
+			pushFailed('unknown-type');
+			continue;
 
 		} else {
 			// untyped <T>
@@ -172,6 +167,7 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 	}
 
 	if (counter.length > 0) {
+		logger(counter);
 		return null
 	};
 
@@ -208,6 +204,9 @@ const logger = (counter: t_counter) =>
 	counter.forEach((c) =>
 	{
 		console.log(`Expected type: `, c.expected);
-		console.log(`Received: (${c.name})${c.received}`);
+		console.log(`Received: ( ${c.value || '_'} ) [ ${c.received || '_'} ]`);
+		console.log(`Due to: ${c.causes}`)
 	})
+
+	console.log('')
 }

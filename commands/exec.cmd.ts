@@ -54,9 +54,11 @@ export default {
 	action: async (args: any, options: any) =>
 	{
 
+		const [name, _arguments] = [args.shift(), args]
+
 		if (options.script) {
 
-			const res = await runScript(args[0] as string);
+			const res = await runScript(name as string);
 
 			if (!res) {
 				return console.log(colored_prefix.error + 'script not found');
@@ -79,7 +81,7 @@ export default {
 			return;
 		}
 
-		const get_cmd = async (key: string = args[0] as string) =>
+		const get_cmd = async (key: string = name as string) =>
 		{
 
 			console.log('[ key ]: ', key, '\n')
@@ -104,7 +106,7 @@ export default {
 			return;
 		}
 
-		let replaced_cmd = await type_checker(get.cmd, args);
+		let replaced_cmd = await type_checker(get.cmd, _arguments);
 
 		if (!replaced_cmd) {
 			return console.log(colored_prefix.error + 'command execution failed');

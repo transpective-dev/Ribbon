@@ -105,8 +105,6 @@ export const spawner = ({
 		const executable = _arguments.shift()!;
 		const isShellMode = typeof shell === 'boolean' ? shell : false;
 
-		return
-
 		const child = spawn(executable, _arguments, {
 			shell: isShellMode,
 			signal: signal,

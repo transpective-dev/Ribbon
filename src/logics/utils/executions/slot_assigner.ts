@@ -21,7 +21,7 @@ export interface Slot {
  * 3. Map user values strictly left-to-right to the sorted target slots.
  * 4. Fill unselected default slots with their defaults.
  */
-export const assign_slots = (slots: Slot[], values: string[], enableSlotFilling: boolean): Map<number, string> => {
+export const assign_slots = (slots: Slot[], values: string[], enableSlotFilling: boolean): Map<number, string | null> => {
 
     const result = new Map<number, string>();
 
