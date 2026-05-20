@@ -132,5 +132,12 @@
     "desc": "No description provided",
     "cmd": "echo hello",
     "tags": []
+  },
+  "test": {
+    "id": "IWT3EY",
+    "time": "2026/5/20 12:45:52",
+    "desc": "No description provided",
+    "cmd": "<T: number> <T> <T>(hello)",
+    "safeRun": false
   }
 }

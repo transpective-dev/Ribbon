@@ -75,6 +75,7 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 
 	// ask for any slot that has no value and no default
 	for (const slot of slots) {
+		
 		if (!assigned.has(slot.index) && slot.defaultVal === null) {
 
 			const sliced = (() =>
