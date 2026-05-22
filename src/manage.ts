@@ -11,7 +11,7 @@ import { system_init } from './logics/templates/alias_init.ts';
 import { _parse } from 'zod/v4/core';
 import fs from 'fs-extra';
 import crypto, { enc } from 'crypto-js';
-import { general_encrypt_key } from '../control/.usr_utils/encryption_utils.ts';
+import { general_encrypt_key } from '../_user/keys.ts';
 
 const platform = process.platform;
 

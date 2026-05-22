@@ -2,7 +2,7 @@ import _interface from "../../templates/interface.ts";
 import { rib_conf } from "../../../manage.ts";
 import { type t_config_schema } from "../../templates/schema.ts";
 
-import { cacheManager } from '../../../../control/.usr_utils/timer.ts'
+import { cacheManager } from '../../../../_user/expiry.ts'
 
 import chalk from 'chalk'
 
@@ -28,6 +28,8 @@ export const execution_guard = async (cmd: {
 	{
 
 		const isValid = await cacheManager?.isExpired()
+
+		console.log(isValid)
 
 		return !isValid
 
@@ -71,15 +73,9 @@ export const execution_guard = async (cmd: {
 	// Pass safely if no violations
 	if (detected.length === 0) return true;
 
-	// Verbose blocking information
-	if (config.settings.showMacro) {
-
-		printReport({ cmd, detected, token: execution_token!, isSafeRun: cmd.safeRun });
-
-	}
-
 	// block if token is false or saferun is false
 	if (!execution_token || !cmd.safeRun) {
+		printReport({ cmd, detected, token: execution_token!, isSafeRun: cmd.safeRun });
 		return false;
 	}
 

@@ -1,7 +1,7 @@
 import _path from './utils/path.ts'
 import fs from "fs-extra"
 import crypto from 'crypto-js'
-import { general_encrypt_key } from '../../control/.usr_utils/encryption_utils.ts'
+import { general_encrypt_key } from '../../_user/keys.ts'
 
 const task_queue: (() => void)[] = []
 

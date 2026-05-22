@@ -1,5 +1,3 @@
-import './logics/beforeClosing.ts'
-
 import './logics/utils/global.ts'
 
 // paths

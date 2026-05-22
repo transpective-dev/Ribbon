@@ -1,4 +1,4 @@
-import crypto from 'crypto-js'
+import crypto from 'crypto'
 import keytar from 'keytar'
 
 export const srv = 'HLIN'
@@ -11,7 +11,7 @@ export const acc_unique = "GENERAL_ENCRYPT_KEY"
 
 const unique_key = async (): Promise<string> => {
 	
-	const random = crypto.SHA256(Math.random().toString()).toString(crypto.enc.Base64)
+	const random = crypto.randomBytes(32).toString('base64')
 
 	const get: string | null = await keytar.getPassword(srv, acc_unique)
 

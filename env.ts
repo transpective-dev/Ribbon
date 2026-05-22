@@ -1,3 +1,5 @@
+// get os 
+
 (() =>
 {
 	const i = process.platform;
@@ -9,6 +11,11 @@
 	}
 })();
 
+export const getOS = () =>
+{
+	return process.env.USR_PLATFORM;
+}
+
 export const startBy = () =>
 {
 	switch (process.env.USR_PLATFORM) {
@@ -17,6 +24,24 @@ export const startBy = () =>
 		case 'lnx': return 'xdg-open';
 	}
 }
+
+export const spawnNewInput = (executable: string, action: string): string =>
+{
+	switch (getOS()) {
+		case 'lnx': {
+			return `x-terminal-emulator -e bash -c "bun run ${executable} ${action}; read -p 'Press Enter to exit...'" || gnome-terminal -- bash -c "bun run ${executable} ${action}; read -p 'Press Enter to exit...'" || xterm -e bash -c "bun run ${executable} ${action}; read -p 'Press Enter to exit...'"`;
+		}
+		case 'mac': {
+			return `osascript -e 'tell app "Terminal" to do script "bun run ${executable} ${action}; read -p \\"Press Enter to exit...\\""'`;
+		}
+		case 'win':
+		default: {
+			return `start "" /wait cmd.exe /c "bun run "${executable}" ${action} || pause"`;
+		}
+	}
+};
+
+// initializing env 
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -37,7 +62,7 @@ const root_path = {
 
 const index_name = "ribbon.exe";
 
-const launcher_name = "launcher.exe";
+const launcher_name = "user.exe";
 
 const env = process.env;
 
@@ -60,7 +85,7 @@ if (execPath.endsWith(launcher_name)) {
 	// dev mode
 	env.GET_ROOT = root_path.fromDev;
 
-	env.INDEX_FILE = path.join(env.GET_ROOT, "src", "logics", "index.ts");
+	env.INDEX_FILE = path.join(env.GET_ROOT, "src", "index.ts");
 
 	env.WHERE_EXE = path.join(env.GET_ROOT, 'HlinPSModule', 'bin', 'executor.exe');
 

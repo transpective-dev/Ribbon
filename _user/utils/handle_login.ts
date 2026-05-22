@@ -2,8 +2,8 @@ import keytar from "keytar";
 import enquirer from 'enquirer'
 import crypto from 'crypto-js'
 
-import { srv, acc_password as acc } from './encryption_utils.ts'
-import { cacheManager } from "./timer.ts"
+import { srv, acc_password as acc } from '../keys.ts'
+import { cacheManager } from "../expiry.ts"
 
 const { prompt } = enquirer
 
@@ -12,7 +12,7 @@ export const get_key = async (): Promise<string | null> =>
 	return await keytar.getPassword(srv, acc)
 }
 
-export const branch = async () =>
+export const branch = async (): Promise<boolean> =>
 {
 
 	const isKeyExist = await get_key();
@@ -40,7 +40,9 @@ export const branch = async () =>
 
 					await keytar.setPassword(srv, acc, encrypted)
 
-					return console.log('Password Initalize Sucessfuly')
+					console.log('Password Initalize Sucessfuly')
+
+					return true
 
 				}
 
@@ -72,12 +74,15 @@ export const branch = async () =>
 
 				await cacheManager?.login();
 
-				return 'Login success'
+				return true;
 
 			}
 
-			return console.log('Incorrect Password. Please Retry')
+			return false
+
 		}
 
 	}
+
+	return false
 }

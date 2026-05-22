@@ -5,7 +5,7 @@ import { startBy } from "../../../env.ts";
 import chalk from "chalk";
 import { pallete } from "./color.ts";
 import keytar from 'keytar';
-import { acc_password, srv } from "../../../control/.usr_utils/encryption_utils.ts";
+import { acc_password, srv } from "../../../_user/keys.ts";
 
 const isWindows = process.platform === 'win32';
 

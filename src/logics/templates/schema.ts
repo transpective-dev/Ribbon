@@ -51,16 +51,11 @@ const config_schema = z.object({
 		// false: Use standard CMD (default system shell)
 		useShell: z.boolean().default(false),
 
-		whenTypeMissing: z.boolean().default(true),
-		whenTypeNotMatched: z.boolean().default(true),
-
 	}).default({
 		showMacro: true,
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
 		useShell: false,
-		whenTypeMissing: true,
-		whenTypeNotMatched: true,
 	})
 }).default({
 	filter: {},
@@ -69,8 +64,6 @@ const config_schema = z.object({
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
 		useShell: false,
-		whenTypeMissing: true,
-		whenTypeNotMatched: true
 	}
 });
 

@@ -1,4 +1,34 @@
-format: {
-  cmd.ts: 'command file. for register commands.',
-  index.ts: 'index of each .exe and bin'
-}
+format:
+  {
+    cmd.ts: "command file. for register commands.",
+    index.ts: "index of each .exe and bin",
+  }
+
+structure:
+  {
+    root:
+      {
+        user.exe: "exe for user. can open agent, login, etc",
+        execute.exe: "receive and execute commands. also it is an index of ribbon",
+        ribbon.exe: "like a toolbox. ai can do something through this.",
+        utils.exe: "saving utils for login, etc",
+
+        # saving caches
+        .cache: {
+          cache.json: 'saving default agent to open, token expiry time',
+          config.cache.json: 'saving decrypted config from config.enc',
+          macro.cache.json: 'saving decrypted macro from macro.enc',
+        },
+
+        # miscul
+        misc: {
+          checksum.json: 'save checksums of config.enc, macro.enc to detect modification',
+          config.enc: 'encrypted config',
+          macro.enc: 'encrypted macro',
+
+          # folder from here
+          commands: 'saving your own commands',
+          scripts: 'saving your own scripts'
+        },
+      },
+  }

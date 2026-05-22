@@ -1,3 +1,5 @@
+import './src/logics/beforeClosing.ts'
+
 import { spawnChild } from './src/logics/utils/spawn.ts';
 
 const args = process.argv.slice(2);
@@ -23,6 +25,10 @@ for (let i = 0; i < args.length - 1; i++) {
 
 // get rawCmdString
 const rawCommand = args.join(' ');
+
+if (rawCommand === "") {
+	process.exit(0);
+}
 
 spawnChild({
 	cmd: {

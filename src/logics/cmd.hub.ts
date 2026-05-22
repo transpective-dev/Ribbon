@@ -66,11 +66,6 @@ await (async () =>
 		return path.join(commandsDir, file)
 	});
 
-	fs.readdirSync(_path.paths.custom).forEach((file: any) =>
-	{
-		files.push(path.join(_path.paths.custom, file))
-	})
-
 	files.forEach((file: any) =>
 	{
 		cmd_file_list.add(file)

@@ -18,4 +18,4 @@ import './src/logics/utils/path.ts'
 import "./env.ts";
 
 // import controller
-import "./control/controller.ts";
+import "./_user/index.ts";
