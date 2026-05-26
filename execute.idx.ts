@@ -19,7 +19,10 @@ for (let i = 0; i < args.length - 1; i++) {
 
 	if (["add", "regis", "register"].includes(a!) && regex.test(b!)) {
 		// Replace b with key='value' so powershell treats the '<' as a string literal
-		args[i + 1] = b!.replace(regex, `$1='$2'`);
+		// We also wrap the entire argument in double quotes and escape inner double quotes
+		// so PowerShell passes it as a single argument instead of splitting by spaces.
+		const replaced = b!.replace(regex, `$1='$2'`).replace(/"/g, '\\"');
+		args[i + 1] = `"${replaced}"`;
 	}
 }
 
@@ -31,8 +34,6 @@ if (rawCommand === "") {
 }
 
 spawnChild({
-	cmd: {
-		cmdString: rawCommand,
-		safeRun: false
-	}
+	cmdString: rawCommand,
+	safeRun: false
 });

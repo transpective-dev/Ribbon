@@ -23,9 +23,3 @@ const unique_key = async (): Promise<string> => {
 }
 
 export const general_encrypt_key = await unique_key();
-
-export const cleanEverything = async () => {
-	await keytar.deletePassword(srv, acc_unique)
-	await keytar.deletePassword(srv, acc_password)
-	await keytar.deletePassword(srv, acc_expiry)
-}

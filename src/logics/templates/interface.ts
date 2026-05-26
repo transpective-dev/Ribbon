@@ -1,6 +1,4 @@
-import { number, string } from "zod"
-
-const search_types: (keyof CommandObject)[] = [
+export const search_types: (keyof CommandObject)[] = [
 	'cmd', 
 	'desc',
 	'id', 

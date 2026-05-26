@@ -16,24 +16,30 @@ import { pallete } from "../color.ts";
  * @returns boolean (true = no keywords found, false = keywords found)
  */
 
-export const execution_guard = async (cmd: {
+export const execution_guard = async ({
+	cmdString,
+	safeRun = false,
+	showReport = true
+}: {
 	cmdString: string;
-	safeRun: boolean;
+	safeRun?: boolean;
+	showReport?: boolean;
 }): Promise<boolean> =>
 {
+
 
 	// true: allow users to run command macro with safeRun: true. 
 	// false: only allowed to run command macro, which is not filtered out.
 	const execution_token = await (async () =>
 	{
 
-		const isValid = await cacheManager?.isExpired()
+		const isExpired = await cacheManager?.isExpired()
 
-		console.log(isValid)
-
-		return !isValid
+		return !isExpired
 
 	})()
+
+	cmdString = cmdString.match(/^['"](.*)['"]$/)?.[1] || cmdString
 
 	const config = rib_conf.all('config') as t_config_schema;
 
@@ -52,7 +58,7 @@ export const execution_guard = async (cmd: {
 			try {
 
 				// global pattern search
-				return new RegExp(r, 'gi').test(cmd.cmdString);
+				return new RegExp(r, 'gi').test(cmdString);
 
 			} catch (e) {
 
@@ -71,28 +77,25 @@ export const execution_guard = async (cmd: {
 	}
 
 	// Pass safely if no violations
-	if (detected.length === 0) return true;
+	if (detected.length === 0 || safeRun === true) return true;
 
 	// block if token is false or saferun is false
-	if (!execution_token || !cmd.safeRun) {
-		printReport({ cmd, detected, token: execution_token!, isSafeRun: cmd.safeRun });
+	if (!execution_token || !safeRun) {
+		if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
 		return false;
 	}
 
+	return false;
 
-	return true;
 };
 
 const printReport = ({
-	cmd,
+	cmdString,
 	detected,
 	token,
 	isSafeRun
 }: {
-	cmd: {
-		cmdString: string;
-		safeRun: boolean;
-	}
+	cmdString: string;
 	token: boolean,
 	isSafeRun: boolean
 	detected: { group: string; matched: string[], msg: string }[]
@@ -118,7 +121,7 @@ const printReport = ({
 
 	}
 
-	let highlighted = cmd.cmdString;
+	let highlighted = cmdString;
 
 	let encounter: {
 		[key: string]: {

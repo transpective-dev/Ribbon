@@ -24,6 +24,10 @@ type t_counter =
 export const type_checker = async (cmdString: string, userValues: string[]) =>
 {
 
+	if (!SLOT_REGEX.test(cmdString)) {
+		return cmdString
+	}
+
 	// store failed 
 	const counter: t_counter = [];
 
@@ -32,8 +36,7 @@ export const type_checker = async (cmdString: string, userValues: string[]) =>
 		.split(SLOT_REGEX)
 		.filter(p => p && p.trim() !== '')
 		.map(p => p.trim());
-
-
+	
 	// --- Pass 1: scan all slots ---
 
 	// transiest extends.

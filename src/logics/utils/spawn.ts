@@ -26,7 +26,7 @@ export const isRibCmd = (cmd: string): string =>
 
 	const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-	const ifRib = process.env.INDEX_FILE?.endsWith('.exe') ? `${startBy()!} "${process.env.INDEX_FILE}" ` : `bun run "${process.env.INDEX_FILE}" `
+	const ifRib = process.env.RIB_EXE?.endsWith('.exe') ? `${startBy()!} "${process.env.RIB_EXE}" ` : `bun run "${process.env.RIB_EXE}" `
 
 	if (regex.test(cmd)) {
 		return cmd.replace(regex, ifRib);
@@ -53,15 +53,14 @@ const init_spawn_config = (cmdString: string, shell: ReturnType<typeof shellStat
 
 interface spawner
 {
-	cmd: {
-		cmdString: string;
-		safeRun: boolean;
-	};
-	signal?: AbortSignal;
+	cmdString: string;
+	safeRun: boolean;
+	signal?: AbortSignal | undefined;
 }
 
 export const spawner = ({
-	cmd,
+	cmdString,
+	safeRun = false,
 	signal,
 }: spawner) =>
 {
@@ -69,7 +68,7 @@ export const spawner = ({
 	return new Promise(async (resolve, reject) =>
 	{
 
-		let _cmdString = isRibCmd(cmd.cmdString);
+		let _cmdString = isRibCmd(cmdString);
 
 		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(_cmdString)}\n`)
 
@@ -78,7 +77,10 @@ export const spawner = ({
 			return reject(false)
 		}
 
-		if (!await execution_guard(cmd)) {
+		if (!await execution_guard({
+			cmdString,
+			safeRun
+		})) {
 			return reject(false);
 		}
 
@@ -129,36 +131,23 @@ export const spawner = ({
 }
 
 export const spawnChild = ({
-	cmd,
+	cmdString,
+	safeRun,
 	signal
 }: spawner) =>
 {
 
-	spawner({ cmd, signal } as spawner).then((res: any) =>
+	// then/catch for keeps console clean
+	spawner({
+		cmdString,
+		safeRun,
+		signal
+	}).then((res: any) =>
 	{
 		if (res && res.message) process.stdout.write(res.message);
 	}).catch((err: any) =>
 	{
 		if (err && err.message) process.stdout.write(err.message);
 	});
-
-}
-
-// spawn agent application
-export const spawnAgent = (agentName: string) =>
-{
-
-	const interceptor = process.env.WHERE_EXE as string;
-
-	const newEnv = {
-		...process.env,
-		SHELL: interceptor,
-		COMSPEC: interceptor,
-	}
-
-	spawnSync(agentName, [], {
-		env: newEnv,
-		stdio: 'inherit',
-	})
 
 }

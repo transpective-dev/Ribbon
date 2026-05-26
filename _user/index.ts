@@ -1,8 +1,8 @@
 import { Command } from 'commander';
-import "./manage.ts";
-import { spawnAgent } from '../src/logics/utils/spawn.ts';
+import "./cache.util.ts";
 import { spawnInput } from './utils/spawner.ts';
-import { cacheManager } from './expiry.ts';
+import { getLoginState } from './cache.util.ts';
+import { spawnSync } from 'node:child_process';
 
 const program = new Command();
 
@@ -16,31 +16,48 @@ program.command('open')
 	.argument("name", "name of the application")
 	.action((name) =>
 	{
-		spawnAgent(name as string)
+
+		const interceptor = process.env.EXE_EXE as string;
+
+		const newEnv = {
+			...process.env,
+			SHELL: interceptor,
+			COMSPEC: interceptor,
+		}
+
+		spawnSync(name, [], {
+			env: newEnv,
+			stdio: 'inherit',
+		})
 	});
 
-import { cleanEverything } from './keys.ts';
 
 program.command('login')
 	.description('login/initialize password')
 	.action(async () =>
 	{
 		await spawnInput({ action: 'login' });
+
+		if (getLoginState()) {
+			return console.log("Login successful")
+		}
+
+		return console.log("Login failed")
+
 	})
+
+import { editType } from './interface.ts';
 
 program.command('edit')
 	.description('edit config, macro')
-	.action(async () =>
+	.argument('<type>', 'type of the file to edit')
+	.action(async (type) =>
 	{
-		// await edit();
-	})
+		if (!editType.includes(type as string)) {
+			return console.log("Invalid type")
+		}
 
-// dev
-program.command('logout')
-	.description('delete password')
-	.action(async () =>
-	{
-		// await cleanEverything();
+		await spawnInput({ action: "edit", type });
 	})
 
 program.command('test')

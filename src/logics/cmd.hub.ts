@@ -61,10 +61,10 @@ await (async () =>
 
 	const commandsDir = _path.paths.commands;
 
-	const files = fs.readdirSync(commandsDir).map((file: any) =>
+	const files = fs.existsSync(commandsDir) ? fs.readdirSync(commandsDir).map((file: any) =>
 	{
 		return path.join(commandsDir, file)
-	});
+	}) : [];
 
 	files.forEach((file: any) =>
 	{

@@ -15,6 +15,7 @@ const cache = path.join(root, '.cache');
 const cache_json = path.join(cache, 'cache.json');
 const u_cfg_cache = path.join(cache, 'config.cache.json');
 const u_cmd_cache = path.join(cache, 'macro.cache.json');
+const state = path.join(cache, '.state');
 
 const paths = {
 	misc,
@@ -22,6 +23,7 @@ const paths = {
 	commands,
 	cache,
 	cache_json,
+	state,
 	checksum
 }
 
