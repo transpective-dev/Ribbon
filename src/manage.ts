@@ -359,11 +359,7 @@ class RibbonConfig
 	})
 	{
 
-		const list = this.config.command.store;
-
-		list[key] = value;
-
-		this.config.command.set(key, list);
+		this.config.command.set(key, value);
 
 		return
 	}
