@@ -3,17 +3,7 @@ import _path from "./utils/path.ts";
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { pathToFileURL } from "node:url";
-
-const cmd_file_list = new Set<string>([
-	path.join(_path.paths.commands, 'config.cmd.ts'),
-	path.join(_path.paths.commands, 'del.cmd.ts'),
-	path.join(_path.paths.commands, 'exec.cmd.ts'),
-	path.join(_path.paths.commands, 'find.cmd.ts'),
-	path.join(_path.paths.commands, 'register.cmd.ts'),
-]);
-
-
+import { pathToFileURL } from "node:url"
 
 const program = new Command();
 
@@ -59,6 +49,14 @@ const registerCommand = (
 await (async () =>
 {
 
+	let list = [
+		path.join(_path.paths.commands, 'config.cmd.ts'),
+		path.join(_path.paths.commands, 'del.cmd.ts'),
+		path.join(_path.paths.commands, 'exec.cmd.ts'),
+		path.join(_path.paths.commands, 'find.cmd.ts'),
+		path.join(_path.paths.commands, 'register.cmd.ts'),
+	]
+
 	const commandsDir = _path.paths.commands;
 
 	const files = fs.existsSync(commandsDir) ? fs.readdirSync(commandsDir).map((file: any) =>
@@ -68,10 +66,16 @@ await (async () =>
 
 	files.forEach((file: any) =>
 	{
-		cmd_file_list.add(file)
+		list.push(file)
 	})
 
-	for (const file of cmd_file_list) {
+	// deduplicate
+	list = list.filter((v, i) => list.indexOf(v) === i)
+
+	// remove non-exist
+	list = list.filter((i: string) => fs.existsSync(i))
+
+	for (const file of list) {
 		if (file.endsWith('.cmd.ts')) {
 			const filePath = pathToFileURL(file).href;
 			const module = await import(filePath);

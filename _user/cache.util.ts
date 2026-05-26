@@ -1,5 +1,5 @@
 import { type Cache, cache } from "./schema.ts"
-import Conf from "conf"
+import Conf from "../src/local-conf.ts"
 import crypto, { enc } from 'crypto-js'
 import { general_encrypt_key } from "./keys.ts";
 import _path from "../src/logics/utils/path.ts";
