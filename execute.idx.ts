@@ -26,6 +26,10 @@ for (let i = 0; i < args.length - 1; i++) {
 	}
 }
 
+if (args[0] === '-c' || args[0] === '/c') {
+	args.shift();
+}
+
 // get rawCmdString
 const rawCommand = args.join(' ');
 

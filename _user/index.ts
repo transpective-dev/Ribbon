@@ -38,7 +38,7 @@ program.command('login')
 	{
 		await spawnInput({ action: 'login' });
 
-		if (getLoginState()) {
+		if (getLoginState() === 'true') {
 			return console.log("Login successful")
 		}
 

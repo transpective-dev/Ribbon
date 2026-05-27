@@ -2,6 +2,7 @@ import _path from './utils/path.ts'
 import fs from "fs-extra"
 import crypto from 'crypto-js'
 import { general_encrypt_key } from '../../_user/keys.ts'
+import { write } from 'fs'
 
 const task_queue: (() => void)[] = []
 
@@ -86,11 +87,12 @@ task_queue.push(() =>
 
 });
 
-export const cleanFiles =() => {
+export const cleanFiles = () => {
 
-	file_types.forEach(({ read }) =>
+	file_types.forEach(({ read, write }) =>
 	{
 		fs.removeSync(read)
+
 	})
 
 }

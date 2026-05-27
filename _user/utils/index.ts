@@ -29,7 +29,7 @@ program
 		}
 	});
 
-import { stdin, stdout } from 'node:process';
+import { stdin } from 'node:process';
 
 import {execSync} from 'node:child_process'
 

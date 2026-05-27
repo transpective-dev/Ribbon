@@ -17,10 +17,10 @@ const root_path = {
 	fromDev: __dirname,
 };
 
-const idx_ribbon = "ribbon.exe";
-const idx_user = "user.exe";
-const idx_utils = "utils.exe";
-const idx_execute = "execute.exe";
+export const idx_ribbon = "ribbon.exe";
+export const idx_user = "user.exe";
+export const idx_utils = "utils.exe";
+export const idx_execute = "execute.exe";
 
 
 const env = process.env;
@@ -29,10 +29,10 @@ env.ROOT_STATUS = 'false'; // allow user to switch admin mode
 env.GET_ROOT = undefined; // get the root path
 env.INDEX_FILE = undefined; // get the entry point of the application
 
-if (root_path.fromExec.endsWith('.exe')) {
+if (root_path.fromDev.includes('B:\\~BUN\\root')) {
 
 	// top dir (the folder containing launcher.exe)
-	env.GET_ROOT = root_path.fromExec;
+	env.GET_ROOT = path.join(root_path.fromExec);
 
 	// point to exe file
 	env.IS_DEV = 'false';
@@ -58,7 +58,7 @@ if (root_path.fromExec.endsWith('.exe')) {
 
 export const isBin = () => {
 	return execPath.endsWith(idx_user);
-}
+};
 
 // get os 
 
@@ -89,16 +89,19 @@ export const startBy = () =>
 
 export const spawnNewInput = (executable: string, action: string, args: string[]): string =>
 {
+	const isDev = process.env.IS_DEV === 'true';
+	const runCmd = isDev ? `bun run "${executable}"` : `"${executable}"`;
+	
 	switch (getOS()) {
 		case 'lnx': {
-			return `x-terminal-emulator -e bash -c "bun run ${executable} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'" || gnome-terminal -- bash -c "bun run ${executable} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'" || xterm -e bash -c "bun run ${executable} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'"`;
+			return `x-terminal-emulator -e bash -c "${runCmd} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'" || gnome-terminal -- bash -c "${runCmd} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'" || xterm -e bash -c "${runCmd} ${action} ${args.join(' ')} ; read -p 'Press Enter to exit...'"`;
 		}
 		case 'mac': {
-			return `osascript -e 'tell app "Terminal" to do script "bun run ${executable} ${action} ${args.join(' ')} ; read -p \\"Press Enter to exit...\\""'`;
+			return `osascript -e 'tell app "Terminal" to do script "${runCmd} ${action} ${args.join(' ')} ; read -p \\"Press Enter to exit...\\""'`;
 		}
 		case 'win':
 		default: {
-			return `start "" /wait cmd.exe /c "bun run "${executable}" ${action} ${args.join(' ')} || pause"`;
+			return `start "" /wait cmd.exe /c "${runCmd} ${action} ${args.join(' ')} || pause"`;
 		}
 	}
 };

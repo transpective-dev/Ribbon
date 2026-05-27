@@ -84,19 +84,14 @@ export const spawner = ({
 			return reject(false);
 		}
 
-		// return msg if pipe
-		let message: string | undefined;
-
 		// kill child process
 		const kill = (status: boolean) =>
 		{
 			child.kill();
 			status ? resolve({
 				state: true,
-				message
 			}) : reject({
 				state: false,
-				message
 			})
 		}
 
@@ -147,6 +142,7 @@ export const spawnChild = ({
 		if (res && res.message) process.stdout.write(res.message);
 	}).catch((err: any) =>
 	{
+		
 		if (err && err.message) process.stdout.write(err.message);
 	});
 

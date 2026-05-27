@@ -27,7 +27,6 @@ export const execution_guard = async ({
 }): Promise<boolean> =>
 {
 
-
 	// true: allow users to run command macro with safeRun: true. 
 	// false: only allowed to run command macro, which is not filtered out.
 	const execution_token = await (async () =>

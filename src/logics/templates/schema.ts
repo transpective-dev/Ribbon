@@ -51,20 +51,28 @@ const config_schema = z.object({
 		// false: Use standard CMD (default system shell)
 		useShell: z.boolean().default(false),
 
+		// try different shell when failed to execute.
+		tryOther: z.boolean().default(false),
+
+		// true: needs token and safeRun two conditions
+		// false: token is not required, but safeRun is still required.
+		rigid: z.boolean().default(false),
+
 	}).default({
 		showMacro: true,
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
 		useShell: false,
-	})
-}).default({
-	filter: {},
-	settings: {
+		tryOther: false,
+		rigid: false,
+	}).default({
 		showMacro: true,
 		appendDQWhenTString: true,
 		enableSlotFilling: true,
 		useShell: false,
-	}
+		tryOther: true,
+		rigid: false,
+	})
 });
 
 export default {

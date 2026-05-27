@@ -4,8 +4,20 @@ import _path from '../../src/logics/utils/path.ts';
 import { spawnNewInput } from '../../env.ts';
 import { cleanFiles } from '../../src/logics/beforeClosing.ts';
 
+import { idx_utils } from '../../env.ts';
 
-const executable = path.join(process.env.GET_ROOT as string, '_user', 'utils', 'index.ts');
+
+const dev = process.env.IS_DEV === "true";
+
+const executable = (() =>
+{
+
+	if (dev) {
+		return path.join(process.env.GET_ROOT as string, '_user', 'utils', 'index.ts')
+	}
+
+	return path.join(process.env.GET_ROOT as string, idx_utils)
+})();
 
 export const spawnInput = async ({
 	action,

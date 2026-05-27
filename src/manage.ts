@@ -1,4 +1,4 @@
-import Conf from './local-conf.ts';
+import Conf from 'conf';
 import _schema from './logics/templates/schema.ts'
 import { type t_command_schema, type t_config_schema } from './logics/templates/schema.ts';
 import schemas from './logics/templates/schema.ts'
