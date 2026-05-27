@@ -3,18 +3,23 @@
 - name: Hlin
 - author: Jonathan Monclare
 - version: 1.0.0
-- license: [PolyForm Noncommercial 1.0.0](./LICENSE)
+- license: [GNU AGPLv3](./LICENSE)
 
 ## Contents
 
 - [Introduction](#introduction)
 	- [Contents](#contents)
 	- [Before start](#before-start)
+	- [Statement](#statement)
 	- [How to use](#how-to-use)
 
 ## Before start
 
 This is a simple version. You can check more specific details in [usage.yml](./usage.yml).
+
+## Statement
+
+*This project is licensed under the GNU Affero General Public License v3.0 - see the LICENSE file for details.*
 
 ## How to use
 
