@@ -55,6 +55,18 @@ Add-Content -Path $PROFILE -Value 'Import-Module "path/to/HlinPSModule"'
 
 - When you try to run a dangerous command, execute.exe will block it and refuse to run.
 
+**Tips** : 
+
+how to add keywords into keywords-filter :
+```
+1. Enter `hlin edit config` and log in at the other console window.
+2. Wait until the cache files open.
+3. Add your regex or keyword.
+4. Type `q` or `Q` in the window where you just logged in.
+
+# it support regex and string. first recommandation is regex.
+``` 
+
 **Something you should know** : 
 
 - I didn't create a new release for the latest version (Hlin 1.0.0) because they won't let me run ribbon.exe with an absolute path while I'm testing. If you have a solution, please let me know.
