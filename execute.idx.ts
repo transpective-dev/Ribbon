@@ -1,4 +1,5 @@
 import './src/logics/beforeClosing.ts'
+import './env.ts'
 
 import { spawnChild } from './src/logics/utils/spawn.ts';
 

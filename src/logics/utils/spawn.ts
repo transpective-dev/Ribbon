@@ -1,11 +1,11 @@
 import { spawn, spawnSync } from "node:child_process";
 import { rib_conf } from "../../manage.ts";
 import { execution_guard } from "./executions/execution_guard.ts";
-import { startBy } from "../../../env.ts";
 import chalk from "chalk";
 import { pallete } from "./color.ts";
 import keytar from 'keytar';
 import { acc_password, srv } from "../../../_user/keys.ts";
+import { startBy } from "env.ts";
 
 const isWindows = process.platform === 'win32';
 
@@ -26,9 +26,13 @@ export const isRibCmd = (cmd: string): string =>
 
 	const regex = /(?:^|\s)\brib\b(?:\s|$)/g
 
-	const ifRib = process.env.RIB_EXE?.endsWith('.exe') ? `${startBy()!} "${process.env.RIB_EXE}" ` : `bun run "${process.env.RIB_EXE}" `
+	const bin = process.env.RIB_EXE?.endsWith('.exe')
+
+	const ifRib =  bin ? `"${process.env.RIB_EXE}" ` : `bun run "${process.env.RIB_EXE}" `
 
 	if (regex.test(cmd)) {
+
+
 		return cmd.replace(regex, ifRib);
 	}
 

@@ -66,7 +66,7 @@ const awaitEditFinish = ({read, write}: {read: string, write: string}) =>
 
 				if (strKey === 'q' || strKey === 'Q') {
 
-					await import('@/logics/beforeClosing.ts')
+					await import('../../src/logics/beforeClosing.ts')
 
 					console.log("\nExit and save...");
 					resolve('saved');
@@ -84,7 +84,7 @@ const awaitEditFinish = ({read, write}: {read: string, write: string}) =>
 	});
 }
 
-import _path from "@/logics/utils/path.ts";
+import _path from "../../src/logics/utils/path.ts";
 
 program.command("edit")
 	.argument("<type>", "type of the file to edit")

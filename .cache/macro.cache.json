@@ -1,0 +1,198 @@
+{
+  "gac": {
+    "id": "SYS000",
+    "time": "1955-02-24T00:00:00",
+    "desc": "Stage all changes and create a commit with the given message.",
+    "cmd": "git add . ; git commit -m <T: string>",
+    "safeRun": false
+  },
+  "clean": {
+    "id": "SYS001",
+    "time": "1955-02-24T00:00:00",
+    "desc": "Remove all cached files, re-add everything, then commit with message.",
+    "cmd": "git rm -r --cached . ; git add . ; git commit -am <T: string>",
+    "safeRun": false
+  },
+  "gcb": {
+    "id": "SYS002",
+    "time": "1955-02-24T00:00:00",
+    "desc": "Create a new git branch and immediately switch to it.",
+    "cmd": "git checkout -b <T: string>",
+    "safeRun": false
+  },
+  "gbdel": {
+    "id": "SYS003",
+    "time": "1955-02-24T00:00:00",
+    "desc": "Delete a local branch that has been fully merged into upstream.",
+    "cmd": "git branch -d <T: string>",
+    "safeRun": false
+  },
+  "glog": {
+    "id": "SYS004",
+    "time": "1955-02-24T00:00:00",
+    "desc": "Display the recent commits in a compact one-line format.",
+    "cmd": "git log --oneline",
+    "safeRun": false
+  },
+  "gpf": {
+    "id": "SYS005",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Force push current branch to remote origin. Use with caution.",
+    "cmd": "git push --force origin <T: string>",
+    "safeRun": false
+  },
+  "grepfind": {
+    "id": "SYS006",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Recursively search for a given string in files, showing line numbers.",
+    "cmd": "grep -rn <T: string> .",
+    "safeRun": false
+  },
+  "biggest": {
+    "id": "SYS007",
+    "time": "1955-02-24 00:00:00",
+    "desc": "List the top N largest items in current directory sorted by size (human readable).",
+    "cmd": "du -ah . | sort -rh | head -n <T: number>",
+    "safeRun": false
+  },
+  "killport": {
+    "id": "SYS008",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Find and forcefully terminate the process listening on the specified port.",
+    "cmd": "lsof -ti :<T: number> | xargs kill -9",
+    "safeRun": false
+  },
+  "backup": {
+    "id": "SYS009",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Create a .tar.gz archive of current directory with a timestamp in the name.",
+    "cmd": "tar -czf backup_$(date +%Y%m%d_%H%M%S).tar.gz .",
+    "safeRun": false
+  },
+  "renamepre": {
+    "id": "SYS010",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Add a specified prefix to all files matching a given pattern.",
+    "cmd": "for f in <T: string>; do mv \"$f\" \"<T: string>_$f\"; done",
+    "safeRun": false
+  },
+  "vid2gif": {
+    "id": "SYS011",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Convert a video file to high-quality GIF using ffmpeg with palette optimization.",
+    "cmd": "ffmpeg -i <T: string> -vf \"fps=10,scale=640:-1:flags=lanczos,palettegen\" -y palette.png ; ffmpeg -i <T: string> -i palette.png -filter_complex \"fps=10,scale=640:-1[x];[x][1:v]paletteuse\" -y output.gif ; rm palette.png",
+    "safeRun": false
+  },
+  "sshexec": {
+    "id": "SYS012",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Execute a command on a remote host via SSH without opening a full shell.",
+    "cmd": "ssh <T: string> '<T: string>'",
+    "safeRun": false
+  },
+  "serve": {
+    "id": "SYS013",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Start a Python HTTP server on the specified port to serve current directory.",
+    "cmd": "python3 -m http.server <T: number>",
+    "safeRun": false
+  },
+  "chmodr": {
+    "id": "SYS014",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Change permissions recursively for a given path, asking for confirmation first.",
+    "cmd": "chmod -R <T: string> <T: string>",
+    "safeRun": false
+  },
+  "rgs": {
+    "id": "SYS015",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Search for a given string in files, showing line numbers.",
+    "cmd": "rg -t <T: string> <T: string>",
+    "safeRun": false
+  },
+  "pack": {
+    "id": "SYS016",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Compile all ribbon entry points into HlinPSModule/bin.",
+    "cmd": "bun build --compile --target=bun --packages bundle --compile-autoload-package-json  --bundle ./user.idx.ts --outfile=./HlinPSModule/bin/user.exe && bun build --compile  --packages bundle --compile-autoload-package-json --bundle --target=bun ./execute.idx.ts --outfile=./HlinPSModule/bin/execute.exe && bun build  --compile --target=bun --packages bundle --compile-autoload-package-json --bundle ./src/ribbon.idx.ts --outfile=./HlinPSModule/bin/ribbon.exe && bun build --packages bundle --compile-autoload-package-json --compile   --target=bun --bundle ./_user/utils/index.ts --outfile=./HlinPSModule/bin/utils.exe",
+    "safeRun": true
+  },
+  "zip": {
+    "id": "SYS016",
+    "time": "1955-02-24 00:00:00",
+    "desc": "Search for a given string in files, showing line numbers.",
+    "cmd": "Compress-Archive -Path \"./.ribbon\" -DestinationPath \"./ribbon.zip\" -Force",
+    "safeRun": false
+  },
+  "test": {
+    "id": "PVMDAW",
+    "time": "2026/5/26 14:43:47",
+    "desc": "No description provided",
+    "cmd": "New-ModuleManifest -Path \"./HlinPSModule/HlinPSModule.psd1\" -RootModule \"./HlinPSModule/HlinPSModule.psm1\" -ModuleVersion \"1.0.0\" -Author \"Jonathan Monclare\" ; Add-Content -Path $PROFILE -Value 'Import-Module \"./HlinPSModule\"'",
+    "safeRun": false
+  },
+  "test2": {
+    "id": "GC8GQR",
+    "time": "2026/5/26 14:44:04",
+    "desc": "No description provided",
+    "cmd": "' ./unknown_place'",
+    "safeRun": true
+  },
+  "test20": {
+    "id": "VVSWJI",
+    "time": "2026/5/26 16:43:42",
+    "desc": "No description provided",
+    "cmd": "'rm ./unknown_place helloworld https:\\\\github.com'",
+    "safeRun": false
+  },
+  "\"test21": {
+    "id": "G4HK6O",
+    "time": "2026/5/26 16:46:38",
+    "desc": "No description provided",
+    "cmd": "'rm\\\" \\\"./unknown_place\\\" \\\"helloworld\\\" \\\"https:\\\\\\\\\\\\\\\\github.com'\\\"",
+    "safeRun": true
+  },
+  "\"test20": {
+    "id": "LWB2VL",
+    "time": "2026/5/26 16:47:40",
+    "desc": "No description provided",
+    "cmd": "'rm\\\" \\\"./unknown_place\\\" \\\"helloworld\\\" \\\"https:\\\\\\\\\\\\\\\\github.com'\\\"",
+    "safeRun": true
+  },
+  "test5": {
+    "id": "CTBYDP",
+    "time": "2026/5/26 16:56:55",
+    "desc": "No description provided",
+    "cmd": "'rm./unknown_placehelloworldhttps:\\\\\\\\github.com'",
+    "safeRun": true
+  },
+  "test50": {
+    "id": "F5DFFB",
+    "time": "2026/5/26 16:58:26",
+    "desc": "No description provided",
+    "cmd": "'rm ./unknown_place helloworld https:\\\\\\\\github.com'",
+    "safeRun": false
+  },
+  "test51": {
+    "id": "YWJ5GE",
+    "time": "2026/5/26 17:10:39",
+    "desc": "No description provided",
+    "cmd": "'rm ./unknown_place \\\"helloworld\\\" \\\"https:\\\\\\\\github.com\\\"'",
+    "safeRun": false
+  },
+  "test52": {
+    "id": "E0RHU9",
+    "time": "2026/5/26 17:13:19",
+    "desc": "No description provided",
+    "cmd": "'rm ./unknown_place \\\"helloworld\\\" \\\"https:\\\\\\\\github.com\\\"'",
+    "safeRun": false
+  },
+  "test523": {
+    "id": "79ZXPY",
+    "time": "2026/5/26 17:15:40",
+    "desc": "No description provided",
+    "cmd": "rm ./unknown_place \"helloworld\" \"https:\\\\github.com\"",
+    "safeRun": false
+  }
+}
