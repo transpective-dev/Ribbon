@@ -90,6 +90,7 @@ export const startBy = () =>
 export const spawnNewInput = (executable: string, action: string, args: string[]): string =>
 {
 	const isDev = process.env.IS_DEV === 'true';
+	
 	const runCmd = isDev ? `bun run "${executable}"` : `"${executable}"`;
 	
 	switch (getOS()) {

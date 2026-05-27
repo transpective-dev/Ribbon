@@ -1,11 +1,12 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { rib_conf } from "../../manage.ts";
 import { execution_guard } from "./executions/execution_guard.ts";
 import chalk from "chalk";
 import { pallete } from "./color.ts";
 import keytar from 'keytar';
 import { acc_password, srv } from "../../../_user/keys.ts";
-import { startBy } from "env.ts";
+import path from "path";
+import { idx_ribbon } from "env.ts";
 
 const isWindows = process.platform === 'win32';
 
@@ -28,7 +29,7 @@ export const isRibCmd = (cmd: string): string =>
 
 	const bin = process.env.RIB_EXE?.endsWith('.exe')
 
-	const ifRib =  bin ? `"${process.env.RIB_EXE}" ` : `bun run "${process.env.RIB_EXE}" `
+	const ifRib =  bin ? `& "${path.join(process.env.GET_ROOT as string, idx_ribbon)}" ` : `bun run "${process.env.RIB_EXE}" `
 
 	if (regex.test(cmd)) {
 
@@ -40,8 +41,12 @@ export const isRibCmd = (cmd: string): string =>
 
 }
 
-const init_spawn_config = (cmdString: string, shell: ReturnType<typeof shellStatus>): string[] =>
+const init_spawn_config = (cmdString: string, shell: ReturnType<typeof shellStatus>, isRib: boolean): string[] =>
 {
+
+	if (isRib) {
+		return [cmdString];
+	}
 
 	if (shell === 'powershell.exe') {
 		// reject interaction and return error
@@ -101,12 +106,13 @@ export const spawner = ({
 
 		const shell = shellStatus();
 
-		const _arguments = init_spawn_config(_cmdString, shell);
+		const _arguments = init_spawn_config(_cmdString, shell, !Boolean(_cmdString === cmdString));
 
-		const executable = _arguments.shift()!;
+		console.log(_arguments);
+
 		const isShellMode = typeof shell === 'boolean' ? shell : false;
 
-		const child = spawn(executable, _arguments, {
+		const child = spawn(_arguments[0]!, _arguments.slice(1), {
 			shell: isShellMode,
 			signal: signal,
 			stdio: 'inherit',
