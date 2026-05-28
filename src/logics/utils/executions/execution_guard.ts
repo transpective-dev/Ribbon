@@ -24,7 +24,7 @@ export const execution_guard = async ({
 	cmdString: string;
 	safeRun?: boolean;
 	showReport?: boolean;
-}): Promise<boolean> =>
+}): Promise<{detected: { group: string, matched: string[]}[], status: boolean, reason: string}> =>
 {
 
 	// true: allow users to run command macro with safeRun: true. 
@@ -45,7 +45,7 @@ export const execution_guard = async ({
 	const filters = config.filter || {};
 
 	// violations vault
-	const detected: { group: string; matched: string[], msg: string }[] = [];
+	const detected: { group: string, matched: string[], msg: string }[] = [];
 
 	for (const [groupName, rule] of Object.entries(filters)) {
 
@@ -76,15 +76,51 @@ export const execution_guard = async ({
 	}
 
 	// Pass safely if no violations
-	if (detected.length === 0 || safeRun === true) return true;
+	if (detected.length === 0) return {
+		status: true,
+		detected: [],
+		reason: 'Passed'
+	};
 
-	// block if token is false or saferun is false
-	if (!execution_token || !safeRun) {
-		if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
-		return false;
+	const rigid = rib_conf.getConfig('rigid') as boolean
+
+	const trimmed_detected = detected.map((d) =>
+	{
+		return {
+			group: d.group,
+			matched: d.matched,
+		}
+	})
+
+	if (rigid) {
+		
+		// block if token is false or saferun is false
+		if (!execution_token || !safeRun) {
+			if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
+			return {
+				status: false,
+				detected: trimmed_detected,
+				reason: !execution_token ? 'Token Expired' : 'SafeRun is disabled'
+			};
+		}
+		
 	}
-
-	return false;
+	
+	if (safeRun) {
+		return {
+			status: true,
+			detected: trimmed_detected,
+			reason: 'Passed'
+		};
+	}
+	
+	
+	if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
+	return {
+		status: false,
+		detected: trimmed_detected,
+		reason: !execution_token ? 'Token Expired' : 'SafeRun is disabled'
+	};
 
 };
 

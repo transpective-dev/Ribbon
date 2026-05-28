@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { exec } from "node:child_process";
 import { rib_conf } from "../../manage.ts";
 import { execution_guard } from "./executions/execution_guard.ts";
 import chalk from "chalk";
@@ -6,11 +6,14 @@ import { pallete } from "./color.ts";
 import keytar from 'keytar';
 import { acc_password, srv } from "../../../_user/keys.ts";
 import path from "path";
-import { idx_ribbon } from "env.ts";
+import { idx_ribbon } from "../../../env.ts";
+import type { audit_log_argument, shellArgs } from "../templates/interface.ts";
+import { smartShell, save_audit_log } from "./utils.ts";
+import { string } from "zod";
 
 const isWindows = process.platform === 'win32';
 
-const shellStatus = () =>
+const shellStatus = (): shellArgs =>
 {
 
 	const useShell = rib_conf.getConfig('useShell') as boolean;
@@ -19,7 +22,8 @@ const shellStatus = () =>
 		return isWindows ? 'powershell.exe' : '/bin/bash';
 	}
 
-	return true;
+	return undefined;
+
 }
 
 export const isRibCmd = (cmd: string): string =>
@@ -29,7 +33,7 @@ export const isRibCmd = (cmd: string): string =>
 
 	const bin = process.env.RIB_EXE?.endsWith('.exe')
 
-	const ifRib =  bin ? `& "${path.join(process.env.GET_ROOT as string, idx_ribbon)}" ` : `bun run "${process.env.RIB_EXE}" `
+	const ifRib = bin ? `"${path.join(process.env.GET_ROOT as string, idx_ribbon)}" ` : `bun run "${process.env.RIB_EXE}" `
 
 	if (regex.test(cmd)) {
 
@@ -71,7 +75,7 @@ export const spawner = ({
 	cmdString,
 	safeRun = false,
 	signal,
-}: spawner) =>
+}: spawner): Promise<audit_log_argument> =>
 {
 
 	return new Promise(async (resolve, reject) =>
@@ -79,48 +83,111 @@ export const spawner = ({
 
 		let _cmdString = isRibCmd(cmdString);
 
+		const getAuditArguments = ({
+			reason = '',
+			login = false,
+			executed = false,
+			encounted = {
+				keywords: {}
+			}
+		}: audit_log_argument): audit_log_argument =>
+		{
+			return {
+				cmd: cmdString,
+				safeRun,
+				reason,
+				login,
+				executed,
+				encounted
+			}
+		}
+
 		console.log(`\nRunning: ${chalk.hex(pallete.grey_4)(_cmdString)}\n`)
 
 		if (typeof await keytar.getPassword(srv, acc_password) !== 'string') {
 			console.log('Please Initialize Your Account')
-			return reject(false)
+			return reject(getAuditArguments({
+				reason: 'Password Not Initialized',
+				login: false,
+				executed: false,
+				encounted: {
+					keywords: {}
+				}
+			}))
 		}
 
-		if (!await execution_guard({
+		const byEG = await execution_guard({
 			cmdString,
 			safeRun
-		})) {
-			return reject(false);
+		})
+
+		if (!(byEG)?.status) {
+			return reject(getAuditArguments({
+				reason: byEG.reason,
+				login: byEG.reason === 'Token Expired' ? false : true,
+				executed: false,
+				encounted: {
+					keywords: Object.fromEntries(byEG.detected.map((i) => {
+						return [i.group, i.matched]
+					}))
+				}
+			}))
 		}
 
 		// kill child process
-		const kill = (status: boolean) =>
+		const kill = (status: boolean, msg?: string) =>
 		{
 			child.kill();
-			status ? resolve({
-				state: true,
-			}) : reject({
-				state: false,
-			})
+			status ? resolve(getAuditArguments({
+				reason: 'Passed',
+				login: byEG.reason === 'Token Expired' ? false : true,
+				executed: true,
+				encounted: {
+					keywords: Object.fromEntries(byEG.detected.map((i) => {
+						return [i.group, i.matched]
+					}))
+				}
+			})) : reject(getAuditArguments({
+				reason: `Execution Failed: ${msg ?? 'Unknown Error'}`,
+				login: byEG.reason === 'Token Expired' ? false : true,
+				executed: true,
+				encounted: {
+					keywords: Object.fromEntries(byEG.detected.map((i) => {
+						return [i.group, i.matched]
+					}))
+				}
+			}))
 		}
 
-		const shell = shellStatus();
+		const shell = (() =>
+		{
+			const res = shellStatus()
+
+			const isSmartShellEnabled = rib_conf.getConfig('smartShell') as boolean ?? false;
+
+			if (isSmartShellEnabled) {
+				return smartShell(_cmdString, res);
+			}
+
+			return res
+
+		})();
 
 		const _arguments = init_spawn_config(_cmdString, shell, !Boolean(_cmdString === cmdString));
 
-		console.log(_arguments);
-
-		const isShellMode = typeof shell === 'boolean' ? shell : false;
-
-		const child = spawn(_arguments[0]!, _arguments.slice(1), {
-			shell: isShellMode,
+		// using exec is for spawn is unable to run ribbon.exe.
+		const child = exec(_arguments.join(' '), {
+			shell: shell,
 			signal: signal,
-			stdio: 'inherit',
 			env: {
 				...process.env,
 				FORCE_COLOR: '1'
 			}
 		});
+
+		// exec buffers output, so we need to pipe it to stdout/stderr for real-time streaming
+		child.stdout?.pipe(process.stdout);
+		child.stderr?.pipe(process.stderr);
 
 		child.on('exit', (code) =>
 		{
@@ -147,13 +214,12 @@ export const spawnChild = ({
 		cmdString,
 		safeRun,
 		signal
-	}).then((res: any) =>
+	}).then((res) =>
 	{
-		if (res && res.message) process.stdout.write(res.message);
-	}).catch((err: any) =>
+		save_audit_log(res);
+	}).catch((err) =>
 	{
-		
-		if (err && err.message) process.stdout.write(err.message);
+		save_audit_log(err);
 	});
 
 }

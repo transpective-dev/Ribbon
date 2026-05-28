@@ -9,6 +9,7 @@ const usr_command = path.join(misc, 'macro.enc');
 const checksum = path.join(misc, 'checksum.json');
 const scripts = path.join(misc, 'scripts');
 const commands = path.join(misc, 'commands');
+const audit = path.join(misc, 'audit_log');
 
 // cache
 const cache = path.join(root, '.cache');
@@ -23,6 +24,7 @@ const paths = {
 	commands,
 	cache,
 	cache_json,
+	audit,
 	state,
 	checksum
 }

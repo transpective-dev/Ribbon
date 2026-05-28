@@ -14,3 +14,4 @@ test.ts
 Hlin
 test
 HlinPSModule
+*.bun-build

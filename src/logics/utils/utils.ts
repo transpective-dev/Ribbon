@@ -4,31 +4,34 @@ import { pallete } from './color.ts';
 
 const base36 = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
-function generate_id(digit: number = 6) {
+function generate_id(digit: number = 6)
+{
 
-    const a = Math.random().toString().slice(2, 2 + digit);
-    const b = Math.random().toString(36).slice(2, 2 + digit);
+	const a = Math.random().toString().slice(2, 2 + digit);
+	const b = Math.random().toString(36).slice(2, 2 + digit);
 
-    let final_id = "";
+	let final_id = "";
 
-    a.split('').forEach((char, n) => {
-        const valA = parseInt(char, 10);
-        const valB = base36.indexOf(b[n]!);
+	a.split('').forEach((char, n) =>
+	{
+		const valA = parseInt(char, 10);
+		const valB = base36.indexOf(b[n]!);
 
-        let targetIndex = valA + valB;
+		let targetIndex = valA + valB;
 
-        targetIndex = targetIndex % 36;
+		targetIndex = targetIndex % 36;
 
-        final_id += base36[targetIndex];
+		final_id += base36[targetIndex];
 
-    });
+	});
 
-    return final_id.toUpperCase();
+	return final_id.toUpperCase();
 
 }
 
-function generate_local_time() {
-    return new Date().toLocaleString();
+function generate_local_time()
+{
+	return new Date().toLocaleString();
 }
 
 import type { t_command_schema } from "../templates/schema.ts";
@@ -52,7 +55,7 @@ export const macro_formatter = (res: t_command_schema) =>
 	Object.entries(res).forEach(([key, value]) =>
 	{
 
-		const { columns } = process.stdout
+		const columns = process.stdout.columns
 
 		console.log('#', chalk.bold(key))
 		console.log('-'.repeat(13))
@@ -62,15 +65,15 @@ export const macro_formatter = (res: t_command_schema) =>
 		Object.entries(value).forEach(([child_key, child_value]) =>
 		{
 
-			switch(child_key) {
-				case "safeRun": 
+			switch (child_key) {
+				case "safeRun":
 					if (child_value) {
 						child_value = chalk.hex(pallete.green)("true")
 					} else {
 						child_value = chalk.hex(pallete.red)("false")
 					}
 					break;
-				
+
 				case "id":
 					child_value = chalk.hex(pallete.orange)(child_value)
 					break
@@ -86,6 +89,7 @@ export const macro_formatter = (res: t_command_schema) =>
 			const log = (child_key.padEnd(keyLength) + chalk.hex(pallete.grey_4)(": ") + child_value) as string
 
 			if (log.length > columns) {
+
 
 				let left = log
 
@@ -132,7 +136,8 @@ export const macro_formatter = (res: t_command_schema) =>
 import path from 'path'
 import { URL } from 'url';
 
-export const command_color_up = (cmd: string) => {
+export const command_color_up = (cmd: string) =>
+{
 
 	cmd = cmd.replace(/'([^"]*)'/g, '$1');
 
@@ -142,14 +147,16 @@ export const command_color_up = (cmd: string) => {
 		url: pallete.purple,
 		str: pallete.orange
 	}
-	
+
 	const split = [...cmd.matchAll(/(["'][^"']*["'])|(\S+)/g)].map(m => m[0]);
 
-	return split.map((i) => {
+	return split.map((i) =>
+	{
 
 		if (!i) return i;
-		
-		const isUrl = (() => {
+
+		const isUrl = (() =>
+		{
 			try {
 				new URL(i)
 				return true
@@ -157,7 +164,7 @@ export const command_color_up = (cmd: string) => {
 				return false
 			}
 		})()
-		
+
 		if (isUrl) {
 			return chalk.hex(color.url)(i)
 		}
@@ -184,8 +191,101 @@ export const command_color_up = (cmd: string) => {
 
 }
 
+
+import { spawnSync } from "child_process";
+
+import type { shellArgs } from "../templates/interface.ts";
+import { stdout } from 'process';
+
+export const smartShell = (cmd: string, useShell: shellArgs): shellArgs =>
+{
+
+	console.log('\nSmartShelling...\n')
+
+	// check is newest powershell version (7.0) or bash.
+	if (cmd.includes('&&')) {
+
+		const try_with_useShell = spawnSync('echo test && echo test', {
+			shell: useShell,
+			stdio: 'ignore'
+		})
+
+		if (try_with_useShell.status === 0) {
+			return useShell
+		}
+
+	}
+
+	const command = cmd.split(' ')[0]?.replaceAll("\"", '').trim();
+
+	// validate existance of command
+	if (command) {
+
+		const src_cmd = spawnSync('gcm', [command!], {
+			shell: useShell,
+			stdio: 'pipe'
+		})
+
+		if (src_cmd.status === 0) {
+			return useShell
+		}
+
+	}
+
+	// use native shell
+	return undefined
+
+}
+
+import _path from "../utils/path.ts"
+
+import fs from 'fs-extra'
+
+import type { audit_log_argument, audit_log } from '../templates/interface.ts'
+
+export const save_audit_log = (data: audit_log_argument) =>
+{
+
+	const date = new Date()
+	const today = date.toISOString().split('T')[0]
+
+	const filepath = path.join(_path.paths.audit, `${today}.log.json`)
+
+	const logData: audit_log = {
+		timestamp: date.getTime(),
+		datetime: date.toLocaleString(),
+		cmd: data.cmd as string,
+		status: {
+			safeRun: data.safeRun as boolean,
+			executed: data.executed,
+			login: data.login,
+		},
+		reason: data.reason,
+		encounted: {
+			keywords: data.encounted?.keywords,
+			count: Object.values(data.encounted?.keywords ?? {}).reduce((a, b) => a + b.length, 0)
+		}
+	}
+
+	if (fs.existsSync(filepath)) {
+		
+		const raw = fs.readFileSync(filepath, 'utf-8');
+		const json = JSON.parse(raw);
+		json.push(logData);
+		fs.writeFileSync(filepath, JSON.stringify(json, null, 2));
+		
+	} else {
+		
+		fs.ensureFileSync(filepath)
+		fs.writeFileSync(filepath, JSON.stringify([logData], null, 2));
+
+	}
+
+}
+
 export default {
-    generate_id,
-    generate_local_time,
-    macro_formatter
+	generate_id,
+	generate_local_time,
+	macro_formatter,
+	save_audit_log
 }
