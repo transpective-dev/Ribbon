@@ -15,3 +15,5 @@ Hlin
 test
 HlinPSModule
 *.bun-build
+.cache
+psm.zip

@@ -3,7 +3,7 @@
 - name: Hlin
 - author: Jonathan Monclare
 - version: 1.0.0
-- license: [GNU AGPLv3](./LICENSE)
+- license: [PolyForm Noncommercial License](./license)
 
 ## Contents
 
