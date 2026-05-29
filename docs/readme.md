@@ -19,7 +19,7 @@ This is a simple version. You can check more specific details in [usage.yml](./u
 
 ## Statement
 
-*This project is licensed under the GNU Affero General Public License v3.0 - see the LICENSE file for details.*
+*This project is licensed under the PolyForm Noncommercial License 1.0.0. See the LICENSE file for details.*
 
 ## How to use
 
