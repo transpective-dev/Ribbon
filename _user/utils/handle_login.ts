@@ -3,7 +3,7 @@ import enquirer from 'enquirer'
 import crypto from 'crypto-js'
 
 import { srv, acc_password as acc } from '../keys.ts'
-import { cacheManager } from "../expiry.ts"
+import { cacheManager } from "../token_manager.ts"
 
 const { prompt } = enquirer
 

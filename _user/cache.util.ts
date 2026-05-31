@@ -1,4 +1,4 @@
-import { type Cache, cache } from "./schema.ts"
+import { type Cache, cache } from "./_user.interface.ts"
 import Conf from "conf"
 import crypto, { enc } from 'crypto-js'
 import { general_encrypt_key } from "./keys.ts";

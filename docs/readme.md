@@ -1,75 +1,94 @@
-# Introduction
+## General Infomation
 
-- name: Hlin
-- author: Jonathan Monclare
-- version: 1.0.0
-- license: [PolyForm Noncommercial License](./license)
+- Name: Hlin
+
+- Creator: Jonathan Monclare
+
+- Version: 1.0.0
+
+- License: [PolyForm Noncommercial License](./license)
+
+- Support: Windows for now.
+
+- Contact: rosettastone0501@gmail.com
 
 ## Contents
 
-- [Introduction](#introduction)
-	- [Contents](#contents)
-	- [Before start](#before-start)
-	- [Statement](#statement)
-	- [How to use](#how-to-use)
+- [Before starting](#before-starting)
+- [Values of Hlin](#values-of-hlin)
+- [Instructions](#instructions)
+  - [Download and Import](#download-and-import)
+  - [How to use Hlin](#how-to-use-hlin)
+- [Commands](#commands)
+  - [Positioning of each command](#positioning-of-each-command)
+  - [Hlin commands](#hlin)
+  - [Ribbon commands](#ribbon)
 
-## Before start
+## Before starting
 
-This is a simple version. You can check more specific details in [usage.yml](./usage.yml).
+This is an overview of Hlin.
 
-## Statement
+If this is your first time using Hlin, we wrote a guide for you.
 
-*This project is licensed under the PolyForm Noncommercial License 1.0.0. See the LICENSE file for details.*
+Check [guide.md](./guide.md) for more details.
 
-## How to use
+## Values of Hlin
 
-*Note: currently it only works on Windows (because I only have .exe at the moment)*
+`High Security` : Block every unacknowledged execution to prevent before a tragedy occurs.
 
-**File structure** : 
-``` powershell
+`Encrypted Data` : All data ( such as config, command macro ) are encrypted to prevent jailbreaking. such as 
 
-HlinPSModule ( module folder )
-├─ *.psm1 
-├─ *.psd1 
-└─ bin ( root )
-   ├─ user.exe ( The main entry point called by the PowerShell module; handles user actions )
-   ├─ execute.exe ( executable for injection; for Agent command execution )
-   ├─ ribbon.exe ( The core logic engine for commands )
-   ├─ utils.exe ( Helper utility for external inputs and states )
-   ├─ .cache ( stores cache )
-   └─ misc ( stores encrypted data )
-   
-```
+- Edit keywords-filter.
+- Manipulate command macro to perform actions with `safeRun: true` without authorization. 
 
-**How to import** : 
-```
-Add-Content -Path $PROFILE -Value 'Import-Module "path/to/HlinPSModule"'
-```
+`Freedom in Confinement` : Agent can use command macro with `safeRun: true` to bypass  execution-guard.
 
-**How to use** : 
+## Instructions
 
-1. Enter `hlin open [your-cli-agent-application]` to open your application.
-2. Just use it.
+### Download and Import
 
-**How it works** : 
+**Windows** :
 
-- When you try to run a dangerous command, execute.exe will block it and refuse to run.
+1. Download zip from latest release and unzip it at any folder you want.
 
-**Tips** : 
+2. Use `Add-Content -Path $PROFILE -Value 'Import-Module "path/to/HlinPSModule"'` to import it.
 
-how to add keywords into keywords-filter :
-```
-1. Enter `hlin edit config` and log in at the other console window.
-2. Wait until the cache files open.
-3. Add your regex or keyword.
-4. Type `q` or `Q` in the window where you just logged in.
+3. Input `hlin` to confirm the action.
 
-# it support regex and string. first recommandation is regex.
-``` 
+---
 
-**Something you should know** : 
+### How to use Hlin
 
-- I didn't create a new release for the latest version (Hlin 1.0.0) because they won't let me run ribbon.exe with an absolute path while I'm testing. If you have a solution, please let me know.
-- This README is an unfinished version, and I currently have no time to refine it. You might be confused while using it. If you have any problems, you can send an email to my email address:
+1. Use `hlin open [your-agent-app]` to open your agent application
 
-rosettastone0501@gmail.com
+2. That's it. Just use like normal.
+
+---
+
+## Commands
+
+### Positioning of each command
+
+| Name | Command | Positioning |
+| :--: | :-----: | :---------: |
+| Hlin | `hlin` | For user to manage data and authorize. | 
+| Ribbon | `rib` | For agent to make action | 
+
+### Hlin commands : 
+
+| Command | Syntax | Action |
+| :--: | :-----: | :-----: |
+| open | `hlin open [your-agent-app]` | Open your agent application |
+| login | `hlin login` | Login or initialize password |
+| edit | `hlin edit [config \| macro]` | Edit config or macro |
+
+### Ribbon commands : 
+
+| Command | Alias | Action |
+| :-: | :-: | :-: |
+| register| `regis`, `add` | Register new command macro | 
+| find | - | Find command macro | 
+| exec | `run` | Execute command of macro |
+| discard | - | Remove command macro | 
+| cfg | - | Ribbon's configuration | 
+

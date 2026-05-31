@@ -2,7 +2,7 @@ import _interface from "../../templates/interface.ts";
 import { rib_conf } from "../../../manage.ts";
 import { type t_config_schema } from "../../templates/schema.ts";
 
-import { cacheManager } from '../../../../_user/expiry.ts'
+import { cacheManager } from '../../../../_user/token_manager.ts'
 
 import chalk from 'chalk'
 
@@ -24,7 +24,7 @@ export const execution_guard = async ({
 	cmdString: string;
 	safeRun?: boolean;
 	showReport?: boolean;
-}): Promise<{detected: { group: string, matched: string[]}[], status: boolean, reason: string}> =>
+}): Promise<{ detected: { group: string, matched: string[] }[], status: boolean, reason: string }> =>
 {
 
 	// true: allow users to run command macro with safeRun: true. 
@@ -93,7 +93,7 @@ export const execution_guard = async ({
 	})
 
 	if (rigid) {
-		
+
 		// block if token is false or saferun is false
 		if (!execution_token || !safeRun) {
 			if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
@@ -103,9 +103,9 @@ export const execution_guard = async ({
 				reason: !execution_token ? 'Token Expired' : 'SafeRun is disabled'
 			};
 		}
-		
+
 	}
-	
+
 	if (safeRun) {
 		return {
 			status: true,
@@ -113,8 +113,8 @@ export const execution_guard = async ({
 			reason: 'Passed'
 		};
 	}
-	
-	
+
+
 	if (showReport) printReport({ cmdString, detected, token: execution_token!, isSafeRun: safeRun });
 	return {
 		status: false,

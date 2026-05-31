@@ -46,7 +46,7 @@ program.command('login')
 
 	})
 
-import { editType } from './interface.ts';
+import { editType } from './_user.interface.ts';
 
 program.command('edit')
 	.description('edit config, macro')
@@ -58,12 +58,6 @@ program.command('edit')
 		}
 
 		await spawnInput({ action: "edit", type });
-	})
-
-program.command('test')
-	.description('test')
-	.action(async () =>
-	{
 	})
 
 program.parse(process.argv);
