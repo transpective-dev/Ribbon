@@ -32,6 +32,11 @@ export interface cmd_register
 	action?: (...args: any[]) => void
 }
 
+// default type
+export interface module_cmd_register {
+	default: cmd_register
+}
+
 // types
 export type t_search_types = typeof search_types[number]
 

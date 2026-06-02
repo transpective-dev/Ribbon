@@ -14,7 +14,7 @@ program
 	.usage('<command> [options]')
 	.helpOption('-h, --help', 'display help for command')
 
-import type { cmd_register } from "./templates/interface.ts";
+import type { cmd_register, module_cmd_register } from "./templates/interface.ts";
 
 const registerCommand = (
 	{
@@ -49,38 +49,41 @@ const registerCommand = (
 await (async () =>
 {
 
-	let list = [
-		path.join(_path.paths.commands, 'config.cmd.ts'),
-		path.join(_path.paths.commands, 'del.cmd.ts'),
-		path.join(_path.paths.commands, 'exec.cmd.ts'),
-		path.join(_path.paths.commands, 'find.cmd.ts'),
-		path.join(_path.paths.commands, 'register.cmd.ts'),
-	]
-
 	const commandsDir = _path.paths.commands;
 
-	const files = fs.existsSync(commandsDir) ? fs.readdirSync(commandsDir).map((file: any) =>
+	type CommandLoader = () => Promise<module_cmd_register>;
+
+	const native: CommandLoader[] = [
+		async () => await import('../../misc/commands/find.cmd.ts'),
+		async () => await import('../../misc/commands/config.cmd.ts'),
+		async () => await import('../../misc/commands/register.cmd.ts'),
+		async () => await import('../../misc/commands/del.cmd.ts'),
+		async () => await import('../../misc/commands/exec.cmd.ts'),
+	]
+
+	const external = fs.existsSync(commandsDir) ? fs.readdirSync(commandsDir).map((file: any) =>
 	{
 		return path.join(commandsDir, file)
-	}) : [];
-
-	files.forEach((file: any) =>
+	}).filter((file: any) =>
 	{
-		list.push(file)
-	})
+		return file.endsWith('.cmd.ts')
 
-	// deduplicate
-	list = list.filter((v, i) => list.indexOf(v) === i)
+	}).map((i) => async () => await import(pathToFileURL(i).href)) : []; // handle if path include space
 
-	// remove non-exist
-	list = list.filter((i: string) => fs.existsSync(i))
+	const registry: CommandLoader[] = [...native, ...external];
 
-	for (const file of list) {
-		if (file.endsWith('.cmd.ts')) {
-			const filePath = pathToFileURL(file).href;
-			const module = await import(filePath);
-			registerCommand(module.default);
+	for (const loader of registry) {
+
+		const commands_list = program.commands.map((cmd) => cmd.name());
+
+		const loaded = await loader()
+
+		if (commands_list.includes(loaded.default.command)) {
+			continue;
 		}
+
+		registerCommand(loaded.default);
+
 	}
 
 })()

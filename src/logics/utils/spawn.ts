@@ -9,7 +9,6 @@ import path from "path";
 import { idx_ribbon } from "../../../env.ts";
 import type { audit_log_argument, shellArgs } from "../templates/interface.ts";
 import { smartShell, save_audit_log } from "./utils.ts";
-import { string } from "zod";
 
 const isWindows = process.platform === 'win32';
 
