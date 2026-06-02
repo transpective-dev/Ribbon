@@ -17,7 +17,7 @@ export default {
 	supported_type
 }
 
-export type shellArgs = 'powershell.exe' | '/bin/bash' | undefined
+export type shellArgs = 'powershell' | 'pwsh' | 'bash' | undefined
 
 export interface cmd_register
 {

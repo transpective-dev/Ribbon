@@ -193,26 +193,111 @@ export const command_color_up = (cmd: string) =>
 
 
 import { spawnSync } from "child_process";
+import os from 'os';
 
 import type { shellArgs } from "../templates/interface.ts";
-import { stdout } from 'process';
+import { rib_conf } from '../../manage.ts';
 
-export const smartShell = (cmd: string, useShell: shellArgs): shellArgs =>
+export const getShell = (cmd: string ): shellArgs =>
 {
 
-	console.log('\nSmartShelling...\n')
+	const isSmartShellEnabled = rib_conf.getConfig('smartShell') as boolean ?? false;
 
-	// check is newest powershell version (7.0) or bash.
+	const platform = os.platform()
+	
+	const shell: shellArgs = (() => {
+
+		if (!(rib_conf.getConfig('useShell') as boolean)) {
+
+			return undefined
+			
+		}
+		
+		if (platform === 'win32') {
+
+			const find_pwsh = spawnSync('where pwsh', {
+				shell: true,
+				stdio: 'ignore'
+			})
+
+			if (find_pwsh.status === 0) {
+
+				return 'pwsh'
+				
+			} else {
+
+				const find_powershell = spawnSync('where powershell', {
+					shell: true,
+					stdio: 'ignore'
+				})
+
+				if (find_powershell.status === 0) {
+					
+					return 'powershell'
+					
+				}
+
+			}
+
+		} else if (platform === 'linux' || platform === 'darwin') {
+
+			const find_bash = spawnSync('which bash', {
+				shell: true,
+				stdio: 'ignore'
+			})
+
+			if (find_bash.status === 0) {
+				return 'bash'
+			}
+			
+		}
+		
+		return undefined
+	})()
+
+	if (!isSmartShellEnabled) {
+		return shell
+	}
+
+	let find: string | null = null
+
+	if (platform === 'win32') {
+
+		if (shell) {
+
+			find = 'gcm'
+
+		} else {
+			
+			find = 'where'
+			
+		}
+		
+	} else if (platform === 'linux' || platform === 'darwin') {
+		
+		find = 'which'
+
+	}
+
+	if (!find) {
+
+		return undefined
+
+	}
+
+	// choose from cmd, bash and powershell 7
 	if (cmd.includes('&&')) {
 
 		const try_with_useShell = spawnSync('echo test && echo test', {
-			shell: useShell,
+			shell: shell ?? true,
 			stdio: 'ignore'
 		})
 
 		if (try_with_useShell.status === 0) {
-			return useShell
+			return shell
 		}
+
+		return undefined;
 
 	}
 
@@ -221,13 +306,13 @@ export const smartShell = (cmd: string, useShell: shellArgs): shellArgs =>
 	// validate existance of command
 	if (command) {
 
-		const src_cmd = spawnSync('gcm', [command!], {
-			shell: useShell,
+		const src_cmd = spawnSync(find as string, [command!], {
+			shell: shell ?? true,
 			stdio: 'pipe'
 		})
 
 		if (src_cmd.status === 0) {
-			return useShell
+			return shell
 		}
 
 	}
@@ -268,14 +353,14 @@ export const save_audit_log = (data: audit_log_argument) =>
 	}
 
 	if (fs.existsSync(filepath)) {
-		
+
 		const raw = fs.readFileSync(filepath, 'utf-8');
 		const json = JSON.parse(raw);
 		json.push(logData);
 		fs.writeFileSync(filepath, JSON.stringify(json, null, 2));
-		
+
 	} else {
-		
+
 		fs.ensureFileSync(filepath)
 		fs.writeFileSync(filepath, JSON.stringify([logData], null, 2));
 

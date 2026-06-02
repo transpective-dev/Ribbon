@@ -8,22 +8,7 @@ import { acc_password, srv } from "../../../_user/keys.ts";
 import path from "path";
 import { idx_ribbon } from "../../../env.ts";
 import type { audit_log_argument, shellArgs } from "../templates/interface.ts";
-import { smartShell, save_audit_log } from "./utils.ts";
-
-const isWindows = process.platform === 'win32';
-
-const shellStatus = (): shellArgs =>
-{
-
-	const useShell = rib_conf.getConfig('useShell') as boolean;
-
-	if (useShell) {
-		return isWindows ? 'powershell.exe' : '/bin/bash';
-	}
-
-	return undefined;
-
-}
+import { getShell, save_audit_log } from "./utils.ts";
 
 export const isRibCmd = (cmd: string): string =>
 {
@@ -44,19 +29,24 @@ export const isRibCmd = (cmd: string): string =>
 
 }
 
-const init_spawn_config = (cmdString: string, shell: ReturnType<typeof shellStatus>, isRib: boolean): string[] =>
+const init_spawn_config = (cmdString: string, shell: shellArgs, isRib: boolean): string[] =>
 {
 
 	if (isRib) {
+
 		return [cmdString];
 	}
 
-	if (shell === 'powershell.exe') {
+	if (shell === 'powershell' || shell === 'pwsh') {
+
 		// reject interaction and return error
 		// prevent direct exit from system
 		return [shell as string, '-NonInteractive', '-NoProfile', '-Command', cmdString];
-	} else if (shell === '/bin/bash') {
+
+	} else if (shell === 'bash') {
+
 		return [shell as string, '--noprofile', '--norc', '-c', cmdString];
+
 	}
 
 	return [cmdString];
@@ -126,7 +116,8 @@ export const spawner = ({
 				login: byEG.reason === 'Token Expired' ? false : true,
 				executed: false,
 				encounted: {
-					keywords: Object.fromEntries(byEG.detected.map((i) => {
+					keywords: Object.fromEntries(byEG.detected.map((i) =>
+					{
 						return [i.group, i.matched]
 					}))
 				}
@@ -142,7 +133,8 @@ export const spawner = ({
 				login: byEG.reason === 'Token Expired' ? false : true,
 				executed: true,
 				encounted: {
-					keywords: Object.fromEntries(byEG.detected.map((i) => {
+					keywords: Object.fromEntries(byEG.detected.map((i) =>
+					{
 						return [i.group, i.matched]
 					}))
 				}
@@ -151,7 +143,8 @@ export const spawner = ({
 				login: byEG.reason === 'Token Expired' ? false : true,
 				executed: true,
 				encounted: {
-					keywords: Object.fromEntries(byEG.detected.map((i) => {
+					keywords: Object.fromEntries(byEG.detected.map((i) =>
+					{
 						return [i.group, i.matched]
 					}))
 				}
@@ -160,15 +153,7 @@ export const spawner = ({
 
 		const shell = (() =>
 		{
-			const res = shellStatus()
-
-			const isSmartShellEnabled = rib_conf.getConfig('smartShell') as boolean ?? false;
-
-			if (isSmartShellEnabled) {
-				return smartShell(_cmdString, res);
-			}
-
-			return res
+			return getShell(_cmdString);
 
 		})();
 
